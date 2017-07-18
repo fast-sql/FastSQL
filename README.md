@@ -3,10 +3,15 @@
 
 ## 为什么使用SQL而不是ORM框架
 
+1.
+2.
+3.
+
 ## 数据库设计约定：
 
 1.使用uuid字符串做为主键类型
-
+2.
+3.
  
 # 二.BaseDAO
 应用中数据访问类需要继承这个类，进行各种操作
@@ -204,4 +209,4 @@ List<Student> studentList1 = studentDao.findListWhere(
 ```
 int countWhere = studentDao.countWhere("age >= 20"); //查找年龄大于等于20的学生
 ```
-
+## 5.通过sql查询
