@@ -407,7 +407,7 @@ public abstract class BaseDAO<E> {
 
     /**
      * 通过where条件查找一条记录
-     * 查找姓名为1年龄大于23的记录  findOneWhere("name=:1 and age>:2", "wang",23)
+     * 查找姓名为1年龄大于23的记录  findOneWhere("name=?1 and age>?2", "wang",23)
      *
      * @param sqlCondition name=:1 and age=:2
      * @param values       "wang",23
@@ -416,17 +416,14 @@ public abstract class BaseDAO<E> {
         if (sqlCondition == null) {
             throw new RuntimeException("sql不能为空");
         }
-        //sql
-        String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition;
 
-//        logger.debug(sql);
-//        logger.debug(Arrays.asList(values).toString());
+        //sql
+        String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition.replaceAll("\\?",":");
 
         Map<String, Object> paramMap = new HashMap<>();
         for (int i = 0; i < values.length; i++) {
             paramMap.put("" + (i + 1), values[i]);
         }
-
 
         List<E> dateList = template.query(
                 sql, paramMap, new BeanPropertyRowMapper<E>(entityClass)
@@ -460,7 +457,7 @@ public abstract class BaseDAO<E> {
 
     public List<E> findListWhere(String sqlCondition, Object... values) {
         //sql
-        String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition;
+        String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition.replaceAll("\\?",":");
 
         Map<String, Object> paramMap = new HashMap<>();
         for (int i = 0; i < values.length; i++) {
@@ -478,9 +475,7 @@ public abstract class BaseDAO<E> {
         return template.query(sql, parameterSource, new BeanPropertyRowMapper<E>(entityClass));
     }
 
-    public List<E> findListWhere(
-            String sqlCondition,
-            Map<String, Object> parameterMap) {
+    public List<E> findListWhere(String sqlCondition, Map<String, Object> parameterMap) {
 
         //sql
         String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition;
@@ -493,7 +488,7 @@ public abstract class BaseDAO<E> {
 
     public int countWhere(String sqlCondition, Object... values) {
         //sql
-        String sql = "SELECT COUNT(*) FROM " + tableName + " WHERE " + sqlCondition;
+        String sql = "SELECT COUNT(*) FROM " + tableName + " WHERE " + sqlCondition.replaceAll("\\?",":");
 
         Map<String, Object> paramMap = new HashMap<>();
         for (int i = 0; i < values.length; i++) {

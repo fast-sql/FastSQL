@@ -92,7 +92,7 @@ public class BaseDAOTest {
     @Test
     public void findOne() {
 
-        Student student = studentDao.findOne("12313sduui886fsdf");
+        Student student = studentDao.findOne("12345678");
         System.out.println(student);
 
     }
@@ -100,7 +100,7 @@ public class BaseDAOTest {
     @Test
     public void findOneWhere() {
 
-        Student student = studentDao.findOneWhere("name=:1", "小明");
+        Student student = studentDao.findOneWhere("name=?1 AND home_address=?2", "小明", "成都");
         System.out.println(student);
 
     }
@@ -109,8 +109,7 @@ public class BaseDAOTest {
     public void findListWhere1() {
         List<Student> studentList1 =
                 studentDao.findListWhere(
-                        "name LIKE :1 AND  ( birthday < :2 OR home_address IS NULL)",
-                        "%小%", new Date());
+                        "name LIKE ?1 OR home_address IS NULL ORDER BY age DESC", "%明%");
         System.out.println(studentList1);
     }
 

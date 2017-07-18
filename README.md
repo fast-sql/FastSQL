@@ -153,5 +153,55 @@ UPDATE student
 SET home_address='成都', birthday='2017-07-17',age=NULL 
 WHERE id='12345678'
 ```
-## 5.单表查询 ，继承自BaseDAO中的方法
+## 5.单表查询，继承自BaseDAO中的方法
+
+### public E findOne(String id) 
+通过id查询一个对象
+```
+Student student = studentDao.findOne("12345678");//查询id为12345678的数据，并封装到Student类中
+```
+### public E findOneWhere(String sqlCondition, Object... values)
+通过语句查询（返回多条数据将会抛出运行时异常）
+```
+Student student = studentDao.findOneWhere("name=?1 AND home_address=?2", "小明", "成都");
+```
+小明将会被匹配到?1中，成都将会被匹配到?2中，查询的是名字的小明，家庭地址为成都的对象。
+
+### public List<E> findListWhere(String sqlCondition, Object... values)
+用法与findOneWhere()相同，可以返回一条或多条数据
+```
+List<Student> studentList  =  studentDao.findListWhere(
+                        "name LIKE ?1 OR home_address IS NULL ORDER BY age DESC", "%明%");
+```
+
+### public List<E> findListWhere(String sqlCondition, BeanPropertySqlParameterSource parameterSource)
+```
+Student student = new Student();
+student.setName("%小%");
+student.setBirthday(new Date());
+
+List<Student> studentList1 = studentDao.findListWhere(
+                "name LIKE :name AND  ( birthday < :birthday OR home_address IS NULL)",
+                new BeanPropertySqlParameterSource(student)
+);
+```
+### public List<E> findListWhere(String sqlCondition, Map<String, Object> parameterMap)
+使用Map作为命名参数
+```
+Map<String, Object> map = new HashMap<>();
+map.put("name", "%小%");
+map.put("birthday", new Date());
+ 
+
+List<Student> studentList1 = studentDao.findListWhere(
+      "name LIKE :name AND  ( birthday < :birthday OR home_address IS NULL)",
+      map
+);
+```
+
+### public int countWhere(String sqlCondition, Object... values)
+通过条件查询数量
+```
+int countWhere = studentDao.countWhere("age >= 20"); //查找年龄大于等于20的学生
+```
 
