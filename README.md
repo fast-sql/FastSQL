@@ -1,7 +1,9 @@
 # 一.FastSql简介
-一个基于spring-jdbc的简单ORM框架，使用了NamedParameterJdbcTemplate类，可以加速你的数据库开发。
+一个基于spring-jdbc的简单ORM框架，主要使用了NamedParameterJdbcTemplate类，可以加速你的数据库开发。
 
-数据库设计约定：
+## 为什么使用SQL而不是ORM框架
+
+## 数据库设计约定：
 
 1.使用uuid字符串做为主键类型
 
@@ -10,7 +12,7 @@
 应用中数据访问类需要继承这个类，进行各种操作
 
 ## 1.准备数据
-新建表student
+新建表
 ```
 CREATE TABLE `student` (
   `id` varchar(36) NOT NULL,
@@ -18,10 +20,16 @@ CREATE TABLE `student` (
   `age` int(11) DEFAULT NULL,
   `birthday` date DEFAULT NULL,
   `home_address` varchar(255) DEFAULT NULL,
+  `city_id` varchar(36) NOT NULL,
+   PRIMARY KEY (`id`)
+)
+CREATE TABLE `city` (
+  `id` varchar(36) NOT NULL,
+  `name` varchar(20) NOT NULL,
    PRIMARY KEY (`id`)
 )
 ```
-新建实体类Student.java，同名或驼峰下转划线相同可以省略@TableName
+新建java实体类，同名或驼峰下转划线相同可以省略@TableName
 ```
 @TableName("student") 
 public class Student {
@@ -33,12 +41,23 @@ public class Student {
     //省略getter和setter
 }
 
+public class City {
+    private String id;
+    private String name;
+    //省略getter和setter
+}
+
 ```
-新建数据访问类StudentDAO.java, 并实现 BaseDAO（泛型中Student为对应的实体类）
+新建DAO层数据访问类, 并继承BaseDAO类
 
 ```
 @Repository
 public class StudentDAO extends BaseDAO<Student> {
+     
+}
+
+@Repository
+public class CityDAO extends BaseDAO<City> {
      
 }
 ```
