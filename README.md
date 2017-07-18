@@ -82,7 +82,7 @@ INSERT INTO student(id,name,birthday,home_address)
 ('622bca40-4c64-43aa-8819-447718bdafa5','小丽','2017-07-11','')
 
 ```
-## 3.删除 ，继承自BaseDAO中的方法
+## 3.数据删除 ，继承自BaseDAO中的方法
 
 ### public int delete(String id) 
 根据id删除数据
@@ -109,7 +109,7 @@ ids.add("881c80a1-8c93-4bb7-926e-9a8bc9799a72");
 int number = studentDao.deleteInBatch(ids);//返回成功删除的数量
 ```
 
-## 4.修改 ，继承自BaseDAO中的方法
+## 4.数据修改 ，继承自BaseDAO中的方法
 
 ### String update(E entity) 
 根据对象进行更新（null字段在数据库中将会被设置为null），对象中id字段不能为空 
@@ -132,5 +132,5 @@ studentDao.update("17661a16-e77b-4979-8a25-c43a489d42ad", map);
 ```
 UPDATE student SET home_address='成都', birthday='2017-07-17',age=NULL WHERE id='22b66bcf-1c2e-4713-b90d-eab17182b565'
 ```
-
+## 5.单表查询 ，继承自BaseDAO中的方法
 
