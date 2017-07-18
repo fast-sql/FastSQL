@@ -125,12 +125,14 @@ map.put("home_address", "成都");// map.put("homeAddress", "成都") -- 使用�
 map.put("birthday", new Date());
 map.put("age", null);
 
-studentDao.update("17661a16-e77b-4979-8a25-c43a489d42ad", map);
+studentDao.update("12345678", map);
 
 ```
 等价如下SQL语句
 ```
-UPDATE student SET home_address='成都', birthday='2017-07-17',age=NULL WHERE id='22b66bcf-1c2e-4713-b90d-eab17182b565'
+UPDATE student 
+SET home_address='成都', birthday='2017-07-17',age=NULL 
+WHERE id='12345678'
 ```
 ## 5.单表查询 ，继承自BaseDAO中的方法
 
