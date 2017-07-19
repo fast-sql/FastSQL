@@ -69,17 +69,17 @@ public abstract class BaseDAO<E> {
     /**
      * 插入对象中非null的值到数据库
      */
-    public String saveIgnoreNull(E object) {
-        String id = getSaveId(object);
+    public String saveIgnoreNull(E entity) {
+        String id = getSaveId(entity);
 
         StringBuilder nameBuilder = new StringBuilder("id");
         StringBuilder valueBuilder = new StringBuilder("'" + id + "'");
 
-        List<Method> methodList = FastSqlUtils.getAllGetterWithoutId(object);
+        List<Method> methodList = FastSqlUtils.getAllGetterWithoutId(entity);
 
         for (Method method : methodList) {
             try {
-                Object value = method.invoke(object);
+                Object value = method.invoke(entity);
                 if (value != null) {
                     String str = method.getName().replace("get", "");
                     String columnName = FastSqlUtils.camelToUnderline(str);
@@ -97,7 +97,7 @@ public abstract class BaseDAO<E> {
                 "(" + valueBuilder.toString() + ")";
 
         int saveNum = template.update(
-                sql, new BeanPropertySqlParameterSource(object)
+                sql, new BeanPropertySqlParameterSource(entity)
         );
         if (saveNum < 1) {
             throw new RuntimeException("保存失败，saveNum = " + saveNum);
@@ -108,16 +108,16 @@ public abstract class BaseDAO<E> {
     /**
      * 插入对象中的值到数据库，null值在数据库中会设置为NULL
      */
-    public String save(E object) {
-        String id = getSaveId(object);
+    public String save(E entity) {
+        String id = getSaveId(entity);
 
         StringBuilder nameBuilder = new StringBuilder("id");
         StringBuilder valueBuilder = new StringBuilder("'" + id + "'");
 
-        List<Method> methodList = FastSqlUtils.getAllGetterWithoutId(object);
+        List<Method> methodList = FastSqlUtils.getAllGetterWithoutId(entity);
         for (Method method : methodList) {
             try {
-                Object value = method.invoke(object);
+                Object value = method.invoke(entity);
                 String str = method.getName().replace("get", "");
                 String columnName = FastSqlUtils.camelToUnderline(str);
                 String fieldName = str.substring(0, 1).toLowerCase() + str.substring(1, str.length());
@@ -138,7 +138,7 @@ public abstract class BaseDAO<E> {
                 " VALUES" +
                 " (" + valueBuilder.toString() + ")";
         int saveNum = template.update(
-                sql, new BeanPropertySqlParameterSource(object)
+                sql, new BeanPropertySqlParameterSource(entity)
         );
         if (saveNum < 1) {
             throw new RuntimeException("保存失败，saveNum = " + saveNum);
@@ -149,11 +149,11 @@ public abstract class BaseDAO<E> {
     /**
      * 获取保存对象的Id
      */
-    private String getSaveId(E object) {
+    private String getSaveId(E entity) {
         String id;
         try {
-            Method getId = object.getClass().getMethod("getId", new Class[]{});
-            id = (String) getId.invoke(object);
+            Method getId = entity.getClass().getMethod("getId", new Class[]{});
+            id = (String) getId.invoke(entity);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException("保存失败， getId() 方法不存在或调用失败");
         }
@@ -418,7 +418,7 @@ public abstract class BaseDAO<E> {
         }
 
         //sql
-        String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition.replaceAll("\\?",":");
+        String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition.replaceAll("\\?", ":");
 
         Map<String, Object> paramMap = new HashMap<>();
         for (int i = 0; i < values.length; i++) {
@@ -440,7 +440,7 @@ public abstract class BaseDAO<E> {
     }
     //////////////////////////////find list/////////////////////////////////////
 
-//    /**
+    //    /**
 //     * 将实体中不为空字段的作为条件进行查询
 //     */
 //    public List<E> findListByPresentFields(E object) {
@@ -454,10 +454,15 @@ public abstract class BaseDAO<E> {
 //        );
 //        return dateList;
 //    }
+    public List<E> findList() {
+        //sql
+        String sql = "SELECT * FROM " + tableName;
+        return template.query(sql, new HashMap<String, Object>(), new BeanPropertyRowMapper<E>(entityClass));
+    }
 
     public List<E> findListWhere(String sqlCondition, Object... values) {
         //sql
-        String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition.replaceAll("\\?",":");
+        String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition.replaceAll("\\?", ":");
 
         Map<String, Object> paramMap = new HashMap<>();
         for (int i = 0; i < values.length; i++) {
@@ -468,7 +473,6 @@ public abstract class BaseDAO<E> {
     }
 
     public List<E> findListWhere(String sqlCondition, BeanPropertySqlParameterSource parameterSource) {
-
         //sql
         String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition;
 
@@ -476,7 +480,6 @@ public abstract class BaseDAO<E> {
     }
 
     public List<E> findListWhere(String sqlCondition, Map<String, Object> parameterMap) {
-
         //sql
         String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition;
 
@@ -488,7 +491,7 @@ public abstract class BaseDAO<E> {
 
     public int countWhere(String sqlCondition, Object... values) {
         //sql
-        String sql = "SELECT COUNT(*) FROM " + tableName + " WHERE " + sqlCondition.replaceAll("\\?",":");
+        String sql = "SELECT COUNT(*) FROM " + tableName + " WHERE " + sqlCondition.replaceAll("\\?", ":");
 
         Map<String, Object> paramMap = new HashMap<>();
         for (int i = 0; i < values.length; i++) {

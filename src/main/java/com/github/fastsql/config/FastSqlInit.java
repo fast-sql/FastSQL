@@ -16,25 +16,12 @@ public class FastSqlInit implements CommandLineRunner {
 
     @Autowired
     private FastSqlProperties fastSqlProperties;
-//    @Autowired
-//    private JdbcTemplate jdbcTemplate;//TODO
 
     @Override
     public void run(String... args) throws Exception {
 
          log.info("FastSqlInit");
-//
-//        if (fastSqlProperties.getShowSql()) {
-//            log.info("-----show sql");
-//            Field[] fields = jdbcTemplate.getClass().getDeclaredFields();
-//            for (Field field : fields) {
-//                System.out.println(field);
-//            }
-//
-//
-//            System.setProperty("logging.level.org.springframework.jdbc.core.JdbcTemplate", "debug");
-//            System.setProperty("logging.level.org.springframework.jdbc.core.StatementCreatorUtils", "trace");
-//        }
+
         PageSqlUtils.DB_TYPE = fastSqlProperties.getDbType();
     }
 }

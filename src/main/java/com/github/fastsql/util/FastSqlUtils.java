@@ -9,7 +9,6 @@ import java.util.*;
  */
 public class FastSqlUtils {
 
-
     public static final char UNDERLINE = '_';
 
     public static String camelToUnderline(String param) {

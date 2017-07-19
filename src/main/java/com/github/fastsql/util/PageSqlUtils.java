@@ -39,8 +39,8 @@ public class PageSqlUtils {
 
 
     /**
-     * @param pageNumber  1+
-     * @param perPageSize 1+
+     * @param pageNumber  页数，从第一页开始
+     * @param perPageSize 每页条数，大于1
      */
     public static String mysql(String sql, int pageNumber, int perPageSize) {
         int limit = (pageNumber - 1) * perPageSize;
@@ -49,6 +49,10 @@ public class PageSqlUtils {
         return sql + " LIMIT " + limit + "," + offset;
     }
 
+    /**
+     * @param pageNumber  页数，从第一页开始
+     * @param perPageSize 每页条数，大于1
+     */
     public static String postgrsql(String sql, int pageNumber, int perPageSize) {
         int limit = (pageNumber - 1) * perPageSize;
         int offset = perPageSize;
@@ -56,6 +60,10 @@ public class PageSqlUtils {
         return sql + " LIMIT " + limit + " OFFSET" + offset;
     }
 
+    /**
+     * @param pageNumber  页数，从第一页开始
+     * @param perPageSize 每页条数，大于1
+     */
     public static String oracle(String sql, int pageNumber, int perPageSize) {
         int limit = (pageNumber - 1) * perPageSize;
         int endRowNum = limit + perPageSize;
@@ -65,33 +73,4 @@ public class PageSqlUtils {
                 " ( " + sql + " ) A   WHERE ROWNUM " +
                 " <= " + endRowNum + ") WHERE RN >=  " + limit;
     }
-
-//    public static void main(String[] args) {
-//        String sql = new SQLBuilder().SELECT("*").FROM("student").build();
-//
-//        System.out.println(PageSqlUtils.mysql(sql, 3, 4));
-//    }
-
-//    public static class SQLGroup{
-//        private String countSQL;
-//        private String selectSQL;
-//
-//
-//        public String getCountSQL() {
-//            return countSQL;
-//        }
-//
-//        public void setCountSQL(String countSQL) {
-//            this.countSQL = countSQL;
-//        }
-//
-//        public String getSelectSQL() {
-//            return selectSQL;
-//        }
-//
-//        public void setSelectSQL(String selectSQL) {
-//            this.selectSQL = selectSQL;
-//        }
-//    }
-
 }
