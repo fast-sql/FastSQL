@@ -201,8 +201,7 @@ map.put("birthday", new Date());
  
 
 List<Student> studentList1 = studentDao.findListWhere(
-      "name LIKE :name AND  ( birthday < :birthday OR home_address IS NULL)",
-      map
+      "name LIKE :name OR birthday < :birthday ORDER BY age DESC" , map
 );
 ```
 ### 5.3 统计对象
@@ -210,5 +209,10 @@ List<Student> studentList1 = studentDao.findListWhere(
 通过条件查询数量
 ```
 int countWhere = studentDao.countWhere("age >= 20"); //查找年龄大于等于20的学生
+int countWhere = studentDao.countWhere("age > ?1" , 10); //查找年龄大于10的学生
+
 ```
 ## 5.通过sql查询
+
+
+# 三.在SpringBoot中配置
