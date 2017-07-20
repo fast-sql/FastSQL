@@ -24,8 +24,8 @@ public class BaseDAOTest {
 
         DataSource dataSource = new SimpleDriverDataSource(
                 new com.mysql.jdbc.Driver(),
-                "jdbc:mysql://localhost:3306/test?characterEncoding=utf8&useSSL=true",
-                "root",
+                "jdbc:mysql://localhost:3306/fastsql?characterEncoding=utf8&useSSL=true",
+                "pig",
                 "123456");
         namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
 
@@ -191,6 +191,16 @@ public class BaseDAOTest {
         map.put("age", null);
 
         studentDao.update("17661a16-e77b-4979-8a25-c43a489d42ad", map);
+    }
+
+    @Test
+    public void findVO() {
+        StudentIndexDTO dto = new StudentIndexDTO();
+        dto.setAge(10);
+        dto.setCityName("成都");
+
+        List<StudentVO> studentVOList = studentDao.findStudentVOList(dto);
+
     }
 
     public static void main(String[] args) {

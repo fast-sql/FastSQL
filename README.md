@@ -43,6 +43,7 @@ public class Student {
     private Integer age;
     private Date birthday;
     private String homeAddress;
+    private String cityId;
     //省略getter和setter
 }
 
@@ -212,7 +213,40 @@ int countWhere = studentDao.countWhere("age >= 20"); //查找年龄大于等于2
 int countWhere = studentDao.countWhere("age > ?1" , 10); //查找年龄大于10的学生
 
 ```
-## 5.通过sql查询
+## 5.通过sql(关联)查询（通过BaseDao中template对象）
+//数据传入对象
+```
+public class StudentIndexDTO {
+    private Integer age;
+    private String cityName;
+    //getter.setter
 
+}
+```
+```
+public class StudentVO extends Student {
+    private String cityName;
 
+    //getter.setter
+}
+
+```
+
+```
+public class StudentDAO extends BaseDAO<Student> {
+
+    public List<StudentVO> findStudentVOList(StudentIndexDTO dto) {
+        String sql = "SELECT s.*,c.name AS cityName FROM student s " +//template可以直接使用
+                "LEFT JOIN city c ON s.city_id = c.id " +
+                "WHERE s.age = :age AND c.name = :cityName ";//命名参数
+
+        List<StudentVO> studentVOList = template.query(sql,//命名参数
+                new BeanPropertySqlParameterSource(dto), //传入参数***
+                new BeanPropertyRowMapper<>(StudentVO.class));//匹配传出参数***
+        return studentVOList;
+    }
+}
+```
 # 三.在SpringBoot中配置
+
+

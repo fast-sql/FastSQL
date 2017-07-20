@@ -17,7 +17,10 @@ public class Student {
     private Integer age;
 
     private Date birthday;
+
     private String homeAddress;
+
+    private String cityId;
 
     public String getId() {
         return id;
@@ -58,6 +61,14 @@ public class Student {
 
     public void setHomeAddress(String homeAddress) {
         this.homeAddress = homeAddress;
+    }
+
+    public String getCityId() {
+        return cityId;
+    }
+
+    public void setCityId(String cityId) {
+        this.cityId = cityId;
     }
 
     @Override
