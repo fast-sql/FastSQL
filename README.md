@@ -214,15 +214,15 @@ int countWhere = studentDao.countWhere("age > ?1" , 10); //查找年龄大于10�
 
 ```
 ## 5.通过sql(关联)查询（通过BaseDao中template对象）
-//数据传入对象
+新建数据传入类StudentIndexDTO
 ```
 public class StudentIndexDTO {
     private Integer age;
     private String cityName;
     //getter.setter
-
 }
 ```
+新建数据展示对象StudentVO
 ```
 public class StudentVO extends Student {
     private String cityName;
@@ -231,7 +231,7 @@ public class StudentVO extends Student {
 }
 
 ```
-
+在StudentDAO中增加方法
 ```
 public class StudentDAO extends BaseDAO<Student> {
 
@@ -247,6 +247,59 @@ public class StudentDAO extends BaseDAO<Student> {
     }
 }
 ```
-# 三.在SpringBoot中配置
-
-
+# 四.SQLBuilder--SQL构建器
+Java程序员面对的最痛苦的事情之一就是在Java代码中嵌入SQL语句。提供SQLBuilder简化你的构建过程。
+## DEMO 1
+```
+String sql_1 = new SQLBuilder()
+        .SELECT("name", "age")
+        .FROM("student")
+        .WHERE("age>10")
+        .build();
+```
+生成如下SQL
+```
+SELECT name,age
+FROM student
+WHERE age>10
+```
+## DEMO 2
+```
+String city = "成都";
+String sql_2 = new SQLBuilder()
+        .SELECT("s.name", "s.age")
+        .FROM("student s")
+        .LEFT_JOIN_ON("city c", "c.id=s.id")
+        .WHERE("s.age>10")
+        .IF_PRESENT_AND(city, "city.name LIKE :city")//如果把city改为null或者"" 这句话将不会添加
+        .build();
+```
+生成如下SQL
+```
+SELECT s.name,s.age
+FROM student s
+LEFT OUTER JOIN city c ON ( c.id=s.id ) 
+WHERE s.age>10
+AND city.name LIKE :city 
+```
+## DEMO 3
+```
+String sql_3 = new SQLBuilder()
+.SELECT("s.name", "s.age")
+.FROM("student s")
+.LEFT_JOIN_ON("city c", "c.id=s.id")
+.WHERE()
+.AND("(age>10 OR age<5)")
+.ORDER_BY("s.age")
+.build();
+```
+生成如下SQL
+```
+SELECT s.name,s.age
+FROM student s
+LEFT OUTER JOIN city c ON ( c.id=s.id ) 
+WHERE 1=1 
+AND (age>10 OR age<5)
+ORDER BY s.age 
+```
+# 五.分页工具PageSqlUtils
