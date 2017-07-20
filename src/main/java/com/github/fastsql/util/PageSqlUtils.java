@@ -21,7 +21,7 @@ public class PageSqlUtils {
 //        return pageSql(sql, (int) pageNumber, (int) perPageSize);
 //    }
 
-    public static String getPageFindSql(String sql, int pageNumber, int perPageSize) {
+    public static String findSQL(String sql, int pageNumber, int perPageSize) {
         if (DB_TYPE.equals("mysql")) {
             return mysql(sql, pageNumber, perPageSize);
         } else if (DB_TYPE.equals("postgrsql")) {
@@ -33,7 +33,7 @@ public class PageSqlUtils {
         }
     }
 
-    public static String getPageCountSql(String sql) {
+    public static String countSQL(String sql) {
         return "SELECT COUNT(*) FROM ( " + sql + " )";
     }
 

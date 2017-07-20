@@ -303,3 +303,23 @@ AND (age>10 OR age<5)
 ORDER BY s.age 
 ```
 # 五.分页工具PageSqlUtils
+分页工具支持mysql/postgresql/oracle
+
+public static String findSQL(String sql, int pageNumber, int perPageSize) 会返回查找行sql
+
+public static String countSQL(String sql) 会返回查找数量sql
+
+比如
+```
+String baseSql = new SQLBuilder()
+        .SELECT("name", "age")
+        .FROM("student")
+        .WHERE("age>10")
+        .build();
+PageSqlUtils.findSQL(baseSql,1,10);
+//生成=>SELECT name,age FROM student WHERE age>10 LIMIT 0,10
+PageSqlUtils.countSQL(baseSql);
+//生成=>
+```
+
+# 六.配置项 

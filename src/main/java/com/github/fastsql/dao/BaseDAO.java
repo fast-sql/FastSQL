@@ -513,12 +513,12 @@ public abstract class BaseDAO<E> {
         }
 
         List<E> coll = template.query(
-                PageSqlUtils.getPageFindSql(sql, pageNumber, perPage),
+                PageSqlUtils.findSQL(sql, pageNumber, perPage),
                 paramMap,
                 new BeanPropertyRowMapper<E>(entityClass)
         );
         Integer count = template.queryForObject(
-                PageSqlUtils.getPageFindSql(sql, pageNumber, perPage),
+                PageSqlUtils.countSQL(sql),
                 paramMap,
                 Integer.class);
 
@@ -532,12 +532,12 @@ public abstract class BaseDAO<E> {
         String sql = "SELECT * FROM " + tableName + " WHERE 1=1 AND " + sqlCondition;
 
         List<E> coll = template.query(
-                PageSqlUtils.getPageFindSql(sql, pageNumber, perPage),
+                PageSqlUtils.findSQL(sql, pageNumber, perPage),
                 parameterSource,
                 new BeanPropertyRowMapper<E>(entityClass)
         );
         Integer count = template.queryForObject(
-                PageSqlUtils.getPageFindSql(sql, pageNumber, perPage),
+                PageSqlUtils.countSQL(sql),
                 parameterSource,
                 Integer.class);
 
@@ -551,12 +551,12 @@ public abstract class BaseDAO<E> {
         String sql = "SELECT * FROM " + tableName + " WHERE 1=1 AND" + sqlCondition;
 
         List<E> coll = template.query(
-                PageSqlUtils.getPageFindSql(sql, pageNumber, perPage),
+                PageSqlUtils.findSQL(sql, pageNumber, perPage),
                 parameterMap,
                 new BeanPropertyRowMapper<E>(entityClass)
         );
         Integer count = template.queryForObject(
-                PageSqlUtils.getPageFindSql(sql, pageNumber, perPage),
+                PageSqlUtils.countSQL(sql),
                 parameterMap,
                 Integer.class);
 

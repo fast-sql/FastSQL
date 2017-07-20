@@ -126,6 +126,10 @@ public class SQLBuilder {
                 .WHERE("age>10")
                 .build();
         System.out.println(sql_1);
+        String findSql = PageSqlUtils.findSQL(sql_1, 1, 10);
+        System.out.println(findSql);
+        String countSQL = PageSqlUtils.countSQL(sql_1);
+        System.out.println(countSQL);
 
         String city = "成都";
         String sql_2 = new SQLBuilder()
