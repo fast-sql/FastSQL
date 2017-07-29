@@ -15,6 +15,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.util.StringUtils;
 
+import javax.persistence.Table;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -28,17 +29,29 @@ import java.util.*;
  * @author Jiazhi
  * @since 2017/3/30
  */
-public abstract class BaseDAO<E> {
+
+/**
+ * E is Entity Type
+ *
+ * @author Jiazhi
+ * @since 2017/3/30
+ */
+public abstract class BaseDAO<E, ID> {
     protected Class<E> entityClass;
+    protected ID id;
     protected Logger logger;
     protected String className;
     protected String tableName;
+    /**
+     * cache
+     */
+    protected List<String> columnListCache = new ArrayList<>();
+    protected List<Method> methodList = new ArrayList<>();
 
     protected NamedParameterJdbcTemplate template;
 
     @Autowired
     public void setTemplate(NamedParameterJdbcTemplate template) {
-
         this.template = template;
     }
 
@@ -53,33 +66,37 @@ public abstract class BaseDAO<E> {
         logger = LoggerFactory.getLogger(entityClass);
 
         className = entityClass.getSimpleName();
-        TableName tableName = entityClass.getAnnotation(TableName.class);
+        Table tableName = entityClass.getAnnotation(Table.class);
         if (tableName != null) {
-            if (StringUtils.isEmpty(tableName.value())) {
-                throw new RuntimeException(entityClass + "的注解@TableName的value不能为空");
+            if (StringUtils.isEmpty(tableName.name())) {
+                throw new RuntimeException(entityClass + "的注解@TableName的name不能为空");
             }
-            this.tableName = tableName.value();
+            this.tableName = tableName.name();
         } else {
             this.tableName = FastSqlUtils.camelToUnderline(className);
         }
 
     }
+
+    void initCache(E object) {
+        this.methodList = FastSqlUtils.getAllGetterWithoutId(object);
+    }
+
     /////////////////////////////////////////////////保存方法////////////////////////////////////////
 
     /**
      * 插入对象中非null的值到数据库
      */
-    public String saveIgnoreNull(E entity) {
-        String id = getSaveId(entity);
-
+    public ID saveIgnoreNull(E object) {
+        initCache(object);
+//
         StringBuilder nameBuilder = new StringBuilder("id");
-        StringBuilder valueBuilder = new StringBuilder("'" + id + "'");
+        StringBuilder valueBuilder = new StringBuilder(":id");
 
-        List<Method> methodList = FastSqlUtils.getAllGetterWithoutId(entity);
 
         for (Method method : methodList) {
             try {
-                Object value = method.invoke(entity);
+                Object value = method.invoke(object);
                 if (value != null) {
                     String str = method.getName().replace("get", "");
                     String columnName = FastSqlUtils.camelToUnderline(str);
@@ -97,7 +114,7 @@ public abstract class BaseDAO<E> {
                 "(" + valueBuilder.toString() + ")";
 
         int saveNum = template.update(
-                sql, new BeanPropertySqlParameterSource(entity)
+                sql, new BeanPropertySqlParameterSource(object)
         );
         if (saveNum < 1) {
             throw new RuntimeException("保存失败，saveNum = " + saveNum);
@@ -108,60 +125,55 @@ public abstract class BaseDAO<E> {
     /**
      * 插入对象中的值到数据库，null值在数据库中会设置为NULL
      */
-    public String save(E entity) {
-        String id = getSaveId(entity);
+    public ID save(E object) {
+        initCache(object);
 
         StringBuilder nameBuilder = new StringBuilder("id");
-        StringBuilder valueBuilder = new StringBuilder("'" + id + "'");
+        StringBuilder valueBuilder = new StringBuilder(":id");
 
-        List<Method> methodList = FastSqlUtils.getAllGetterWithoutId(entity);
-        for (Method method : methodList) {
+        for (Method method : FastSqlUtils.getAllGetterWithoutId(object)) {
             try {
-                Object value = method.invoke(entity);
+                Object value = method.invoke(object);
                 String str = method.getName().replace("get", "");
                 String columnName = FastSqlUtils.camelToUnderline(str);
                 String fieldName = str.substring(0, 1).toLowerCase() + str.substring(1, str.length());
 
+
+                nameBuilder.append("," + columnName);
                 if (value != null) {
-                    nameBuilder.append("," + columnName);
                     valueBuilder.append(",:" + fieldName);
                 } else {
-                    nameBuilder.append("," + columnName);
                     valueBuilder.append(",NULL");
                 }
+
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
-        String sql = "INSERT INTO " + tableName +
-                "(" + nameBuilder.toString() + ")" +
-                " VALUES" +
-                " (" + valueBuilder.toString() + ")";
-        int saveNum = template.update(
-                sql, new BeanPropertySqlParameterSource(entity)
-        );
+        String sql = "INSERT INTO " + tableName + "(" + nameBuilder.toString() + ") VALUES(" + valueBuilder.toString() + ")";
+        int saveNum = template.update(sql, new BeanPropertySqlParameterSource(object));
         if (saveNum < 1) {
             throw new RuntimeException("保存失败，saveNum = " + saveNum);
         }
         return id;
     }
 
-    /**
-     * 获取保存对象的Id
-     */
-    private String getSaveId(E entity) {
-        String id;
-        try {
-            Method getId = entity.getClass().getMethod("getId", new Class[]{});
-            id = (String) getId.invoke(entity);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException("保存失败， getId() 方法不存在或调用失败");
-        }
-        if (StringUtils.isEmpty(id)) {
-            id = UUID.randomUUID().toString();
-        }
-        return id;
-    }
+//    /**
+//     * 获取保存对象的Id
+//     */
+//    private String getSaveId(E object) {
+//        String id;
+//        try {
+//            Method getId = object.getClass().getMethod("getId", new Class[]{});
+//            id = (String) getId.invoke(object);
+//        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+//            throw new RuntimeException("保存失败， getId() 方法不存在或调用失败");
+//        }
+//        if (StringUtils.isEmpty(id)) {
+//            id = UUID.randomUUID().toString();
+//        }
+//        return id;
+//    }
 
     /////////////////////////////////////////////////删除方法////////////////////////////////////////
 
@@ -208,25 +220,18 @@ public abstract class BaseDAO<E> {
         return row;
     }
 
-    /**
-     * 根据id列表批量删除数据
-     */
-    public int deleteInBatch(String... ids) {
-        return deleteInBatch(Arrays.asList(ids));
-    }
-
     /////////////////////////////修改 /////////////////////////////////////////////
 
     /**
      * 全更新 null值在 数据库中设置为null
      */
-    public String update(E entity) {
+    public ID update(E entity) {
 //        List<Object> ignoreColumnList = Arrays.asList(ignoreColumns);
 
-        String id;
+        ID id;
         try {
             Method getId = entity.getClass().getMethod("getId", new Class[]{});
-            id = (String) getId.invoke(entity);
+            id = (ID) getId.invoke(entity);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException("保存失败， getId() 方法不存在或调用失败");
         }
@@ -275,11 +280,11 @@ public abstract class BaseDAO<E> {
     /**
      * 仅更新非null， null值 不更新
      */
-    public String updateIgnoreNull(E entity) {
-        String id;
+    public ID updateIgnoreNull(E entity) {
+        ID id;
         try {
             Method getId = entity.getClass().getMethod("getId", new Class[]{});
-            id = (String) getId.invoke(entity);
+            id = (ID) getId.invoke(entity);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException("保存失败， getId() 方法不存在或调用失败");
         }
@@ -299,16 +304,8 @@ public abstract class BaseDAO<E> {
                 throw new RuntimeException(e);
             }
         }
-        String sql = "UPDATE " + tableName + " SET " +
-                builder.toString().replaceFirst(",", "") +
-                " WHERE id=:id";
+        String sql = "UPDATE " + tableName + " SET " + builder.toString().replaceFirst(",", "") + " WHERE id=:id";
 
-//        logger.debug(sql);
-//        logger.debug(object.toString());
-
-//        return template.update(
-//                sql, new BeanPropertySqlParameterSource(object)
-//        );
         int rows = template.update(
                 sql, new BeanPropertySqlParameterSource(entity)
         );
@@ -317,6 +314,7 @@ public abstract class BaseDAO<E> {
         }
         return id;
     }
+
 
     /**
      * 根据Map更新
