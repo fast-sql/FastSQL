@@ -9,7 +9,7 @@ import java.util.List;
  * @author Jiazhi
  * @since 2017/4/2
  */
-public class StudentDAO extends BaseDAO<Student> {
+public class StudentDAO extends BaseDAO<Student,String> {
 
     public List<StudentVO> findStudentVOList(StudentIndexDTO dto) {
         String sql = "SELECT s.*,c.name AS cityName FROM student s " +//template可以直接使用

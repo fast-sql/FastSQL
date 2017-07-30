@@ -2,6 +2,7 @@ package com.github.fastsql.dao;
 
 import com.github.fastsql.util.TableName;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 /**
@@ -16,7 +17,7 @@ public class Student {
 
     private Integer age;
 
-    private Date birthday;
+    private LocalDate birthday;
 
     private String homeAddress;
 
@@ -47,11 +48,11 @@ public class Student {
     }
 
 
-    public Date getBirthday() {
+    public LocalDate getBirthday() {
         return birthday;
     }
 
-    public void setBirthday(Date birthday) {
+    public void setBirthday(LocalDate birthday) {
         this.birthday = birthday;
     }
 

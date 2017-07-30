@@ -2,12 +2,17 @@ package com.github.fastsql.dao;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.PreparedStatementCallback;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 
 import javax.sql.DataSource;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class BaseDAOTest {
@@ -22,43 +27,52 @@ public class BaseDAOTest {
 
         System.setProperty("log4j.logger.org.springframework.jdbc.core.StatementCreatorUtils", "Trace");
 
+//        DataSource dataSource = new SimpleDriverDataSource(
+//                new com.mysql.jdbc.Driver(),
+//                "jdbc:mysql://localhost:3306/fastsql?characterEncoding=utf8&useSSL=true",
+//                "pig",
+//                "123456");
         DataSource dataSource = new SimpleDriverDataSource(
                 new com.mysql.jdbc.Driver(),
-                "jdbc:mysql://localhost:3306/fastsql?characterEncoding=utf8&useSSL=true",
-                "pig",
+                "jdbc:mysql://localhost:3306/test?characterEncoding=utf8&useSSL=true",
+                "root",
                 "123456");
         namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
 
 
         studentDao = new StudentDAO();
+
         studentDao.setTemplate(namedParameterJdbcTemplate); //模拟注入
 
     }
 
     @Test
     public void save() {
-
         Student student = new Student();
-//        student.setId(UUID.randomUUID().toString());
-        student.setName("小丽");
-        student.setBirthday(new Date());
+        student.setId(UUID.randomUUID().toString());
+        student.setName("小xxxxx");
+        student.setBirthday(LocalDate.now());
         student.setHomeAddress("");
 
-        String id = studentDao.save(student);
-
-        System.out.println(id);
+        studentDao.save(student);
     }
+
+//    @Test
+//    public void save21323() {
+//
+//    }
 
     @Test
     public void saveIgnoreNull() {
 
         Student student = new Student();
-//        student.setId(UUID.randomUUID().toString());
+        student.setId(UUID.randomUUID().toString());
         student.setName("小丽");
         student.setBirthday(null);
         student.setHomeAddress("");
 
         String id = studentDao.saveIgnoreNull(student);
+
 
         System.out.println(id);
     }
@@ -116,15 +130,37 @@ public class BaseDAOTest {
     @Test
     public void findListWhere2() {
 
-        Student student = new Student();
-        student.setName("%小%");
-        student.setBirthday(new Date());
+        StudentIndexDTO dto = new StudentIndexDTO();
+        dto.setName("%小%");
+        dto.setBirthday(LocalDate.of(1991,10,10));
+//        student.setBirthday(new Date());
 
         List<Student> studentList1 = studentDao.findListWhere(
-                "name LIKE :name AND  ( birthday < :birthday OR home_address IS NULL)",
-                new BeanPropertySqlParameterSource(student)
+                "name LIKE :name AND  birthday < :birthday ",
+                new BeanPropertySqlParameterSource(dto)
         );
         System.out.println(studentList1);
+    }
+
+    static class StudentIndexDTO{
+        private String name;
+        private LocalDate birthday;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public LocalDate getBirthday() {
+            return birthday;
+        }
+
+        public void setBirthday(LocalDate birthday) {
+            this.birthday = birthday;
+        }
     }
 
     @Test
@@ -171,7 +207,7 @@ public class BaseDAOTest {
     }
 
     @Test
-    public void updateignoreNull() {
+    public void updateIgnoreNull() {
 
 
         Student student = new Student();
@@ -195,11 +231,11 @@ public class BaseDAOTest {
 
     @Test
     public void findVO() {
-        StudentIndexDTO dto = new StudentIndexDTO();
-        dto.setAge(10);
-        dto.setCityName("成都");
-
-        List<StudentVO> studentVOList = studentDao.findStudentVOList(dto);
+//        StudentIndexDTO dto = new StudentIndexDTO();
+//        dto.setAge(10);
+//        dto.setCityName("成都");
+//
+//        List<StudentVO> studentVOList = studentDao.findStudentVOList(dto);
 
     }
 

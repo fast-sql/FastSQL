@@ -29,13 +29,6 @@ import java.util.*;
  * @author Jiazhi
  * @since 2017/3/30
  */
-
-/**
- * E is Entity Type
- *
- * @author Jiazhi
- * @since 2017/3/30
- */
 public abstract class BaseDAO<E, ID> {
     protected Class<E> entityClass;
     protected ID id;
@@ -69,7 +62,7 @@ public abstract class BaseDAO<E, ID> {
         Table tableName = entityClass.getAnnotation(Table.class);
         if (tableName != null) {
             if (StringUtils.isEmpty(tableName.name())) {
-                throw new RuntimeException(entityClass + "的注解@TableName的name不能为空");
+                throw new RuntimeException(entityClass + "的注解@Table的name不能为空");
             }
             this.tableName = tableName.name();
         } else {
@@ -79,7 +72,9 @@ public abstract class BaseDAO<E, ID> {
     }
 
     void initCache(E object) {
-        this.methodList = FastSqlUtils.getAllGetterWithoutId(object);
+        if (methodList.size() > 0) {//lazy init
+            this.methodList = FastSqlUtils.getAllGetterWithoutId(object);
+        }
     }
 
     /////////////////////////////////////////////////保存方法////////////////////////////////////////
@@ -125,7 +120,7 @@ public abstract class BaseDAO<E, ID> {
     /**
      * 插入对象中的值到数据库，null值在数据库中会设置为NULL
      */
-    public ID save(E object) {
+    public int save(E object) {
         initCache(object);
 
         StringBuilder nameBuilder = new StringBuilder("id");
@@ -138,24 +133,22 @@ public abstract class BaseDAO<E, ID> {
                 String columnName = FastSqlUtils.camelToUnderline(str);
                 String fieldName = str.substring(0, 1).toLowerCase() + str.substring(1, str.length());
 
-
                 nameBuilder.append("," + columnName);
-                if (value != null) {
-                    valueBuilder.append(",:" + fieldName);
-                } else {
-                    valueBuilder.append(",NULL");
-                }
-
+//                if (value != null) {
+                valueBuilder.append(",:" + fieldName);
+//                } else {
+//                    valueBuilder.append(",NULL");
+//                }
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
         String sql = "INSERT INTO " + tableName + "(" + nameBuilder.toString() + ") VALUES(" + valueBuilder.toString() + ")";
-        int saveNum = template.update(sql, new BeanPropertySqlParameterSource(object));
-        if (saveNum < 1) {
-            throw new RuntimeException("保存失败，saveNum = " + saveNum);
-        }
-        return id;
+        return template.update(sql, new BeanPropertySqlParameterSource(object));
+//        if (saveNum < 1) {
+//            throw new RuntimeException("保存失败，saveNum = " + saveNum);
+//        }
+//       id;
     }
 
 //    /**
@@ -280,7 +273,7 @@ public abstract class BaseDAO<E, ID> {
     /**
      * 仅更新非null， null值 不更新
      */
-    public ID updateIgnoreNull(E entity) {
+    public int updateIgnoreNull(E entity) {
         ID id;
         try {
             Method getId = entity.getClass().getMethod("getId", new Class[]{});
@@ -306,20 +299,16 @@ public abstract class BaseDAO<E, ID> {
         }
         String sql = "UPDATE " + tableName + " SET " + builder.toString().replaceFirst(",", "") + " WHERE id=:id";
 
-        int rows = template.update(
+        return template.update(
                 sql, new BeanPropertySqlParameterSource(entity)
         );
-        if (rows < 1) {
-            logger.warn("修改失败:" + sql);
-        }
-        return id;
     }
 
 
     /**
      * 根据Map更新
      */
-    public String update(String id, Map<String, Object> updateColumnMap) {
+    public int update(String id, Map<String, Object> updateColumnMap) {
 
 
         StringBuilder sqlBuilder = new StringBuilder();
@@ -338,45 +327,33 @@ public abstract class BaseDAO<E, ID> {
                 " WHERE id=:id";
 
 
-        int rows = template.update(
-                sql, updateColumnMap
-        );
-        if (rows < 1) {
-            logger.warn("修改失败:" + sql);
-        }
-        return id;
+        return template.update(sql, updateColumnMap);
     }
 
-    /**
-     * 根据Sql筛选更新
-     */
-    public int updateWhere(String condition, Map<String, Object> conditionMap, Map<String, Object> updateColumnMap) {
-
-
-        StringBuilder sqlBuilder = new StringBuilder();
-
-        for (Map.Entry<String, Object> entry : updateColumnMap.entrySet()) {
-            String column = FastSqlUtils.camelToUnderline(entry.getKey());
-            if (entry.getValue() != null) {
-                sqlBuilder.append("," + column + "=:" + entry.getKey());
-            } else {
-                sqlBuilder.append("," + column + "=NULL");
-            }
-        }
-        updateColumnMap.putAll(conditionMap);
-        String sql = "UPDATE " + tableName + " SET " +
-                sqlBuilder.toString().replaceFirst(",", "") +
-                " WHERE  " + condition;
-
-
-        int rows = template.update(
-                sql, updateColumnMap
-        );
-        if (rows < 1) {
-            logger.warn("修改失败:" + sql);
-        }
-        return rows;
-    }
+//    /**
+//     * 根据Sql筛选更新
+//     */
+//    public int updateWhere(Map<String, Object> updateColumnMap, String condition, Map<String, Object> conditionMap) {
+//
+//
+//        StringBuilder sqlBuilder = new StringBuilder();
+//
+//        for (Map.Entry<String, Object> entry : updateColumnMap.entrySet()) {
+//            String column = FastSqlUtils.camelToUnderline(entry.getKey());
+//            if (entry.getValue() != null) {
+//                sqlBuilder.append("," + column + "=:" + entry.getKey());
+//            } else {
+//                sqlBuilder.append("," + column + "=NULL");
+//            }
+//        }
+//        updateColumnMap.putAll(conditionMap);
+//        String sql = "UPDATE " + tableName + " SET " +
+//                sqlBuilder.toString().replaceFirst(",", "") +
+//                " WHERE  " + condition;
+//
+//
+//        return template.update(sql, updateColumnMap);
+//    }
 
 
     //////////////////////////////find one/////////////////////////////////////

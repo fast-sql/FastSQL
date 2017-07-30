@@ -28,25 +28,28 @@ CREATE TABLE `student` (
   `city_id` varchar(36) NOT NULL,
    PRIMARY KEY (`id`)
 )
+
+
 CREATE TABLE `city` (
   `id` varchar(36) NOT NULL,
   `name` varchar(20) NOT NULL,
    PRIMARY KEY (`id`)
 )
 ```
-新建java实体类，同名或驼峰下转划线相同可以省略@TableName
+新建java实体类，（同名或驼峰下转划线相同可以省略@Table），student和city是多对一关系。
 ```
-@TableName("student") 
+@Table(name="student") 
 public class Student {
     private String id;
     private String name;
     private Integer age;
-    private Date birthday;
+    private LocalDate birthday;
     private String homeAddress;
     private String cityId;
     //省略getter和setter
 }
 
+@Table(name="") 
 public class City {
     private String id;
     private String name;
@@ -54,7 +57,7 @@ public class City {
 }
 
 ```
-新建DAO层数据访问类, 并继承BaseDAO类，会自动集成BaseDAO中的方法---见第2部分
+新建DAO层数据访问类, 并继承BaseDAO类，会自动继承BaseDAO中的方法(详见第2部分）
 
 ```
 @Repository
@@ -70,35 +73,35 @@ public class CityDAO extends BaseDAO<City> {
 
 ## 2.数据保存 ，继承自BaseDAO中的方法
 
-#### public String save(E entity) 
+#### 2.1 public int save(E entity) 
 插入对象中的值到数据库，null值在数据库中会设置为NULL
 ```
 Student student = new Student();
-//student.setId(UUID.randomUUID().toString()); //不指定id将会自动把id保存为uuid
+//student.setId(UUID.randomUUID().toString()); 
 student.setName("小丽");
 student.setBirthday(new Date());
 student.setHomeAddress("");
 
-String id = studentDao.save(student);//获取保存成功的id
+studentDao.save(student);//获取保存成功的id
 ```
 等价如下SQL语句（注意：age被设置为null）
 ```
-INSERT INTO student(id,name,age,birthday,home_address) 
+INSERT INTO student(id,name,age,birthday,home_address,city_id) 
  VALUES 
-('622bca40-4c64-43aa-8819-447718bdafa5','小丽',NULL,'2017-07-11','')
+('622bca40-4c64-43aa-8819-447718bdafa5','小丽',NULL,'2017-07-11','',NULL)
 ```
 
 
-#### public String saveIgnoreNull(E entity)  
+#### 2.2 public int saveIgnoreNull(E entity)  
 插入对象中非null的值到数据库
 ```
 Student student = new Student();
-//student.setId(UUID.randomUUID().toString());//不指定id将会自动把id保存为uuid
+student.setId(UUID.randomUUID().toString());
 student.setName("小丽");
 student.setBirthday(new Date());
 student.setHomeAddress("");
  
-String id =  studentDao.saveIgnoreNull(student);//获取保存成功的id
+studentDao.saveIgnoreNull(student);
 ```
 等价如下SQL语句（注意：没有对age进行保存，在数据库层面age将会保存为该表设置的默认值，如果没有设置默认值，将会被保存为null ）
 ```
@@ -112,7 +115,7 @@ INSERT INTO student(id,name,birthday,home_address)
 #### public int delete(String id) 
 根据id删除数据
 ```
-int deleteRowNumber = studentDao.delete("22b66bcf-1c2e-4713-b90d-eab17182b565");
+int num = studentDao.delete("22b66bcf-1c2e-4713-b90d-eab17182b565");//获取删除的行数量
 ```
 等价如下SQL语句
 ```
@@ -122,7 +125,7 @@ DELETE FROM student WHERE id='22b66bcf-1c2e-4713-b90d-eab17182b565'
 #### public int deleteAll()
 删除某个表所有行
 ```
-int number = studentDao.deleteAll()//获取删除的行数量
+int number = studentDao.deleteAll();//获取删除的行数量
 ```
 
 #### public int  deleteInBatch(List<String> ids) 和 public int deleteInBatch(String... ids)
@@ -146,7 +149,7 @@ int number = studentDao.deleteInBatch(ids);//返回成功删除的数量
 使用id根据map进行更新
 ```
 Map<String, Object> map = new HashMap<>();
-map.put("home_address", "成都");// map.put("homeAddress", "成都") -- 使用实体字段作为key也可以
+map.put("home_address", "成都");
 map.put("birthday", new Date());
 map.put("age", null);
 
@@ -159,7 +162,7 @@ UPDATE student
 SET home_address='成都', birthday='2017-07-17',age=NULL 
 WHERE id='12345678'
 ```
-## 5.单表查询，继承自BaseDAO中的方法
+## 5.单表查询,使用findXXX，继承自BaseDAO中的方法
 
 ### 5.1 单个对象
 #### public E findOne(String id) 
@@ -170,7 +173,8 @@ Student student = studentDao.findOne("12345678");//查询id为12345678的数据�
 #### public E findOneWhere(String sqlCondition, Object... values)
 通过语句查询（返回多条数据将会抛出运行时异常）
 ```
-Student student = studentDao.findOneWhere("name=?1 AND home_address=?2", "小明", "成都");
+Student student = studentDao.findOneWhere("name=?1 AND home_address=?2", "小明", "成都");   
+  
 ```
 ### 5.2 多个对象
 小明将会被匹配到?1中，成都将会被匹配到?2中，查询的是名字的小明，家庭地址为成都的对象。
@@ -178,19 +182,27 @@ Student student = studentDao.findOneWhere("name=?1 AND home_address=?2", "小明
 #### public List<E> findListWhere(String sqlCondition, Object... values)
 用法与findOneWhere()相同，可以返回一条或多条数据
 ```
-List<Student> studentList  =  studentDao.findListWhere(
-                        "name LIKE ?1 OR home_address IS NULL ORDER BY age DESC", "%明%");
+List<Student> studentList  =  studentDao.findListWhere("name=?1", "小明");
+List<Student> studentList  =  studentDao.findListWhere("ORDER BY age");
+List<Student> studentList  =  studentDao.findListWhere("home_address IS NULL ORDER BY age DESC");
+//...
 ```
 
 #### public List<E> findListWhere(String sqlCondition, BeanPropertySqlParameterSource parameterSource)
 ```
-Student student = new Student();
-student.setName("%小%");
-student.setBirthday(new Date());
+class StudentIndexDTO{
+    private String name;
+    private LocalDate birthday;
+    //getter setter
+}
 
-List<Student> studentList1 = studentDao.findListWhere(
-                "name LIKE :name AND  ( birthday < :birthday OR home_address IS NULL)",
-                new BeanPropertySqlParameterSource(student)
+StudentIndexDTO dto = new StudentIndexDTO();
+dto.setName("%小%");
+dto.setBirthday(LocalDate.of(1991,10,10));
+
+List<Student> studentList = studentDao.findListWhere(
+                "name LIKE :name AND  birthday < :birthday ",
+                new BeanPropertySqlParameterSource(dto));
 );
 ```
 #### public List<E> findListWhere(String sqlCondition, Map<String, Object> parameterMap)
@@ -198,11 +210,9 @@ List<Student> studentList1 = studentDao.findListWhere(
 ```
 Map<String, Object> map = new HashMap<>();
 map.put("name", "%小%");
-map.put("birthday", new Date());
  
-
-List<Student> studentList1 = studentDao.findListWhere(
-      "name LIKE :name OR birthday < :birthday ORDER BY age DESC" , map
+List<Student> studentList = studentDao.findListWhere(
+      "name LIKE :name  ORDER BY age DESC" , map
 );
 ```
 ### 5.3 统计对象
@@ -267,12 +277,12 @@ WHERE age>10
 ```
 String city = "成都";
 String sql_2 = new SQLBuilder()
-        .SELECT("s.name", "s.age")
-        .FROM("student s")
-        .LEFT_JOIN_ON("city c", "c.id=s.id")
-        .WHERE("s.age>10")
-        .IF_PRESENT_AND(city, "city.name LIKE :city")//如果把city改为null或者"" 这句话将不会添加
-        .build();
+      .SELECT("s.name", "s.age")
+      .FROM("student s")
+      .LEFT_JOIN_ON("city c", "c.id=s.id")
+      .WHERE("s.age>10")
+      .IF_PRESENT_AND(city, "city.name LIKE :city")//如果把city改为null或者"" 这句话将不会添加
+      .build();
 ```
 生成如下SQL
 ```
@@ -285,13 +295,13 @@ AND city.name LIKE :city
 ## DEMO 3
 ```
 String sql_3 = new SQLBuilder()
-.SELECT("s.name", "s.age")
-.FROM("student s")
-.LEFT_JOIN_ON("city c", "c.id=s.id")
-.WHERE()
-.AND("(age>10 OR age<5)")
-.ORDER_BY("s.age")
-.build();
+    .SELECT("s.name", "s.age")
+    .FROM("student s")
+    .LEFT_JOIN_ON("city c", "c.id=s.id")
+    .WHERE()
+    .AND("(age>10 OR age<5)")
+    .ORDER_BY("s.age")
+    .build();
 ```
 生成如下SQL
 ```
@@ -316,10 +326,14 @@ String baseSql = new SQLBuilder()
         .FROM("student")
         .WHERE("age>10")
         .build();
+        
 PageSqlUtils.findSQL(baseSql,1,10);
+
 //生成=>SELECT name,age FROM student WHERE age>10 LIMIT 0,10
 PageSqlUtils.countSQL(baseSql);
 //生成=>
 ```
 
 # 六.配置项 
+
+fastsql.db-type=mysql # mysql postgresql oracle
