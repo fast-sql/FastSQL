@@ -7,7 +7,7 @@
 应用中数据访问类需要继承这个类，进行各种操作
 
 ## 1.准备数据
-新建表
+mysql新建表，student和city是多对一关系。
 ```
 CREATE TABLE `student` (
   `id` varchar(36) NOT NULL,
@@ -19,14 +19,13 @@ CREATE TABLE `student` (
    PRIMARY KEY (`id`)
 )
 
-
 CREATE TABLE `city` (
   `id` varchar(36) NOT NULL,
   `name` varchar(20) NOT NULL,
    PRIMARY KEY (`id`)
 )
 ```
-新建java实体类，（同名或驼峰下转划线相同可以省略@Table），student和city是多对一关系。
+新建java实体类，（同名或驼峰下转划线相同可以省略@Table）。
 ```
 @Table(name="student") 
 public class Student {
@@ -61,7 +60,7 @@ public class CityDAO extends BaseDAO<City> {
 }
 ```
 
-## 2.数据保存 ，继承自BaseDAO中的方法
+## 2.数据保存的方法 ，继承自BaseDAO
 
 #### 2.1 public int save(E entity) 
 插入对象中的值到数据库，null值在数据库中会设置为NULL
@@ -100,7 +99,7 @@ INSERT INTO student(id,name,birthday,home_address)
 ('622bca40-4c64-43aa-8819-447718bdafa5','小丽','2017-07-11','')
 
 ```
-## 3.数据删除 ，继承自BaseDAO中的方法
+## 3.数据删除的方法 ，继承自BaseDAO
 
 #### public int delete(String id) 
 根据id删除数据
@@ -127,7 +126,7 @@ ids.add("881c80a1-8c93-4bb7-926e-9a8bc9799a72");
 int number = studentDao.deleteInBatch(ids);//返回成功删除的数量
 ```
 
-## 4.数据修改 ，继承自BaseDAO中的方法
+## 4.数据修改的方法 ，继承自BaseDAO中
 
 #### String update(E entity) 
 根据对象进行更新（null字段在数据库中将会被设置为null），对象中id字段不能为空 
@@ -213,7 +212,27 @@ int countWhere = studentDao.countWhere("age >= 20"); //查找年龄大于等于2
 int countWhere = studentDao.countWhere("age > ?1" , 10); //查找年龄大于10的学生
 
 ```
-## 5.通过sql(关联)查询（通过BaseDao中template对象）
+#四.通过sql查询（通过BaseDao中）
+
+## 把结果封装到Map中
+以下方法获取Map对象（由column和值组成的）
+```
+Map<String, Object> queryMapBySql(String sql)
+Map<String, Object> queryMapBySql(String sql, SqlParameterSource paramSource) 
+Map<String, Object> queryMapBySql(String sql, Map<String, ?> paramMap)
+```
+
+
+以下方法获取Map对象的列表（每个map由column和值组成的）
+```
+List<Map<String, Object>> queryMapListBySql(String sql)
+List<Map<String, Object>> queryMapListBySql(String sql, SqlParameterSource paramSource) 
+List<Map<String, Object>> queryMapListBySql(String sql, Map<String, ?> paramMap)
+```
+ 
+
+## 把结果封装到对象中
+
 新建数据传入类StudentIndexDTO
 ```
 public class StudentIndexDTO {
@@ -309,8 +328,10 @@ public static String findSQL(String sql, int pageNumber, int perPageSize) 会返
 
 public static String countSQL(String sql) 会返回查找数量sql
 
-比如
+比如(mysql)
 ```
+PageSqlUtils.DB_TYPE="mysql"
+
 String baseSql = new SQLBuilder()
         .SELECT("name", "age")
         .FROM("student")
@@ -321,7 +342,7 @@ PageSqlUtils.findSQL(baseSql,1,10);
 
 //生成=>SELECT name,age FROM student WHERE age>10 LIMIT 0,10
 PageSqlUtils.countSQL(baseSql);
-//生成=>
+//生成=>SELECT count(*) FROM student WHERE age>10
 ```
 
 # 六.配置项 

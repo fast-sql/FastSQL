@@ -16,7 +16,7 @@ public class StudentDAO extends BaseDAO<Student,String> {
                 "LEFT JOIN city c ON s.city_id = c.id " +
                 "WHERE s.age = :age AND c.name = :cityName ";//命名参数
 
-        List<StudentVO> studentVOList = template.query(sql,//命名参数
+        List<StudentVO> studentVOList = queryListBySql(sql,//命名参数
                 new BeanPropertySqlParameterSource(dto), //传入参数***
                 new BeanPropertyRowMapper<>(StudentVO.class));//匹配传出参数***
         return studentVOList;

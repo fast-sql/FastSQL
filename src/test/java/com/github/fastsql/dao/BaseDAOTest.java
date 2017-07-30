@@ -71,11 +71,10 @@ public class BaseDAOTest {
         student.setBirthday(null);
         student.setHomeAddress("");
 
-        String id = studentDao.saveIgnoreNull(student);
+         studentDao.saveIgnoreNull(student);
 
 
-        System.out.println(id);
-    }
+     }
 
     @Test
     public void delete() {
@@ -219,15 +218,7 @@ public class BaseDAOTest {
 
     }
 
-    @Test
-    public void updateByMap() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("home_address", "成都");//map.put("homeAddress", "成都")也可以
-        map.put("birthday", new Date());
-        map.put("age", null);
 
-        studentDao.update("17661a16-e77b-4979-8a25-c43a489d42ad", map);
-    }
 
     @Test
     public void findVO() {

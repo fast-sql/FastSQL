@@ -1,5 +1,8 @@
 package com.github.fastsql.util;
 
+import javax.persistence.Id;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -100,6 +103,31 @@ public class FastSqlUtils {
 
         }
         return methodList;
+    }
+
+    public static List<Field> getAllFieldWithoutId(Object object) {
+        List<Field> fieldList = new ArrayList<>();
+        Field[] declaredFields = object.getClass().getDeclaredFields();
+
+        for (Field field : declaredFields) {
+
+            if (!field.isAnnotationPresent(Id.class)) {
+                fieldList.add(field);
+            }
+
+
+        }
+        return fieldList;
+    }
+
+    public static List<Field> getAllField(Object object) {
+        Field[] declaredFields = object.getClass().getDeclaredFields();
+        List<Field> fieldList = new ArrayList<>(declaredFields.length);
+
+        for (Field field : declaredFields) {
+            fieldList.add(field);
+        }
+        return fieldList;
     }
 
     public static Map<String, Object> emptyHashMap() {
