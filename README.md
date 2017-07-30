@@ -1,17 +1,7 @@
 # 一.FastSql简介
-一个基于spring-jdbc的简单ORM框架，主要使用了NamedParameterJdbcTemplate类，可以加速你的数据库开发。
-
-## 为什么使用SQL而不是ORM框架
-
-1.
-2.
-3.
-
-## 数据库设计约定：
-
-1.使用uuid字符串做为主键类型
-2. 数据库表名称最好使用单数
-3.
+一个基于spring-jdbc的简单ORM框架，结合了hibernate和mybatis的优点,
+主要使用了NamedParameterJdbcTemplate类，可以加速你的数据库开发。
+ 
  
 # 二.BaseDAO
 应用中数据访问类需要继承这个类，进行各种操作

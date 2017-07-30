@@ -3,7 +3,7 @@
 
 /.idea/
 
-fastsql.iml
+*.iml
 
 /target/
 
