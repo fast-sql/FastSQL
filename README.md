@@ -52,12 +52,12 @@ public class City {
 
 ```
 @Repository
-public class StudentDAO extends BaseDAO<Student> {
+public class StudentDAO extends BaseDAO<Student,String> {
      
 }
 
 @Repository
-public class CityDAO extends BaseDAO<City> {
+public class CityDAO extends BaseDAO<City,String> {
      
 }
 ```
@@ -136,23 +136,7 @@ int number = studentDao.deleteInBatch(ids);//返回成功删除的数量
 #### `String updateIgnoreNull(E entity) `
 根据对象进行更新（只更新实体中非null字段），对象中id字段不能为空 
 
-#### `String update(String id, Map<String, Object> updateColumnMap) `
-使用id根据map进行更新
-```
-Map<String, Object> map = new HashMap<>();
-map.put("home_address", "成都");
-map.put("birthday", new Date());
-map.put("age", null);
-
-studentDao.update("12345678", map);
-
-```
-等价如下SQL语句
-```
-UPDATE student 
-SET home_address='成都', birthday='2017-07-17',age=NULL 
-WHERE id='12345678'
-```
+ 
 ## 5.单表查询,使用findXXX，继承自BaseDAO中的方法
 
 ### 5.1 单个对象
