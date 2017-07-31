@@ -12,8 +12,6 @@ public class FastSqlProperties {
 
     private String dbType = "postgresql";
 
-
-
     public String getDbType() {
         return dbType;
     }
@@ -21,6 +19,4 @@ public class FastSqlProperties {
     public void setDbType(String dbType) {
         this.dbType = dbType;
     }
-
-
 }

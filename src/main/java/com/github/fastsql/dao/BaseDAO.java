@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 /**
  * @author 陈佳志
  */
@@ -187,10 +186,9 @@ public abstract class BaseDAO<E, ID> {
      */
     public int saveIgnoreNull(E object) {
         initCache(object);
-//
+
         StringBuilder nameBuilder = new StringBuilder("id");
         StringBuilder valueBuilder = new StringBuilder(":id");
-
 
         for (Method method : getterMethodsWithoutId) {
             try {
