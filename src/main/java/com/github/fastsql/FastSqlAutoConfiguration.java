@@ -18,9 +18,9 @@ public class FastSqlAutoConfiguration {
 
     @Bean
     public FastSqlInit fastSqlInit() {
-        log.info("fastSqlInit");
-        System.setProperty("logging.level.org.springframework.jdbc.core.JdbcTemplate", "debug");
-        System.setProperty("logging.level.org.springframework.jdbc.core.StatementCreatorUtils", "trace");
+//        log.info("fastSqlInit");
+//        System.setProperty("logging.level.org.springframework.jdbc.core.JdbcTemplate", "debug");
+//        System.setProperty("logging.level.org.springframework.jdbc.core.StatementCreatorUtils", "trace");
         return new FastSqlInit();
     }
 
