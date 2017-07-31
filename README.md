@@ -1,8 +1,10 @@
 # 一.FastSql简介
 一个基于spring-jdbc的简单ORM框架，结合了hibernate和mybatis的优点,
 主要使用了NamedParameterJdbcTemplate类，可以加速你的数据库开发。
+注意：
+1.主键名称必须为id（暂时）
  
- 
+
 # 二.BaseDAO
 应用中数据访问类需要继承这个类，进行各种操作
 
@@ -212,10 +214,10 @@ int countWhere = studentDao.countWhere("age >= 20"); //查找年龄大于等于2
 int countWhere = studentDao.countWhere("age > ?1" , 10); //查找年龄大于10的学生
 
 ```
-#四.通过sql查询（通过BaseDao中）
+# 四.通过sql查询（通过BaseDao中的queryXXX方法）
 
 ## 把结果封装到Map中
-以下方法获取Map对象（由column和值组成的）
+以下方法可以获取Map对象（由column和值组成的）
 ```
 Map<String, Object> queryMapBySql(String sql)
 Map<String, Object> queryMapBySql(String sql, SqlParameterSource paramSource) 
@@ -259,7 +261,8 @@ public class StudentDAO extends BaseDAO<Student> {
                 "LEFT JOIN city c ON s.city_id = c.id " +
                 "WHERE s.age = :age AND c.name = :cityName ";//命名参数
 
-        List<StudentVO> studentVOList = template.query(sql,//命名参数
+        List<StudentVO> studentVOList = template.query(
+                sql,//命名参数
                 new BeanPropertySqlParameterSource(dto), //传入参数***
                 new BeanPropertyRowMapper<>(StudentVO.class));//匹配传出参数***
         return studentVOList;
@@ -296,30 +299,27 @@ String sql_2 = new SQLBuilder()
 生成如下SQL
 ```
 SELECT s.name,s.age
-FROM student s
-LEFT OUTER JOIN city c ON ( c.id=s.id ) 
-WHERE s.age>10
-AND city.name LIKE :city 
+   FROM student s
+   LEFT OUTER JOIN city c ON ( c.id=s.id ) 
+   WHERE s.age>10  AND city.name LIKE :city 
 ```
 ## DEMO 3
 ```
 String sql_3 = new SQLBuilder()
-    .SELECT("s.name", "s.age")
-    .FROM("student s")
-    .LEFT_JOIN_ON("city c", "c.id=s.id")
-    .WHERE()
-    .AND("(age>10 OR age<5)")
-    .ORDER_BY("s.age")
-    .build();
+      .SELECT("s.name", "s.age")
+      .FROM("student s")
+      .LEFT_JOIN_ON("city c", "c.id=s.id")
+      .WHERE()
+      .AND("(age>10 OR age<5)")
+      .ORDER_BY("s.age")
+      .build();
 ```
 生成如下SQL
 ```
 SELECT s.name,s.age
 FROM student s
 LEFT OUTER JOIN city c ON ( c.id=s.id ) 
-WHERE 1=1 
-AND (age>10 OR age<5)
-ORDER BY s.age 
+WHERE 1=1   AND (age>10 OR age<5)  ORDER BY s.age 
 ```
 # 五.分页工具PageSqlUtils和分页查询
 分页工具支持mysql/postgresql/oracle
