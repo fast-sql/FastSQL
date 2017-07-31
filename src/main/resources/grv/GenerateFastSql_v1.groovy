@@ -10,7 +10,7 @@ import com.intellij.database.util.DasUtil
  *   FILES       files helper
  */
 
-packageName = "com.sample;"
+packageName = "cn.com.vdin.picasso.common;"
 typeMapping = [
         (~/(?i)int/)               : "Integer",
         (~/(?i)bool|boolean/)      : "Boolean",
@@ -29,18 +29,22 @@ FILES.chooseDirectoryAndSave("Choose directory", "Choose where to store generate
 def generate(table, dir) {
     def className = javaName(table.getName(), true)
     def fields = calcFields(table)
-    new File(dir, className + ".java").withPrintWriter { out -> generate(out, className, fields) }
+    new File(dir, firstCharUpper(className) + ".java").withPrintWriter { out -> generate(out, table.getName(), firstCharUpper(className), fields) }
+    new File(dir, firstCharUpper(className) + "DAO.java").withPrintWriter { out -> generateDao(out, firstCharUpper(className) + "DAO", firstCharUpper(className)) }
 }
 
-def generate(out, className, fields) {
+def generate(out, tableName, className, fields) {
 
     out.println "package $packageName"
-    out.println "import java.util.*;"
-    out.println "import java.time.*;"
+    out.println ""
+    out.println ""
     out.println "import javax.persistence.*;"
+    out.println "import java.time.*;"
+    out.println "import java.util.*;"
     out.println ""
     out.println ""
-    out.println "public class $className {"
+    out.println "@Table(name = \"${tableName}\")"
+    out.println "public class ${className} {"
     out.println ""
     fields.each() {
         if (it.annos != "") out.println "  ${it.annos}"
@@ -58,6 +62,22 @@ def generate(out, className, fields) {
         out.println "  }"
         out.println ""
     }
+    out.println "}"
+}
+
+def generateDao(out, className, entityName) {
+
+    out.println "package $packageName"
+    out.println ""
+    out.println ""
+    out.println "import com.github.fastsql.dao.*;"
+    out.println "import com.github.fastsql.dto.*;"
+    out.println "import com.github.fastsql.util.*;"
+    out.println "import java.time.*;"
+    out.println "import java.util.*;"
+    out.println ""
+    out.println "public class ${className} extends BaseDAO<${entityName},String> {"
+    out.println "//"
     out.println "}"
 }
 
@@ -82,37 +102,46 @@ def javaName(str, capitalize) {
 
 def underlineToCamel(String param) {
 
-    int len = param.length()
-    StringBuilder sb = new StringBuilder(len)
+    int len = param.length();
+    StringBuilder sb = new StringBuilder(len);
     for (int i = 0; i < len; i++) {
-        char c = param.charAt(i)
-        if (c.equals('_')) {
+        char c = param.charAt(i);
+        if (c == '_') {
             if (++i < len) {
-                sb.append(Character.toUpperCase(param.charAt(i)))
+                sb.append(Character.toUpperCase(param.charAt(i)));
             }
         } else {
-            sb.append(c)
+            sb.append(c);
         }
     }
 
-    sb.toString()
+    sb.toString();
 }
 
 def camelToUnderline(String param) {
-    int len = param.length()
-    StringBuilder sb = new StringBuilder(len)
+
+    int len = param.length();
+    StringBuilder sb = new StringBuilder(len);
     for (int i = 0; i < len; i++) {
-        char c = param.charAt(i)
+        char c = param.charAt(i);
         if (Character.isUpperCase(c)) {
-            sb.append('_')
-            sb.append(Character.toLowerCase(c))
+            sb.append('_');
+            sb.append(Character.toLowerCase(c));
         } else {
-            sb.append(c)
+            sb.append(c);
         }
     }
-    String temp = sb.toString()
+    String temp = sb.toString();
     if (temp.startsWith("_")) {
         return temp.substring(1);
     }
-    temp
+    temp;
+}
+
+def firstCharUpper(str) {
+    return str.substring(0, 1).toUpperCase() + str.substring(1);
+}
+
+def firstCharLower(str) {
+    return str.substring(0, 1).toLowerCase() + str.substring(1);
 }
