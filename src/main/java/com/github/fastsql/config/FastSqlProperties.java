@@ -3,8 +3,7 @@ package com.github.fastsql.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * @author Jiazhi
- * @since 2017/5/28
+ * @author 陈佳志
  */
 @ConfigurationProperties(
         ignoreUnknownFields = false,
@@ -13,7 +12,6 @@ public class FastSqlProperties {
 
     private String dbType = "postgresql";
 
-    private Boolean showSql = true;
 
 
     public String getDbType() {
@@ -24,11 +22,5 @@ public class FastSqlProperties {
         this.dbType = dbType;
     }
 
-    public Boolean getShowSql() {
-        return showSql;
-    }
 
-    public void setShowSql(Boolean showSql) {
-        this.showSql = showSql;
-    }
 }

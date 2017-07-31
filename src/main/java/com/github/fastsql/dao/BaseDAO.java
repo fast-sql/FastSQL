@@ -22,14 +22,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**
- * E is Entity Type
- *
- * @author Jiazhi
- * @since 2017/3/30
+ * @author 陈佳志
  */
 public abstract class BaseDAO<E, ID> {
     protected Class<E> entityClass;
@@ -170,7 +170,7 @@ public abstract class BaseDAO<E, ID> {
             for (Method method : getterMethodsWithoutId) {
                 Annotation[] annotations = method.getDeclaredAnnotations();
                 for (Annotation annotation : annotations) {
-                    if (annotation.getClass().isAnnotationPresent(Id.class)   ) {
+                    if (annotation.getClass().isAnnotationPresent(Id.class)) {
                         logger.info("id---" + method.getName());
                     }
                 }
@@ -490,12 +490,12 @@ public abstract class BaseDAO<E, ID> {
         }
 
         List<E> coll = template.query(
-                PageSqlUtils.findSQL(sql, pageNumber, perPage),
+                PageSqlUtils.getRowsSQL(sql, pageNumber, perPage),
                 paramMap,
                 new BeanPropertyRowMapper<E>(entityClass)
         );
         Integer count = template.queryForObject(
-                PageSqlUtils.countSQL(sql),
+                PageSqlUtils.getNumberSQL(sql),
                 paramMap,
                 Integer.class);
 
@@ -509,12 +509,12 @@ public abstract class BaseDAO<E, ID> {
         String sql = "SELECT * FROM " + tableName + " WHERE 1=1 AND " + sqlCondition;
 
         List<E> coll = template.query(
-                PageSqlUtils.findSQL(sql, pageNumber, perPage),
+                PageSqlUtils.getRowsSQL(sql, pageNumber, perPage),
                 parameterSource,
                 new BeanPropertyRowMapper<E>(entityClass)
         );
         Integer count = template.queryForObject(
-                PageSqlUtils.countSQL(sql),
+                PageSqlUtils.getNumberSQL(sql),
                 parameterSource,
                 Integer.class);
 
@@ -528,12 +528,12 @@ public abstract class BaseDAO<E, ID> {
         String sql = "SELECT * FROM " + tableName + " WHERE 1=1 AND" + sqlCondition;
 
         List<E> coll = template.query(
-                PageSqlUtils.findSQL(sql, pageNumber, perPage),
+                PageSqlUtils.getRowsSQL(sql, pageNumber, perPage),
                 parameterMap,
                 new BeanPropertyRowMapper<E>(entityClass)
         );
         Integer count = template.queryForObject(
-                PageSqlUtils.countSQL(sql),
+                PageSqlUtils.getNumberSQL(sql),
                 parameterMap,
                 Integer.class);
 
@@ -584,32 +584,31 @@ public abstract class BaseDAO<E, ID> {
         return template.query(sql, paramSource, rowMapper);
     }
 
-    public DbPageResult<E> queryPageBySql(String baseSql, int pageNumber, int perPage,
-                                          BeanPropertySqlParameterSource parameterSource) {
+    public <T> DbPageResult<T> queryPageBySql(String baseSql, int pageNumber, int perPage,
+                                              BeanPropertySqlParameterSource parameterSource,
+                                              RowMapper<T> rowMapper) {
         //sql
-        List<E> column = template.query(
-                PageSqlUtils.findSQL(baseSql, pageNumber, perPage),
+        List<T> column = template.query(
+                PageSqlUtils.getRowsSQL(baseSql, pageNumber, perPage),
                 parameterSource,
-                new BeanPropertyRowMapper<E>(entityClass)
-        );
+                rowMapper);
         Integer count = template.queryForObject(
-                PageSqlUtils.countSQL(baseSql),
+                PageSqlUtils.getNumberSQL(baseSql),
                 parameterSource,
                 Integer.class);
 
         return new DbPageResult<>(column, count);
     }
 
-    public DbPageResult<E> queryPageBySql(String baseSql, int pageNumber, int perPage,
-                                          Map<String, ?> paramMap) {
+    public <T> DbPageResult<T> queryPageBySql(String baseSql, int pageNumber, int perPage,
+                                              Map<String, ?> paramMap, RowMapper<T> rowMapper) {
         //sql
-        List<E> column = template.query(
-                PageSqlUtils.findSQL(baseSql, pageNumber, perPage),
+        List<T> column = template.query(
+                PageSqlUtils.getRowsSQL(baseSql, pageNumber, perPage),
                 paramMap,
-                new BeanPropertyRowMapper<E>(entityClass)
-        );
+                rowMapper);
         Integer count = template.queryForObject(
-                PageSqlUtils.countSQL(baseSql),
+                PageSqlUtils.getNumberSQL(baseSql),
                 paramMap,
                 Integer.class);
 

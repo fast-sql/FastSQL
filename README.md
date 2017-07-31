@@ -321,30 +321,60 @@ WHERE 1=1
 AND (age>10 OR age<5)
 ORDER BY s.age 
 ```
-# 五.分页工具PageSqlUtils
+# 五.分页工具PageSqlUtils和分页查询
 分页工具支持mysql/postgresql/oracle
 
 public static String findSQL(String sql, int pageNumber, int perPageSize) 会返回查找行sql
 
 public static String countSQL(String sql) 会返回查找数量sql
 
-比如(mysql)
+以mysql为例
 ```
-PageSqlUtils.DB_TYPE="mysql"
-
 String baseSql = new SQLBuilder()
         .SELECT("name", "age")
         .FROM("student")
         .WHERE("age>10")
         .build();
         
-PageSqlUtils.findSQL(baseSql,1,10);
+String rowsSql = PageSqlUtils.getRowsSQL(baseSql,1,10);   //生成=> SELECT name,age FROM student WHERE age>10 LIMIT 0,10
 
-//生成=>SELECT name,age FROM student WHERE age>10 LIMIT 0,10
-PageSqlUtils.countSQL(baseSql);
-//生成=>SELECT count(*) FROM student WHERE age>10
+String numberSql = PageSqlUtils.getNumberSQL(baseSql);       //生成=> SELECT count(*) ( SELECT name,age   FROM student WHERE age>10 )
 ```
-
+分页API
+```
+DbPageResult<E> queryPageBySql(String baseSql, int pageNumber, int perPage, Map<String, ?> paramMap)
+DbPageResult<E> queryPageBySql(String baseSql, int pageNumber, int perPage, BeanPropertySqlParameterSource parameterSource)
+```
+示例
+```
+public class StudentDAO extends BaseDAO<Student,String> {
+     /**
+      * 查询前十条数据
+      */
+     public DbPageResult<StudentVO> findStudentVOPage(StudentIndexDTO dto) {
+         String sql = "SELECT s.*,c.name AS cityName FROM student s " +//template可以直接使用
+                 "LEFT JOIN city c ON s.city_id = c.id " +
+                 "WHERE s.age = :age AND c.name = :cityName ";//命名参数
+ 
+         DbPageResult<StudentVO> studentDbPageResult = queryPageBySql(
+                 sql, 1, 10,  //sql ,页数 ，和每页条数
+                 new BeanPropertySqlParameterSource(dto), //匹配传入参数 
+                 new BeanPropertyRowMapper<>(StudentVO.class));//匹配传出参数 
+         return studentDbPageResult;
+     }
+}
+```
+ 
+ 
 # 六.配置项 
 
-fastsql.db-type=mysql # mysql postgresql oracle
+1.配置数据库类型 可选mysql postgresql oracle
+```
+fastsql.db-type=mysql  
+```
+2.显示sql日志
+```
+logging.level.org.springframework.jdbc.core.JdbcTemplate=debug
+logging.level.org.springframework.jdbc.core.StatementCreatorUtils=trace
+```
+

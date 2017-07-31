@@ -1,14 +1,14 @@
 package com.github.fastsql.util;
 
 import javax.persistence.Id;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 
 /**
- * Created by aaa
- * on 2016/7/10.
+ * 内部工具类
+ *
+ * @author 陈佳志
  */
 public class FastSqlUtils {
 

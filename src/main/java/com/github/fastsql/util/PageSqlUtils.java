@@ -1,27 +1,14 @@
 package com.github.fastsql.util;
 
 /**
- * @author Jiazhi
- * @since 2017/4/7
+ * @author 陈佳志
  */
 public class PageSqlUtils {
 
     public static String DB_TYPE = "mysql";//mysql,postgrsql,oracle
 
 
-//    public static SQLGroup getGroupSQL(String sql, int pageNumber, int perPageSize) {
-//        SQLGroup twoSql = new SQLGroup();
-//        twoSql.setCountSQL("SELECT COUNT(*) FROM ( " + sql + " )");
-//        twoSql.setSelectSQL(pageSql(sql, pageNumber, perPageSize));
-//        return twoSql;
-//
-//    }
-
-//    public static String getPageFindSql(String sql, int pageNumber, int perPageSize) {
-//        return pageSql(sql, (int) pageNumber, (int) perPageSize);
-//    }
-
-    public static String findSQL(String sql, int pageNumber, int perPageSize) {
+    public static String getRowsSQL(String sql, int pageNumber, int perPageSize) {
         if (DB_TYPE.equals("mysql")) {
             return mysql(sql, pageNumber, perPageSize);
         } else if (DB_TYPE.equals("postgrsql")) {
@@ -33,7 +20,7 @@ public class PageSqlUtils {
         }
     }
 
-    public static String countSQL(String sql) {
+    public static String getNumberSQL(String sql) {
         return "SELECT COUNT(*) FROM ( " + sql + " )";
     }
 

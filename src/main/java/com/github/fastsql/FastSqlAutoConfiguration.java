@@ -4,14 +4,12 @@ import com.github.fastsql.config.FastSqlInit;
 import com.github.fastsql.config.FastSqlProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * @author Jiazhi
- * @since 2017/5/28
+ * @author 陈佳志
  */
 @Configuration // 配置注解
 @EnableConfigurationProperties(FastSqlProperties.class) // 开启指定类的配置

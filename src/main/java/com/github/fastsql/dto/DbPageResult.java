@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Jiazhi
- * @since 2017/4/4
+ * @author 陈佳志
  */
 public class DbPageResult<T> {
 

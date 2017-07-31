@@ -3,8 +3,7 @@ package com.github.fastsql.util;
 import com.google.common.base.Joiner;
 
 /**
- * @author Jiazhi
- * @since 2017/3/30
+ * @author 陈佳志
  */
 public class SQLBuilder {
 
@@ -119,37 +118,37 @@ public class SQLBuilder {
         return sqlBuilder.toString();
     }
 
-    public static void main(String[] args) {
-        String sql_1 = new SQLBuilder()
-                .SELECT("name", "age")
-                .FROM("student")
-                .WHERE("age>10")
-                .build();
-        System.out.println(sql_1);
-        String findSql = PageSqlUtils.findSQL(sql_1, 1, 10);
-        System.out.println(findSql);
-        String countSQL = PageSqlUtils.countSQL(sql_1);
-        System.out.println(countSQL);
-
-        String city = "成都";
-        String sql_2 = new SQLBuilder()
-                .SELECT("s.name", "s.age")
-                .FROM("student s")
-                .LEFT_JOIN_ON("city c", "c.id=s.id")
-                .WHERE("s.age>10")
-                .IF_PRESENT_AND(city, "city.name LIKE :city")//如果把city改为null或者"" 这句话将不会添加
-                .build();
-        System.out.println(sql_2);
-
-
-        String sql_3 = new SQLBuilder()
-                .SELECT("s.name", "s.age")
-                .FROM("student s")
-                .LEFT_JOIN_ON("city c", "c.id=s.id")
-                .WHERE()
-                .AND("(age>10 OR age<5)")
-                .ORDER_BY("s.age")
-                .build();
-        System.out.println(sql_3);
-    }
+//    public static void main(String[] args) {
+//        String sql_1 = new SQLBuilder()
+//                .SELECT("name", "age")
+//                .FROM("student")
+//                .WHERE("age>10")
+//                .build();
+//        System.out.println(sql_1);
+//        String findSql = PageSqlUtils.getRowsSQL(sql_1, 1, 10);
+//        System.out.println(findSql);
+//        String getNumberSQL = PageSqlUtils.getNumberSQL(sql_1);
+//        System.out.println(getNumberSQL);
+//
+//        String city = "成都";
+//        String sql_2 = new SQLBuilder()
+//                .SELECT("s.name", "s.age")
+//                .FROM("student s")
+//                .LEFT_JOIN_ON("city c", "c.id=s.id")
+//                .WHERE("s.age>10")
+//                .IF_PRESENT_AND(city, "city.name LIKE :city")//如果把city改为null或者"" 这句话将不会添加
+//                .build();
+//        System.out.println(sql_2);
+//
+//
+//        String sql_3 = new SQLBuilder()
+//                .SELECT("s.name", "s.age")
+//                .FROM("student s")
+//                .LEFT_JOIN_ON("city c", "c.id=s.id")
+//                .WHERE()
+//                .AND("(age>10 OR age<5)")
+//                .ORDER_BY("s.age")
+//                .build();
+//        System.out.println(sql_3);
+//    }
 }
