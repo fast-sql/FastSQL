@@ -119,15 +119,15 @@ def getPackageName(dir) {
             previousSegmentIndex = i;
         }
     }
-    //判断开始片段索引状态
+    //判断“前一个片段”索引状态
     if (previousSegmentIndex == -1) {
-        //路径没有"java"片段
+        //路径没有“前一个片段”片段，抛出异常
         throw new IllegalArgumentException("路径错误，请选择\"src/main/java\"下的子目录")
     } else if (previousSegmentIndex == segments.length - 1) {
-        //"java"片段在路径末尾，则不需要包名
+        //“前一个片段”片段在路径末尾，返回空包名
         return EMPTY_PACKAGE_NAME;
     } else {
-        //"java"片段不在末尾，拼接包名
+        //“前一个片段”片段不在末尾，拼接包名并返回
         StringBuilder stringBuilder = new StringBuilder("package ");
         for (int i = previousSegmentIndex + 1; i < segments.length - 1; i++) {
             stringBuilder.append(segments[i]).append(".")
