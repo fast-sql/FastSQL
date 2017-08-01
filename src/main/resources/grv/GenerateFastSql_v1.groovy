@@ -117,6 +117,7 @@ def getPackageName(dir) {
     for (int i = 0; i < segments.length; i++) {
         if (Objects.equals(segments[i], previousSegment)) {
             previousSegmentIndex = i;
+            break
         }
     }
     //判断“前一个片段”索引状态
