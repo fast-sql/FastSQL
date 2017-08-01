@@ -28,12 +28,12 @@ public class BaseDAOTest {
 //                "jdbc:mysql://localhost:3306/fastsql?characterEncoding=utf8&useSSL=true",
 //                "pig",
 //                "123456");
-//        DataSource dataSource = new SimpleDriverDataSource(
-//                new com.mysql.jdbc.Driver(),
-//                "jdbc:mysql://localhost:3306/test?characterEncoding=utf8&useSSL=true",
-//                "root",
-//                "123456");
-//        namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        DataSource dataSource = new SimpleDriverDataSource(
+                new com.mysql.jdbc.Driver(),
+                "jdbc:mysql://localhost:3306/test?characterEncoding=utf8&useSSL=true",
+                "root",
+                "123456");
+        namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
 
 
         studentDao = new StudentDAO();
