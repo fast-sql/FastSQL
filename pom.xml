@@ -6,13 +6,12 @@
 
     <groupId>com.github.fast</groupId>
     <artifactId>fastsql-starter</artifactId>
-    <version>1.0.0</version>
-    <packaging>jar</packaging>
+    <version>0.1.0</version>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.5.3.RELEASE</version>
+        <version>1.5.6.RELEASE</version>
         <relativePath/>
     </parent>
 
@@ -32,12 +31,7 @@
             <artifactId>spring-boot-starter-test</artifactId>
         </dependency>
 
-        <!--<dependency>-->
-            <!--<groupId>mysql</groupId>-->
-            <!--<artifactId>mysql-connector-java</artifactId>-->
-            <!--<version>5.1.38</version>-->
-            <!--<scope>test</scope>-->
-        <!--</dependency>-->
+
 
         <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
         <dependency>
@@ -52,17 +46,23 @@
             <version>1.0.2</version>
         </dependency>
 
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>junit</groupId>-->
+            <!--<artifactId>junit</artifactId>-->
+            <!--<version>4.12</version>-->
+        <!--</dependency>-->
 
         <!--<dependency>-->
         <!--<groupId>org.mybatis</groupId>-->
         <!--<artifactId>mybatis</artifactId>-->
         <!--<version>3.4.2</version>-->
         <!--</dependency>-->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.38</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

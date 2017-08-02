@@ -2,6 +2,7 @@ package com.github.fastsql.util;
 
 import javax.persistence.Id;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -91,6 +92,15 @@ public class FastSqlUtils {
         return Arrays.asList(methods);
     }
 
+    public static Object invokeMethod(Object object, String methodStr) {
+        try {
+            Method method = object.getClass().getMethod(methodStr, new Class[]{});
+            return method.invoke(object);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static List<Method> getAllGetterWithoutId(Object object) {
         List<Method> methodList = new ArrayList<>();
         Method[] methods = object.getClass().getDeclaredMethods();
@@ -109,14 +119,19 @@ public class FastSqlUtils {
         List<Field> fieldList = new ArrayList<>();
         Field[] declaredFields = object.getClass().getDeclaredFields();
 
-        for (Field field : declaredFields) {
+        boolean containId = false;
 
+        for (Field field : declaredFields) {
             if (!field.isAnnotationPresent(Id.class)) {
                 fieldList.add(field);
+            } else {
+                containId = true;
             }
-
-
         }
+        if (!containId) {
+            throw new RuntimeException(object.getClass().getSimpleName() + " must with a @Id field");
+        }
+
         return fieldList;
     }
 

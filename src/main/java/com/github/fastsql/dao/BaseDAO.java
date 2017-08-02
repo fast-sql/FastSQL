@@ -38,7 +38,7 @@ public abstract class BaseDAO<E, ID> {
     private String className;
     private String tableName;
     /**
-     * cache
+     * cache缓存
      */
     private String idName;
     private Method idGetMethod;
@@ -88,13 +88,13 @@ public abstract class BaseDAO<E, ID> {
     public int update(E entity) {
         initCache(entity);
 
-        ID id;
-        try {
-            Method getId = entity.getClass().getMethod("getId", new Class[]{});
-            id = (ID) getId.invoke(entity);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException("保存失败， getId() 方法不存在或调用失败");
-        }
+        ID id = (ID) FastSqlUtils.invokeMethod(entity, "getId");
+
+//            Method getId = entity.getClass().getMethod("getId", new Class[]{});
+//            id = (ID) getId.invoke(entity);
+//        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+//            throw new RuntimeException("保存失败， getId() 方法不存在或调用失败");
+//        }
         if (StringUtils.isEmpty(id)) {
             throw new RuntimeException("修改时对象id不能为空");
         }
