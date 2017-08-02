@@ -2,11 +2,13 @@ package com.github.fastsql.dao;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.jdbc.core.StatementCreatorUtils;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 
 import javax.sql.DataSource;
+import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.*;
@@ -21,6 +23,7 @@ public class BaseDAOTest {
     @Before
     public void datasource() throws SQLException {
 
+//        System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.SimpleLog");
 //        System.setProperty("log4j.logger.org.springframework.jdbc.core.StatementCreatorUtils", "Trace");
 
         DataSource dataSource = new SimpleDriverDataSource(
@@ -43,10 +46,13 @@ public class BaseDAOTest {
     }
 
     @Test
-    public void save() {
+    public void save() throws NoSuchFieldException {
+//        Field field = StatementCreatorUtils.class.getField("logger");
+//        field.setAccessible(true);
+
         Student student = new Student();
-        student.setId(UUID.randomUUID().toString());
-        student.setName("小xxxxx");
+        student.setId(new Random().nextInt(1234));
+        student.setName("2132131");
         student.setBirthday(LocalDate.now());
         student.setHomeAddress("");
         student.setCityId("xxxxxxxxxx");
@@ -65,7 +71,7 @@ public class BaseDAOTest {
         Student student = new Student();
         String id = UUID.randomUUID().toString();
         System.out.println(id);
-        student.setId(id);
+        student.setId(123234);
         student.setName("小丽");
         student.setBirthday(null);
 //        student.setHomeAddress("");
@@ -191,7 +197,7 @@ public class BaseDAOTest {
     public void update() {
 
         Student student = new Student();
-        student.setId("17661a16-e77b-4979-8a25-c43a489d42ad");
+        student.setId(234);
         student.setName("99999");
 
         studentDao.update(student);
@@ -202,7 +208,7 @@ public class BaseDAOTest {
 
 
         Student student = new Student();
-        student.setId("17661a16-e77b-4979-8a25-c43a489d42ad");
+        student.setId(234);
         student.setName("99999");
 
         studentDao.updateIgnoreNull(student);

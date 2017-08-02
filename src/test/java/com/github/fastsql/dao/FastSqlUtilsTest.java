@@ -13,7 +13,7 @@ public class FastSqlUtilsTest {
 
     public static void main(String[] args) throws IllegalAccessException {
         Student student = new Student();
-        student.setId("12");
+        student.setId(123);
         student.setName("abc");
         List<Field> allFieldWithoutId =
                 FastSqlUtils.getAllFieldWithoutId(student);

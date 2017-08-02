@@ -12,7 +12,7 @@ import java.time.LocalDate;
 public class Student {
 
     @Id
-    private String id;
+    private Integer id;
 
     private String name;
 
@@ -24,11 +24,11 @@ public class Student {
 
     private String cityId;
 
-    public String getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

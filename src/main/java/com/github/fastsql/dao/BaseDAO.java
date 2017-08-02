@@ -216,14 +216,8 @@ public abstract class BaseDAO<E, ID> {
 
 
         StringBuilder nameBuilder = new StringBuilder();
-//        for (String columnName : columnNames) {
-//            nameBuilder.append(",").append(columnName);
-//        }
 //
         StringBuilder valueBuilder = new StringBuilder();
-//        for (Field field : entityFields) {
-//            valueBuilder.append(",:").append(field.getName());
-//        }
         for (Field field : entityFields) {
             nameBuilder.append(",").append(FastSqlUtils.camelToUnderline(field.getName()));
             valueBuilder.append(",:").append(field.getName());
@@ -234,22 +228,6 @@ public abstract class BaseDAO<E, ID> {
         return template.update(sql, new BeanPropertySqlParameterSource(object));
     }
 
-//    /**
-//     * 获取保存对象的Id
-//     */
-//    private String getSaveId(E object) {
-//        String id;
-//        try {
-//            Method getId = object.getClass().getMethod("getId", new Class[]{});
-//            id = (String) getId.invoke(object);
-//        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-//            throw new RuntimeException("保存失败， getId() 方法不存在或调用失败");
-//        }
-//        if (StringUtils.isEmpty(id)) {
-//            id = UUID.randomUUID().toString();
-//        }
-//        return id;
-//    }
 
     /////////////////////////////////////////////////删除方法////////////////////////////////////////
 
@@ -274,7 +252,7 @@ public abstract class BaseDAO<E, ID> {
      * 删除所有数据
      */
     public int deleteAll() {
-        logger.warn(tableName + "#deleteAll()删除该表所有数据");
+        logger.warn(tableName + "#deleteAll()--删除该表所有数据");
         //sql
         String sql = "DELETE FROM " + tableName;
         //参数
@@ -284,7 +262,7 @@ public abstract class BaseDAO<E, ID> {
     /**
      * 根据id列表批量删除数据
      */
-    public int deleteInBatch(List<> ids) {
+    public int deleteInBatch(List<ID> ids) {
         String sql = "DELETE FROM " + tableName + " WHERE id=:id";
 
         MapSqlParameterSource[] parameterSources = new MapSqlParameterSource[ids.size()];
