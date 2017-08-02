@@ -23,16 +23,16 @@ public class BaseDAOTest {
 
 //        System.setProperty("log4j.logger.org.springframework.jdbc.core.StatementCreatorUtils", "Trace");
 
-//        DataSource dataSource = new SimpleDriverDataSource(
-//                new com.mysql.jdbc.Driver(),
-//                "jdbc:mysql://localhost:3306/fastsql?characterEncoding=utf8&useSSL=true",
-//                "pig",
-//                "123456");
         DataSource dataSource = new SimpleDriverDataSource(
                 new com.mysql.jdbc.Driver(),
-                "jdbc:mysql://localhost:3306/test?characterEncoding=utf8&useSSL=true",
-                "root",
+                "jdbc:mysql://localhost:3306/fastsql?characterEncoding=utf8&useSSL=true",
+                "pig",
                 "123456");
+//        DataSource dataSource = new SimpleDriverDataSource(
+//                new com.mysql.jdbc.Driver(),
+//                "jdbc:mysql://localhost:3306/test?characterEncoding=utf8&useSSL=true",
+//                "root",
+//                "123456");
         namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
 
 
@@ -49,6 +49,7 @@ public class BaseDAOTest {
         student.setName("小xxxxx");
         student.setBirthday(LocalDate.now());
         student.setHomeAddress("");
+        student.setCityId("xxxxxxxxxx");
 
         studentDao.save(student);
     }
@@ -62,10 +63,13 @@ public class BaseDAOTest {
     public void saveIgnoreNull() {
 
         Student student = new Student();
-        student.setId(UUID.randomUUID().toString());
+        String id = UUID.randomUUID().toString();
+        System.out.println(id);
+        student.setId(id);
         student.setName("小丽");
         student.setBirthday(null);
-        student.setHomeAddress("");
+//        student.setHomeAddress("");
+        student.setCityId("2212");
 
         studentDao.saveIgnoreNull(student);
 
@@ -74,18 +78,15 @@ public class BaseDAOTest {
 
     @Test
     public void delete() {
-
-
-        int deleteRowNumber = studentDao.delete("22b66bcf-1c2e-4713-b90d-eab17182b565");
-
+        int deleteRowNumber = studentDao.delete("b89de0c4-b517-4088-a109-40ffc3aa6d4a");
     }
 
     @Test
     public void deleteInBatch() {
         List<String> ids = new ArrayList<>();
-        ids.add("467641d2-e344-45e9-9e0e-fd6152f80867");
-        ids.add("6");
-        ids.add("5");
+        ids.add("264024f4-07d0-48b0-9249-b17545a6ad5a");
+//        ids.add("6");
+//        ids.add("5");
 
         System.out.println(studentDao.deleteInBatch(ids));
     }

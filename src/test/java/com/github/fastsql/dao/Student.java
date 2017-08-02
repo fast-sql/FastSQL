@@ -1,5 +1,6 @@
 package com.github.fastsql.dao;
 
+import javax.persistence.Id;
 import javax.persistence.Table;
 import java.time.LocalDate;
 
@@ -10,6 +11,7 @@ import java.time.LocalDate;
 @Table(name = "student")
 public class Student {
 
+    @Id
     private String id;
 
     private String name;

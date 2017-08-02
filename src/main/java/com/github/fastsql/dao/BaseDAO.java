@@ -15,10 +15,8 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.util.StringUtils;
 
-import javax.persistence.Id;
 import javax.persistence.Table;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -40,11 +38,15 @@ public abstract class BaseDAO<E, ID> {
     /**
      * cache缓存
      */
-    private String idName;
-    private Method idGetMethod;
+    private Field idField;
+    private String idColumnName;
+
+
+    private List<Field> entityFieldsWithodId = new ArrayList<>();
+    private List<Field> entityFields = new ArrayList<>();
 
     private List<String> columnNamesWithodId = new ArrayList<>();
-    private List<Method> getterMethodsWithoutId = new ArrayList<>();
+    private List<String> columnNames = new ArrayList<>();
 
     private NamedParameterJdbcTemplate template;
 
@@ -59,24 +61,48 @@ public abstract class BaseDAO<E, ID> {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public BaseDAO() {
+
         Type type = getClass().getGenericSuperclass();
         if (type instanceof ParameterizedType) {
             this.entityClass = (Class<E>) ((ParameterizedType) type).getActualTypeArguments()[0];
         } else {
             this.entityClass = null;
         }
+
+        //log
         logger = LoggerFactory.getLogger(entityClass);
 
+        //
         className = entityClass.getSimpleName();
+
+        //解析表名称
         Table tableName = entityClass.getAnnotation(Table.class);
+        this.tableName = FastSqlUtils.camelToUnderline(className);//默认
         if (tableName != null) {
-            if (StringUtils.isEmpty(tableName.name())) {
-                throw new RuntimeException(entityClass + "的注解@Table的name不能为空");
+            if (!StringUtils.isEmpty(tableName.name())) {
+                this.tableName = tableName.name();
             }
-            this.tableName = tableName.name();
-        } else {
-            this.tableName = FastSqlUtils.camelToUnderline(className);
         }
+
+        //属性
+        this.entityFieldsWithodId = FastSqlUtils.getAllFieldWithoutIdByClass(entityClass);
+        for (Field field : entityFieldsWithodId) {
+            this.columnNamesWithodId.add(FastSqlUtils.camelToUnderline(field.getName()));
+            this.columnNames.add(FastSqlUtils.camelToUnderline(field.getName()));
+            this.entityFields.add(field);
+
+        }
+
+        //主键
+        this.idField = FastSqlUtils.getIdFieldByClass(entityClass);
+        this.idColumnName = FastSqlUtils.camelToUnderline(idField.getName());
+
+        //所有
+        this.entityFields.add(0, idField);
+        this.columnNames.add(0, FastSqlUtils.camelToUnderline(idField.getName()));
+
+//        List<Field> allField = FastSqlUtils.getIdField(entityClass);
+
 
     }
 
@@ -85,77 +111,23 @@ public abstract class BaseDAO<E, ID> {
     /**
      * 全更新 null值在 数据库中设置为null
      */
+
     public int update(E entity) {
-        initCache(entity);
+//        initCache(entity);
 
-        ID id = (ID) FastSqlUtils.invokeMethod(entity, "getId");
+        ID id = (ID) FastSqlUtils.getFieldValue(entity, idField);
 
-//            Method getId = entity.getClass().getMethod("getId", new Class[]{});
-//            id = (ID) getId.invoke(entity);
-//        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-//            throw new RuntimeException("保存失败， getId() 方法不存在或调用失败");
-//        }
         if (StringUtils.isEmpty(id)) {
             throw new RuntimeException("修改时对象id不能为空");
         }
 
         StringBuilder sqlBuilder = new StringBuilder();
-        for (Method method : getterMethodsWithoutId) {
-            try {
-                Object value = method.invoke(entity);
-                String columnName = FastSqlUtils.getterMethodNameToColumn(method.getName());
-                String fieldName = FastSqlUtils.getterMethodNameToFieldName(method.getName());
-
-                if (value != null) {
-                    sqlBuilder.append("," + columnName + "=:" + fieldName);
-                } else {
-                    sqlBuilder.append("," + columnName + "=NULL");
-                }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+        for (Field field : entityFieldsWithodId) {
+            sqlBuilder.append("," + FastSqlUtils.camelToUnderline(field.getName()) + "=:" + field.getName());
         }
+
         String setValueSql = sqlBuilder.toString().replaceFirst(",", "");
         String sql = "UPDATE " + tableName + " SET " + setValueSql + " WHERE id=:id";//set sql
-
-
-        int rows = template.update(
-                sql, new BeanPropertySqlParameterSource(entity)
-        );
-
-        return rows;
-    }
-
-
-    /**
-     * 仅更新非null， null值 不更新
-     */
-    public int updateIgnoreNull(E entity) {
-        initCache(entity);
-
-        ID id;
-        try {
-            Method getId = entity.getClass().getMethod("getId", new Class[]{});
-            id = (ID) getId.invoke(entity);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException("保存失败， getId() 方法不存在或调用失败");
-        }
-        if (StringUtils.isEmpty(id)) {
-            throw new RuntimeException("修改时对象id不能为空");
-        }
-
-        StringBuilder builder = new StringBuilder();
-        for (Method method : getterMethodsWithoutId) {
-            try {
-                Object value = method.invoke(entity);
-                if (value != null) {
-                    builder.append("," + getSingleEqualsStr(method));
-                }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-        String sql = "UPDATE " + tableName + " SET " + builder.toString().replaceFirst(",", "") + " WHERE id=:id";
 
         return template.update(
                 sql, new BeanPropertySqlParameterSource(entity)
@@ -163,21 +135,47 @@ public abstract class BaseDAO<E, ID> {
     }
 
 
-    private void initCache(E object) {
-        if (getterMethodsWithoutId.size() > 0) {//lazy init
-            this.getterMethodsWithoutId = FastSqlUtils.getAllGetterWithoutId(object);
-            for (Method method : getterMethodsWithoutId) {
-                Annotation[] annotations = method.getDeclaredAnnotations();
-                for (Annotation annotation : annotations) {
-                    if (annotation.getClass().isAnnotationPresent(Id.class)) {
-                        logger.info("id---" + method.getName());
-                    }
-                }
+    /**
+     * 仅更新非null， null值 不更新
+     */
+    public int updateIgnoreNull(E entity) {
+        ID id = (ID) FastSqlUtils.getFieldValue(entity, idField);
 
+        if (StringUtils.isEmpty(id)) {
+            throw new RuntimeException("修改时对象id不能为空");
+        }
+
+        StringBuilder sqlBuilder = new StringBuilder();
+        for (Field field : entityFieldsWithodId) {
+            if (FastSqlUtils.getFieldValue(entity, field) != null) {
+                sqlBuilder.append("," + FastSqlUtils.camelToUnderline(field.getName()) + "=:" + field.getName());
             }
         }
 
+        String setValueSql = sqlBuilder.toString().replaceFirst(",", "");
+        String sql = "UPDATE " + tableName + " SET " + setValueSql + " WHERE id=:id";//set sql
+
+        return template.update(
+                sql, new BeanPropertySqlParameterSource(entity)
+        );
     }
+
+
+//    private void initCache(E object) {
+//        if (getterMethodsWithoutId.size() > 0) {//lazy init
+//            this.getterMethodsWithoutId = FastSqlUtils.getAllGetterWithoutId(object);
+//            for (Method method : getterMethodsWithoutId) {
+//                Annotation[] annotations = method.getDeclaredAnnotations();
+//                for (Annotation annotation : annotations) {
+//                    if (annotation.getClass().isAnnotationPresent(Id.class)) {
+//                        logger.info("id---" + method.getName());
+//                    }
+//                }
+//
+//            }
+//        }
+//
+//    }
 
     /////////////////////////////////////////////////保存方法////////////////////////////////////////
 
@@ -185,29 +183,24 @@ public abstract class BaseDAO<E, ID> {
      * 插入对象中非null的值到数据库
      */
     public int saveIgnoreNull(E object) {
-        initCache(object);
+//        initCache(object);
 
-        StringBuilder nameBuilder = new StringBuilder("id");
-        StringBuilder valueBuilder = new StringBuilder(":id");
+        StringBuilder nameBuilder = new StringBuilder();
+        StringBuilder valueBuilder = new StringBuilder();
+//        for (String columnName : columnNames) {
+//            nameBuilder.append(",").append(columnName);
+//        }
 
-        for (Method method : getterMethodsWithoutId) {
-            try {
-                Object value = method.invoke(object);
-                if (value != null) {
-                    String str = method.getName().replace("get", "");
-                    String columnName = FastSqlUtils.camelToUnderline(str);
-                    String fieldName = str.substring(0, 1).toLowerCase() + str.substring(1, str.length());
-                    nameBuilder.append("," + columnName);
-                    valueBuilder.append(",:" + fieldName);
-                }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+        for (Field field : entityFields) {
+            if (FastSqlUtils.getFieldValue(object, field) != null) {
+                nameBuilder.append(",").append(FastSqlUtils.camelToUnderline(field.getName()));
+                valueBuilder.append(",:").append(field.getName());
             }
         }
-        String sql = "INSERT INTO " + tableName +
-                "(" + nameBuilder.toString() + ") " +
-                " VALUES " +
-                "(" + valueBuilder.toString() + ")";
+
+        String sql = "INSERT INTO " + tableName + "(" + nameBuilder.toString().replaceFirst(",", "") + ") " +
+                "VALUES(" + valueBuilder.toString().replaceFirst(",", "") + ")";
+//        return template.update(sql, new BeanPropertySqlParameterSource(object));
 
         int saveNum = template.update(
                 sql, new BeanPropertySqlParameterSource(object)
@@ -220,25 +213,24 @@ public abstract class BaseDAO<E, ID> {
      * 插入对象中的值到数据库，null值在数据库中会设置为NULL
      */
     public int save(E object) {
-        initCache(object);
 
-        StringBuilder nameBuilder = new StringBuilder("id");
-        StringBuilder valueBuilder = new StringBuilder(":id");
 
-        for (Method method : getterMethodsWithoutId) {
-            try {
-                Object value = method.invoke(object);
-                String str = method.getName().replace("get", "");
-                String columnName = FastSqlUtils.camelToUnderline(str);
-                String fieldName = str.substring(0, 1).toLowerCase() + str.substring(1, str.length());
+        StringBuilder nameBuilder = new StringBuilder();
+//        for (String columnName : columnNames) {
+//            nameBuilder.append(",").append(columnName);
+//        }
+//
+        StringBuilder valueBuilder = new StringBuilder();
+//        for (Field field : entityFields) {
+//            valueBuilder.append(",:").append(field.getName());
+//        }
+        for (Field field : entityFields) {
+            nameBuilder.append(",").append(FastSqlUtils.camelToUnderline(field.getName()));
+            valueBuilder.append(",:").append(field.getName());
 
-                nameBuilder.append("," + columnName);
-                valueBuilder.append(",:" + fieldName);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
         }
-        String sql = "INSERT INTO " + tableName + "(" + nameBuilder.toString() + ") VALUES(" + valueBuilder.toString() + ")";
+        String sql = "INSERT INTO " + tableName + "(" + nameBuilder.toString().replaceFirst(",", "") + ") " +
+                "VALUES(" + valueBuilder.toString().replaceFirst(",", "") + ")";
         return template.update(sql, new BeanPropertySqlParameterSource(object));
     }
 
@@ -264,7 +256,13 @@ public abstract class BaseDAO<E, ID> {
     /**
      * 根据id删除数据
      */
-    public int delete(String id) {
+    public int delete(ID id) {
+
+        E one = findOne(id);
+        if (one == null) {
+            throw new RuntimeException("删除失败，数据不存在");
+        }
+
         //sql
         String sql = "DELETE FROM " + tableName + " WHERE id=:id";
         //参数
@@ -286,7 +284,7 @@ public abstract class BaseDAO<E, ID> {
     /**
      * 根据id列表批量删除数据
      */
-    public int deleteInBatch(List<String> ids) {
+    public int deleteInBatch(List<> ids) {
         String sql = "DELETE FROM " + tableName + " WHERE id=:id";
 
         MapSqlParameterSource[] parameterSources = new MapSqlParameterSource[ids.size()];
@@ -361,7 +359,7 @@ public abstract class BaseDAO<E, ID> {
     /**
      * 通过id查找
      */
-    public E findOne(String id) {
+    public E findOne(ID id) {
         //sql
         String sql = "SELECT * FROM " + tableName + " WHERE id=:id";
         //参数
