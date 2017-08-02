@@ -70,7 +70,7 @@ public class CityDAO extends BaseDAO<City,String> {
 Student student = new Student();
 //student.setId(UUID.randomUUID().toString()); 
 student.setName("小丽");
-student.setBirthday(new Date());
+student.setBirthday(LocalDate.now());
 student.setHomeAddress("");
 
 studentDao.save(student);//获取保存成功的id
