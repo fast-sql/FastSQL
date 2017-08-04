@@ -46,17 +46,7 @@
             <version>1.0.2</version>
         </dependency>
 
-        <!--<dependency>-->
-            <!--<groupId>junit</groupId>-->
-            <!--<artifactId>junit</artifactId>-->
-            <!--<version>4.12</version>-->
-        <!--</dependency>-->
 
-        <!--<dependency>-->
-        <!--<groupId>org.mybatis</groupId>-->
-        <!--<artifactId>mybatis</artifactId>-->
-        <!--<version>3.4.2</version>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
@@ -64,6 +54,41 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <distributionManagement>
+        <repository>
+            <id>nexus</id>
+            <name>Nexus Release Repository</name>
+            <url>http://192.168.0.223:8081/repository/maven-releases/</url>
+        </repository>
+
+    </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>maven-central</id>
+            <name>maven-central</name>
+            <url>http://192.168.0.223:8081/repository/maven-central/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+
+        <repository>
+            <id>maven-releases</id>
+            <name>maven-releases</name>
+            <url>http://192.168.0.223:8081/repository/maven-releases/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+    </repositories>
 
     <build>
         <plugins>
