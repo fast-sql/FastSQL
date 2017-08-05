@@ -1,8 +1,12 @@
 package com.github.fastsql.dao;
 
+
+import com.github.fastsql.dto.StudentIndexDTO;
 import com.github.fastsql.dto.DbPageResult;
+import com.github.fastsql.vo.StudentVO;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
@@ -10,6 +14,7 @@ import java.util.List;
  * @author Jiazhi
  * @since 2017/4/2
  */
+@Repository
 public class StudentDAO extends BaseDAO<Student,String> {
 
     public List<StudentVO> findStudentVOList(StudentIndexDTO dto) {
