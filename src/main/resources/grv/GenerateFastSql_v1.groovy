@@ -3,6 +3,9 @@ import com.intellij.database.model.ObjectKind
 import com.intellij.database.util.Case
 import com.intellij.database.util.DasUtil
 
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+
 /*
  * Available context bindings:
  *   SELECTION   Iterable<DasObject>
@@ -106,35 +109,26 @@ def javaName(str, capitalize) {
     underlineToCamel(s.length() == 1 ? s : Case.LOWER.apply(s[0]) + s[1..-1])
 }
 
-def getPackageName(dir) {
-    //路径中包名的上一级路径名，既是前一个片段
-    String previousSegment = "java"
-    //切分路径
-    String[] segments = dir.toString().split(File.separator)
-    //“前一个片段”在数组中的索引
-    int previousSegmentIndex = -1;
-    //遍历数组，获取开始片段的索引
-    for (int i = 0; i < segments.length; i++) {
-        if (Objects.equals(segments[i], previousSegment)) {
-            previousSegmentIndex = i;
-            break
-        }
-    }
-    //判断“前一个片段”索引状态
-    if (previousSegmentIndex == -1) {
-        //路径没有“前一个片段”片段，抛出异常
+def getPackageName(File dir) {
+    //正则表达式
+    String patterString = String.format(".*src%smain%sjava(.*)", File.separator, File.separator)
+    Pattern pattern = Pattern.compile(patterString)
+    Matcher matcher = pattern.matcher(dir.getPath())
+    //判断是否匹配正则表达式
+    if (!matcher.find()) {
+        //不匹配，抛出异常
         throw new IllegalArgumentException("路径错误，请选择\"src/main/java\"下的子目录")
-    } else if (previousSegmentIndex == segments.length - 1) {
-        //“前一个片段”片段在路径末尾，返回空包名
-        return EMPTY_PACKAGE_NAME;
     } else {
-        //“前一个片段”片段不在末尾，拼接包名并返回
-        StringBuilder stringBuilder = new StringBuilder("package ");
-        for (int i = previousSegmentIndex + 1; i < segments.length - 1; i++) {
-            stringBuilder.append(segments[i]).append(".")
+        //匹配
+        String packageNameSegment = matcher.group(1)
+        //判断目标字符串是否等于""
+        if (Objects.equals(packageNameSegment, "")) {
+            //等于，则选择路径在项目根目录下，返回空包名
+            return EMPTY_PACKAGE_NAME
+        } else {
+            //不等于，则返回非空包名
+            return String.format("package %s;", packageNameSegment.substring(1).replace(File.separator, "."))
         }
-        stringBuilder.append(segments.last()).append(";")
-        return stringBuilder.toString()
     }
 }
 

@@ -11,7 +11,7 @@ public class PageSqlUtils {
     public static String getRowsSQL(String sql, int pageNumber, int perPageSize) {
         if (DB_TYPE.equals("mysql")) {
             return mysql(sql, pageNumber, perPageSize);
-        } else if (DB_TYPE.equals("postgrsql")) {
+        } else if (DB_TYPE.equals("postgresql")) {
             return postgrsql(sql, pageNumber, perPageSize);
         } else if (DB_TYPE.equals("oracle")) {
             return oracle(sql, pageNumber, perPageSize);
@@ -44,7 +44,7 @@ public class PageSqlUtils {
         int limit = (pageNumber - 1) * perPageSize;
         int offset = perPageSize;
 
-        return sql + " LIMIT " + limit + " OFFSET" + offset;
+        return sql + " LIMIT " + limit + " OFFSET " + offset;
     }
 
     /**
