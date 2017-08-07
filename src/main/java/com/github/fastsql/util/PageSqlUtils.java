@@ -30,10 +30,11 @@ public class PageSqlUtils {
      * @param perPageSize 每页条数，大于1
      */
     public static String mysql(String sql, int pageNumber, int perPageSize) {
-        int limit = (pageNumber - 1) * perPageSize;
-        int offset = perPageSize;
+        //偏移量，即是忽略offset行
+        int offset = (pageNumber - 1) * perPageSize;
 
-        return sql + " LIMIT " + limit + "," + offset;
+        return sql + " LIMIT " + offset + "," + perPageSize;
+        //return sql + " LIMIT " + perPageSize + " OFFSET " + offset;
     }
 
     /**
@@ -41,10 +42,10 @@ public class PageSqlUtils {
      * @param perPageSize 每页条数，大于1
      */
     public static String postgrsql(String sql, int pageNumber, int perPageSize) {
-        int limit = (pageNumber - 1) * perPageSize;
-        int offset = perPageSize;
+        //偏移量，即是忽略offset行
+        int offset = (pageNumber - 1) * perPageSize;
 
-        return sql + " LIMIT " + limit + " OFFSET " + offset;
+        return sql + " LIMIT " + perPageSize + " OFFSET " + offset;
     }
 
     /**
