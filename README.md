@@ -151,8 +151,9 @@ Student student = studentDao.findOne("12345678");//查询id为12345678的数据�
 Student student = studentDao.findOneWhere("name=?1 AND home_address=?2", "小明", "成都");   
   
 ```
-### 5.2 多个对象
 小明将会被匹配到?1中，成都将会被匹配到?2中，查询的是名字的小明，家庭地址为成都的对象。
+
+### 5.2 多个对象
 
 ####   `List<E> findListWhere(String sqlCondition, Object... values)`
 用法与findOneWhere()相同，可以返回一条或多条数据
