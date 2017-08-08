@@ -1,9 +1,18 @@
 # 一.FastSql简介
 一个基于spring-jdbc的简单ORM框架，结合了hibernate和mybatis的优点,
 主要使用了NamedParameterJdbcTemplate类，可以加速你的数据库开发。
-注意：
-1.主键名称必须为id（暂时）
- 
+
+## 使用
+1.本地下载并安装到maven仓库  mvn install -DskipTests=true
+2.在spring-boot项目中引入
+```
+<dependency>
+    <groupId>com.github.fast</groupId>
+    <artifactId>fastsql-starter</artifactId>
+    <version>0.2.1</version>
+</dependency>
+```
+
 
 # 二.BaseDAO
 应用中数据访问类需要继承这个类，进行各种操作
