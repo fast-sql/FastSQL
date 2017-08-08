@@ -3,7 +3,10 @@
 主要使用了NamedParameterJdbcTemplate类，可以加速你的数据库开发。
 
 ## 使用
-1.本地下载并安装到maven仓库  mvn install -DskipTests=true
+1.本地下载并安装到maven仓库 
+
+mvn install -DskipTests=true
+
 2.在spring-boot项目中引入
 ```
 <dependency>
