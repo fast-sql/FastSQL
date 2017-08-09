@@ -3,6 +3,7 @@ package com.github.fastsql.dao;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.time.LocalDate;
+import java.util.Date;
 
 /**
  * @author Jiazhi
@@ -18,7 +19,7 @@ public class Student {
 
     private Integer age;
 
-    private LocalDate birthday;
+    private Date birthday;
 
     private String homeAddress;
 
@@ -49,11 +50,11 @@ public class Student {
     }
 
 
-    public LocalDate getBirthday() {
+    public Date getBirthday() {
         return birthday;
     }
 
-    public void setBirthday(LocalDate birthday) {
+    public void setBirthday(Date birthday) {
         this.birthday = birthday;
     }
 

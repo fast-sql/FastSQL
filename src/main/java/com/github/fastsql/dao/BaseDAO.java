@@ -413,14 +413,14 @@ public abstract class BaseDAO<E, ID> {
 
     public List<E> findListWhere(String sqlCondition, Object... values) {
         //sql
-        String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition.replaceAll("\\?", ":");
+        String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition;
 
-        Map<String, Object> paramMap = new HashMap<>();
-        for (int i = 0; i < values.length; i++) {
-            paramMap.put("" + (i + 1), values[i]);
-        }
+//        Map<String, Object> paramMap = new HashMap<>();
+//        for (int i = 0; i < values.length; i++) {
+//            paramMap.put("" + (i + 1), values[i]);
+//        }
 
-        return template.query(sql, paramMap, new BeanPropertyRowMapper<E>(entityClass));
+        return template.getJdbcOperations().query(sql, new BeanPropertyRowMapper<E>(entityClass), values);
     }
 
     public List<E> findListWhere(String sqlCondition, BeanPropertySqlParameterSource parameterSource) {
