@@ -12,7 +12,7 @@ public class PageSqlUtils {
         if (DB_TYPE.equals("mysql")) {
             return mysql(sql, pageNumber, perPageSize);
         } else if (DB_TYPE.equals("postgresql")) {
-            return postgrsql(sql, pageNumber, perPageSize);
+            return postgresql(sql, pageNumber, perPageSize);
         } else if (DB_TYPE.equals("oracle")) {
             return oracle(sql, pageNumber, perPageSize);
         } else {
@@ -21,7 +21,7 @@ public class PageSqlUtils {
     }
 
     public static String getNumberSQL(String sql) {
-        return "SELECT COUNT(*) FROM ( " + sql + " )";
+        return "SELECT COUNT(*) FROM ( " + sql + " ) AS a ";
     }
 
 
@@ -40,7 +40,7 @@ public class PageSqlUtils {
      * @param pageNumber  页数，从第一页开始
      * @param perPageSize 每页条数，大于1
      */
-    public static String postgrsql(String sql, int pageNumber, int perPageSize) {
+    public static String postgresql(String sql, int pageNumber, int perPageSize) {
         int limit = (pageNumber - 1) * perPageSize;
         int offset = perPageSize;
 

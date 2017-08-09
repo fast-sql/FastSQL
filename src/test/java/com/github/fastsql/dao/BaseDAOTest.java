@@ -2,13 +2,11 @@ package com.github.fastsql.dao;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.jdbc.core.StatementCreatorUtils;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 
 import javax.sql.DataSource;
-import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.*;
