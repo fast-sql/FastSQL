@@ -1,12 +1,21 @@
-package com.github.fastsql.dao;
+package com.github.fastsql;
 
+
+import com.github.fastsql.dao.Student;
+import com.github.fastsql.dao.StudentDAO;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.PreparedStatementCallback;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.*;
@@ -21,19 +30,18 @@ public class BaseDAOTest {
     @Before
     public void datasource() throws SQLException {
 
-//        System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.SimpleLog");
 //        System.setProperty("log4j.logger.org.springframework.jdbc.core.StatementCreatorUtils", "Trace");
 
-        DataSource dataSource = new SimpleDriverDataSource(
-                new com.mysql.jdbc.Driver(),
-                "jdbc:mysql://localhost:3306/fastsql?characterEncoding=utf8&useSSL=true",
-                "pig",
-                "123456");
 //        DataSource dataSource = new SimpleDriverDataSource(
 //                new com.mysql.jdbc.Driver(),
-//                "jdbc:mysql://localhost:3306/test?characterEncoding=utf8&useSSL=true",
-//                "root",
+//                "jdbc:mysql://localhost:3306/fastsql?characterEncoding=utf8&useSSL=true",
+//                "pig",
 //                "123456");
+        DataSource dataSource = new SimpleDriverDataSource(
+                new com.mysql.jdbc.Driver(),
+                "jdbc:mysql://localhost:3306/test?characterEncoding=utf8&useSSL=true",
+                "root",
+                "123456");
         namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
 
 
@@ -44,16 +52,12 @@ public class BaseDAOTest {
     }
 
     @Test
-    public void save() throws NoSuchFieldException {
-//        Field field = StatementCreatorUtils.class.getField("logger");
-//        field.setAccessible(true);
-
+    public void save() {
         Student student = new Student();
-        student.setId(new Random().nextInt(1234));
-        student.setName("2132131");
+        student.setId(UUID.randomUUID().toString());
+        student.setName("小xxxxx");
         student.setBirthday(LocalDate.now());
         student.setHomeAddress("");
-        student.setCityId("xxxxxxxxxx");
 
         studentDao.save(student);
     }
@@ -67,13 +71,10 @@ public class BaseDAOTest {
     public void saveIgnoreNull() {
 
         Student student = new Student();
-        String id = UUID.randomUUID().toString();
-        System.out.println(id);
-        student.setId(123234);
+        student.setId(UUID.randomUUID().toString());
         student.setName("小丽");
         student.setBirthday(null);
-//        student.setHomeAddress("");
-        student.setCityId("2212");
+        student.setHomeAddress("");
 
         studentDao.saveIgnoreNull(student);
 
@@ -82,15 +83,18 @@ public class BaseDAOTest {
 
     @Test
     public void delete() {
-        int deleteRowNumber = studentDao.delete("b89de0c4-b517-4088-a109-40ffc3aa6d4a");
+
+
+        int deleteRowNumber = studentDao.delete("22b66bcf-1c2e-4713-b90d-eab17182b565");
+
     }
 
     @Test
     public void deleteInBatch() {
         List<String> ids = new ArrayList<>();
-        ids.add("264024f4-07d0-48b0-9249-b17545a6ad5a");
-//        ids.add("6");
-//        ids.add("5");
+        ids.add("467641d2-e344-45e9-9e0e-fd6152f80867");
+        ids.add("6");
+        ids.add("5");
 
         System.out.println(studentDao.deleteInBatch(ids));
     }
@@ -195,7 +199,7 @@ public class BaseDAOTest {
     public void update() {
 
         Student student = new Student();
-        student.setId(234);
+        student.setId("17661a16-e77b-4979-8a25-c43a489d42ad");
         student.setName("99999");
 
         studentDao.update(student);
@@ -206,7 +210,7 @@ public class BaseDAOTest {
 
 
         Student student = new Student();
-        student.setId(234);
+        student.setId("17661a16-e77b-4979-8a25-c43a489d42ad");
         student.setName("99999");
 
         studentDao.updateIgnoreNull(student);
@@ -228,6 +232,43 @@ public class BaseDAOTest {
     }
 
 
+    @Test
+    public void testJDBC1() {
+        Integer count = namedParameterJdbcTemplate.getJdbcOperations().execute(
+                new PreparedStatementCreator() {
+
+                    @Override
+                    public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+                        return con.prepareStatement("SELECT count(1) FROM student");//拓展点，可以调用重载方法
+                    }
+                },
+                new PreparedStatementCallback<Integer>() {
+                    @Override
+                    public Integer doInPreparedStatement(PreparedStatement ps) throws SQLException, DataAccessException {
+                        ResultSet resultSet = ps.executeQuery();
+                        resultSet.next();
+                        return resultSet.getInt(1);//拓展点
+                    }
+                });
+        System.out.println(count);
+    }
+
+//    @Test
+//    public void testJDBC2() {
+//        namedParameterJdbcTemplate.getJdbcOperations().update("INSERT INTO student(id,name) VALUES (?,?)",
+//                new PreparedStatementSetter() {
+//                    @Override
+//                    public void setValues(PreparedStatement ps) throws SQLException {
+//                        ps.setInt(1, 11);
+//                        ps.setString(2, "小张");
+//                    }
+//                });
+//    }
+
+//    @Test
+//    public void testJDBC3() {
+//        namedParameterJdbcTemplate.getJdbcOperations().
+//    }
 }
 
 
