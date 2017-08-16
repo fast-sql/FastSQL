@@ -236,10 +236,10 @@ public abstract class BaseDAO<E, ID> {
      */
     public int delete(ID id) {
 
-        E one = findOne(id);
-        if (one == null) {
-            throw new RuntimeException("删除失败，数据不存在");
-        }
+//        E one = findOne(id);
+//        if (one == null) {
+//            throw new RuntimeException("删除失败，数据不存在");
+//        }
 
         //sql
         String sql = "DELETE FROM " + tableName + " WHERE id=:id";
