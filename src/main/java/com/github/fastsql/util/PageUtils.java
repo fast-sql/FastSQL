@@ -1,6 +1,6 @@
 package com.github.fastsql.util;
 
-import com.github.fastsql.config.DbType;
+import com.github.fastsql.config.DatabaseType;
 
 import java.util.Objects;
 
@@ -11,16 +11,16 @@ public class PageUtils {
 
 //    public static String getRowsSQL(String sql, int pageNumber, int perPageSize) {
 //        //没指定dbType，使用FastSqlConfig配置项中默认的
-//        return getRowsSQL(sql, pageNumber, perPageSize, FastSqlConfig.dbType);
+//        return getRowsSQL(sql, pageNumber, perPageSize, FastSqlConfig.databaseType);
 //    }
 
 
-    public static String getRowsSQL(String sql, int pageNumber, int perPageSize, DbType dbType) {
-        if (Objects.equals(dbType, DbType.MY_SQL)) {
+    public static String getRowsSQL(String sql, int pageNumber, int perPageSize, DatabaseType databaseType) {
+        if (Objects.equals(databaseType, DatabaseType.MY_SQL)) {
             return mysql(sql, pageNumber, perPageSize);
-        } else if (Objects.equals(dbType, DbType.POSTGRESQL)) {
+        } else if (Objects.equals(databaseType, DatabaseType.POSTGRESQL)) {
             return postgresql(sql, pageNumber, perPageSize);
-        } else if (Objects.equals(dbType, DbType.ORACLE)) {
+        } else if (Objects.equals(databaseType, DatabaseType.ORACLE)) {
             return oracle(sql, pageNumber, perPageSize);
         } else {
             throw new RuntimeException("不支持的数据库类型");

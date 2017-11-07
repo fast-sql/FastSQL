@@ -1,6 +1,6 @@
 package com.github.fastsql.dao;
 
-import com.github.fastsql.config.DbType;
+import com.github.fastsql.config.DatabaseType;
 import com.github.fastsql.dto.ResultPage;
 import com.github.fastsql.util.EntityRefelectUtils;
 import com.github.fastsql.util.PageUtils;
@@ -60,17 +60,12 @@ public abstract class BaseDAO<E, ID> {
     protected boolean useBeforeDelete = false;
     protected boolean useAfterDelete = true;//
 
-    protected DbType dbType;
+    protected DatabaseType databaseType;
 
-    /**
-     * 允许最大的可变参数个数
-     */
-    @Deprecated
-    protected int variableParameterLimit = 3;
 
     protected NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    //////@Override
+    //TODO 完全使用SQL代替NamedParameterJdbcTemplate
     @Autowired
     public void setNamedParameterJdbcTemplate(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
@@ -118,7 +113,7 @@ public abstract class BaseDAO<E, ID> {
         this.columnNames.add(0, camelToUnderline(this.idField.getName()));
 
         //使用默认配置
-        this.dbType = DbType.POSTGRESQL;
+        this.databaseType = DatabaseType.POSTGRESQL;
     }
 
 
@@ -130,7 +125,6 @@ public abstract class BaseDAO<E, ID> {
      * @param entity 实体类对象
      * @return 插入成功的数量
      */
-//    //@Override
     public int insertSelective(E entity) {
         if (useBeforeInsert) {
             beforeInsert(entity);
@@ -163,7 +157,6 @@ public abstract class BaseDAO<E, ID> {
     /**
      * 插入对象中的值到数据库，null值在数据库中会设置为NULL
      */
-    //@Override
     public int insert(E entity) {
         if (useBeforeInsert) {
             beforeInsert(entity);
@@ -192,7 +185,6 @@ public abstract class BaseDAO<E, ID> {
     /**
      * 全更新 null值在 数据库中设置为null
      */
-    //@Override
     public int update(E entity) {
         if (useBeforeUpdate) {
             beforeUpdate(entity);
@@ -276,13 +268,6 @@ public abstract class BaseDAO<E, ID> {
         return count;
     }
 
-    /**
-     * 根据id更改columns列
-     */
-    @Deprecated
-    public int updateByColumn(E entity, String... columns) {
-        return updateColumns(entity, columns);
-    }
 
     public int updateColumns(E entity, String... columns) {
         if (useBeforeUpdate) {
@@ -339,7 +324,7 @@ public abstract class BaseDAO<E, ID> {
     /**
      * 根据条件删除
      */
-    //@Override
+     
     public int deleteWhere(String sqlCondition, Object... values) {
         String sql = "DELETE FROM " + tableName + " WHERE " + sqlCondition;
         return namedParameterJdbcTemplate.getJdbcOperations().update(sql, values);
@@ -417,7 +402,7 @@ public abstract class BaseDAO<E, ID> {
         }
     }
 
-    //@Override
+     
     public E selectOneWhere(String sqlCondition, SqlParameterSource parameterSource) {
         //sql
         String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition;
@@ -437,8 +422,6 @@ public abstract class BaseDAO<E, ID> {
 
     //////////////////////////////find list/////////////////////////////////////
 
-
-    //@Override
     public List<E> selectAll() {
         //sql
         String sql = "SELECT * FROM " + tableName;
@@ -464,7 +447,7 @@ public abstract class BaseDAO<E, ID> {
                 .query(sql, values, new BeanPropertyRowMapper<E>(entityClass));
     }
 
-    //@Override
+     
     public List<E> selectWhere(String sqlCondition, SqlParameterSource parameterSource) {
         //sql
         String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition;
@@ -522,7 +505,7 @@ public abstract class BaseDAO<E, ID> {
         //sql
         String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition;
         List<E> list = namedParameterJdbcTemplate.getJdbcOperations().query(
-                PageUtils.getRowsSQL(sql, pageNumber, perPage, this.dbType),
+                PageUtils.getRowsSQL(sql, pageNumber, perPage, this.databaseType),
                 values,
                 new BeanPropertyRowMapper<E>(entityClass)
         );
@@ -533,14 +516,14 @@ public abstract class BaseDAO<E, ID> {
     }
 
 
-    //@Override
+     
     public ResultPage<E> selectPageWhere(String sqlCondition, int pageNumber, int perPage,
                                          SqlParameterSource parameterSource) {
         //sql
         String sql = "SELECT * FROM " + tableName + " WHERE 1=1 AND " + sqlCondition;
 
         List<E> coll = namedParameterJdbcTemplate.query(
-                PageUtils.getRowsSQL(sql, pageNumber, perPage, this.dbType),
+                PageUtils.getRowsSQL(sql, pageNumber, perPage, this.databaseType),
                 parameterSource,
                 new BeanPropertyRowMapper<E>(entityClass)
         );
@@ -552,13 +535,13 @@ public abstract class BaseDAO<E, ID> {
         return new ResultPage<>(coll, count);
     }
 
-    //@Override
+     
     public ResultPage<E> selectPage(int pageNumber, int perPage) {
         //sql
         String sql = "SELECT * FROM " + tableName;
 
         List<E> coll = namedParameterJdbcTemplate.query(
-                PageUtils.getRowsSQL(sql, pageNumber, perPage, this.dbType),
+                PageUtils.getRowsSQL(sql, pageNumber, perPage, this.databaseType),
                 EmptySqlParameterSource.INSTANCE,
                 new BeanPropertyRowMapper<E>(entityClass)
         );

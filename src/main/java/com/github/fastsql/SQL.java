@@ -1,6 +1,6 @@
 package com.github.fastsql;
 
-import com.github.fastsql.config.DbType;
+import com.github.fastsql.config.DatabaseType;
 import com.github.fastsql.dto.BatchUpdateResult;
 import com.github.fastsql.dto.ColumnMetaData;
 import com.github.fastsql.dto.ResultPage;
@@ -48,7 +48,7 @@ public class SQL {
 
     private Object[] varParams;
 
-    private DbType dbType;
+    private DatabaseType databaseType;
 
     public SQL() {
         userDefaultDbType();//使用默认的数据类类型
@@ -561,7 +561,7 @@ public class SQL {
         if (value == null) {
             strBuilder.append(" IS NULL");
         } else {
-            //TODO 1.日期 还不支持oracle 使用 this.dbType 判断
+            //TODO 1.日期 还不支持oracle 使用 this.databaseType 判断
             strBuilder.append(" = ").append(getStrByType(value));
 //            getStrByType(value);
         }
@@ -694,7 +694,7 @@ public class SQL {
 
 
     public SQL rows(int pageNumber, int perPageSize) {
-        this.strBuilder = new StringBuilder(PageUtils.getRowsSQL(strBuilder.toString(), pageNumber, perPageSize, this.dbType));
+        this.strBuilder = new StringBuilder(PageUtils.getRowsSQL(strBuilder.toString(), pageNumber, perPageSize, this.databaseType));
         return this;
     }
 
@@ -743,7 +743,7 @@ public class SQL {
 
 
     private SQL userDefaultDbType() {
-        this.dbType = DbType.POSTGRESQL;
+        this.databaseType = DatabaseType.POSTGRESQL;
         return this;
     }
 
@@ -778,8 +778,8 @@ public class SQL {
         return this;
     }
 
-    public SQL dbType(DbType dbType) {
-        this.dbType = dbType;
+    public SQL dbType(DatabaseType databaseType) {
+        this.databaseType = databaseType;
         return this;
     }
 
@@ -1122,10 +1122,10 @@ public class SQL {
 
         if (useClassicJdbcTemplate) {
             return new PageTemplate(namedParameterJdbcTemplate)
-                    .queryPage(strBuilder.toString(), page, perPage, varParams, rowMapper, this.dbType);
+                    .queryPage(strBuilder.toString(), page, perPage, varParams, rowMapper, this.databaseType);
         }
         return new PageTemplate(namedParameterJdbcTemplate)
-                .queryPage(strBuilder.toString(), page, perPage, sqlParameterSource, rowMapper, this.dbType);
+                .queryPage(strBuilder.toString(), page, perPage, sqlParameterSource, rowMapper, this.databaseType);
     }
 
     public <T> ResultPage<T> queryPage(int page, int perPage, RowMapper<T> rowMapper) {
@@ -1133,10 +1133,10 @@ public class SQL {
 
         if (useClassicJdbcTemplate) {
             return new PageTemplate(namedParameterJdbcTemplate)
-                    .queryPage(strBuilder.toString(), page, perPage, varParams, rowMapper, this.dbType);
+                    .queryPage(strBuilder.toString(), page, perPage, varParams, rowMapper, this.databaseType);
         }
         return new PageTemplate(namedParameterJdbcTemplate)
-                .queryPage(strBuilder.toString(), page, perPage, sqlParameterSource, rowMapper, this.dbType);
+                .queryPage(strBuilder.toString(), page, perPage, sqlParameterSource, rowMapper, this.databaseType);
     }
 
 
@@ -1352,7 +1352,7 @@ public class SQL {
                         byte[].class, Blob.class, Clob.class);
 
         if (classArrayList.contains(returnClassType)) {
-            if (this.dbType.equals(DbType.ORACLE)) {
+            if (this.databaseType.equals(DatabaseType.ORACLE)) {
                 return new OraclePagingSingleColumnRowMapper<>(returnClassType);
             }
             return new SingleColumnRowMapper<>(returnClassType);

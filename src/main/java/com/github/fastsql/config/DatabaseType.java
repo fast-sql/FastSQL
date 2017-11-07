@@ -6,21 +6,21 @@ package com.github.fastsql.config;
  * @author 陈佳志
  * 2017-08-17
  */
-public enum DbType {
+public enum DatabaseType {
     MY_SQL("mysql"),
     POSTGRESQL("postgresql"),
     ORACLE("oracle");
 
     public String code;
 
-    DbType(String code) {
+    DatabaseType(String code) {
         this.code = code;
     }
 
 
-    public static DbType getByCode(String paramCode) {
-        DbType[] values = DbType.values();
-        for (DbType value : values) {
+    public static DatabaseType getByCode(String paramCode) {
+        DatabaseType[] values = DatabaseType.values();
+        for (DatabaseType value : values) {
             if (value.code.equals(paramCode)) {
                 return value;
             }
