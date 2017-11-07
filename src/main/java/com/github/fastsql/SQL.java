@@ -31,7 +31,7 @@ import java.util.function.Consumer;
  *
  * @author 陈佳志
  */
-@SuppressWarnings("ALL")
+@SuppressWarnings("unused")
 public class SQL {
     private Logger logger = LoggerFactory.getLogger(SQL.class);
 
@@ -139,7 +139,7 @@ public class SQL {
         return this.SELECT("*").FROM(tableName);
     }
 
-    public SQL appendSELECT(String... columns) {
+    public SQL append_SELECT(String... columns) {
         String columnsStr = String.join(",", columns);
         strBuilder.append(",").append(columnsStr);
         return this;
@@ -229,12 +229,19 @@ public class SQL {
         return this;
     }
 
-    public SQL SET(String column, String value) {
-        strBuilder.append(" SET ").append(column).append("=").append(value);
+    public SQL SET(String... columnOrValue) {
+        strBuilder.append(" SET ");
+
+        for (int i = 0; i < columnOrValue.length; i = i + 2) {
+            if (i != 0) {
+                strBuilder.append(",");
+            }
+            strBuilder.append(columnOrValue[i]).append("=").append(columnOrValue[i + 1]);
+        }
         return this;
     }
 
-    public SQL setOne(String column, String value) {
+    public SQL append_SET(String column, String value) {
         strBuilder.append(",").append(column).append("=").append(value);
         return this;
     }
@@ -274,7 +281,7 @@ public class SQL {
         return this;
     }
 
-    public SQL FULL_JOIN_ON(String table, String on) {
+    public SQL FULL_OUTER_JOIN_ON(String table, String on) {
         strBuilder.append(" FULL OUTER JOIN ")
                 .append(table)
                 .append(" ON (")
@@ -283,7 +290,7 @@ public class SQL {
         return this;
     }
 
-    public SQL LEFT_JOIN_ON(String table, String on) {
+    public SQL LEFT_OUTER_JOIN_ON(String table, String on) {
         strBuilder.append(" LEFT OUTER JOIN ")
                 .append(table)
                 .append(" ON (")
@@ -292,7 +299,7 @@ public class SQL {
         return this;
     }
 
-    public SQL LEFT_JOIN(String table) {
+    public SQL LEFT_OUTER_JOIN(String table) {
         strBuilder.append(" LEFT OUTER JOIN ").append(table);
         return this;
     }
@@ -312,12 +319,12 @@ public class SQL {
         return this;
     }
 
-    public SQL RIGHT_JOIN_ON(String table, String on) {
+    public SQL RIGHT_OUTER_JOIN_ON(String table, String on) {
         strBuilder.append(" RIGHT OUTER JOIN ").append(table).append(" ON (").append(on).append(")");
         return this;
     }
 
-    public SQL RIGHT_JOIN(String table) {
+    public SQL RIGHT_OUTER_JOIN(String table) {
         strBuilder.append(" RIGHT OUTER JOIN ").append(table);
         return this;
     }
@@ -729,36 +736,14 @@ public class SQL {
     }
 
 
-//    private SQL userDefaultDbType() {
-//        this.databaseType = DatabaseType.POSTGRESQL;
-//        return this;
-//    }
 
-
-    ///////////////other////////////////////////////
-//      SQL template(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
-//        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
-//        return this;
-//    }
 
     SQL template(JdbcTemplate jdbcTemplate) {
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
         return this;
     }
 
-//    public SQL dataSourceConfig(Driver driver, String url, String username, String password) {
-//        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(
-//                new SimpleDriverDataSource(driver, url, username, password)
-//        );
-//        return this;
-//    }
-//
-//    public SQL dataSource(DataSource dataSource) {
-//        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(
-//                dataSource
-//        );
-//        return this;
-//    }
+
 
     public SQL parameter(SqlParameterSource sqlParameterSource) {
         this.sqlParameterSource = sqlParameterSource;
