@@ -8,6 +8,7 @@ import java.util.List;
  * 内部工具类
  *
  * @author 陈佳志
+ * @author 袁臻
  */
 public class FastSqlUtils {
 
@@ -92,6 +93,36 @@ public class FastSqlUtils {
         }
         return list.subList(from, to);
 
+    }
+
+    /**
+     * 返回源字符串的左端添加通配符后的字符串
+     *
+     * @param source 源字符串
+     * @return 源字符串的左端添加通配符后的字符串
+     */
+    public static String leftWildcard(final String source) {
+        return String.format("%%%s", source);
+    }
+
+    /**
+     * 返回源字符串的右端添加通配符后的字符串
+     *
+     * @param source 源字符串
+     * @return 源字符串的右端添加通配符后的字符串
+     */
+    public static String rightWildcard(final String source) {
+        return String.format("%s%%", source);
+    }
+
+    /**
+     * 返回源字符串的两端添加通配符后的字符串
+     *
+     * @param source 源字符串
+     * @return 源字符串的两端添加通配符后的字符串
+     */
+    public static String bothWildcard(final String source) {
+        return String.format("%%%s%%", source);
     }
 
 
