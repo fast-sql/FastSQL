@@ -133,12 +133,6 @@ public class SQL {
 
 
     public SQL SELECT(String... columns) {
-        if (columns[0].split(",").length > 5) {
-            logger.warn("---请使用SELECT(String... columns)的可变参数代替一个参数中含有的多个查询列---" + columns[0]);
-        }
-        if (columns.length > 10) {
-            logger.warn("---SELECT()含有了过多参数，推荐使用appendSELECT()---" + Arrays.asList(columns));
-        }
         String columnsStr = Joiner.on(",").join(columns);
         strBuilder.append("SELECT ").append(columnsStr);
         return this;
