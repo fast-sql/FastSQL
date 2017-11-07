@@ -1,6 +1,8 @@
 package com.github.fastsql.dto;
 
 /**
+ * 表元数据
+ *
  * @author 陈佳志
  * 2017-10-18
  */

@@ -1,380 +1,1081 @@
-# 一.FastSql简介
-一个基于spring-jdbc的简单ORM框架，结合了hibernate和mybatis的优点,
-主要使用了NamedParameterJdbcTemplate类，可以加速你的数据库开发。
+- [【一.简介】](#%E3%80%90%E4%B8%80%E7%AE%80%E4%BB%8B%E3%80%91)
+    - [1.主要功能点介绍](#1%E4%B8%BB%E8%A6%81%E5%8A%9F%E8%83%BD%E7%82%B9%E4%BB%8B%E7%BB%8D)
+    - [2.如何安装](#2%E5%A6%82%E4%BD%95%E5%AE%89%E8%A3%85)
+    - [3.与Jdbc,Mybatis,JPA进行对比](#3%E4%B8%8Ejdbcmybatisjpa%E8%BF%9B%E8%A1%8C%E5%AF%B9%E6%AF%94)
+- [【二.作为SQL构建器使用】](#%E3%80%90%E4%BA%8C%E4%BD%9C%E4%B8%BAsql%E6%9E%84%E5%BB%BA%E5%99%A8%E4%BD%BF%E7%94%A8%E3%80%91)
+    - [1.数据准备](#1%E6%95%B0%E6%8D%AE%E5%87%86%E5%A4%87)
+    - [2.构建查询语句](#2%E6%9E%84%E5%BB%BA%E6%9F%A5%E8%AF%A2%E8%AF%AD%E5%8F%A5)
+        - [生成SQL字符串](#%E7%94%9F%E6%88%90sql%E5%AD%97%E7%AC%A6%E4%B8%B2)
+        - [基本查询](#%E5%9F%BA%E6%9C%AC%E6%9F%A5%E8%AF%A2)
+        - [使用操作符方法](#%E4%BD%BF%E7%94%A8%E6%93%8D%E4%BD%9C%E7%AC%A6%E6%96%B9%E6%B3%95)
+        - [使用LIKE](#%E4%BD%BF%E7%94%A8like)
+        - [使用连接查询/排序](#%E4%BD%BF%E7%94%A8%E8%BF%9E%E6%8E%A5%E6%9F%A5%E8%AF%A2%E6%8E%92%E5%BA%8F)
+        - [分组查询](#%E5%88%86%E7%BB%84%E6%9F%A5%E8%AF%A2)
+        - [IN语句](#in%E8%AF%AD%E5%8F%A5)
+        - [子查询subQuery](#%E5%AD%90%E6%9F%A5%E8%AF%A2subquery)
+        - [AND和OR结合使用](#and%E5%92%8Cor%E7%BB%93%E5%90%88%E4%BD%BF%E7%94%A8)
+        - [使用Lambda表达式简化判断语句](#%E4%BD%BF%E7%94%A8lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E7%AE%80%E5%8C%96%E5%88%A4%E6%96%AD%E8%AF%AD%E5%8F%A5)
+    - [3.构建插入语句](#3%E6%9E%84%E5%BB%BA%E6%8F%92%E5%85%A5%E8%AF%AD%E5%8F%A5)
+    - [4.构建更新语句](#4%E6%9E%84%E5%BB%BA%E6%9B%B4%E6%96%B0%E8%AF%AD%E5%8F%A5)
+    - [5.构建删除语句](#5%E6%9E%84%E5%BB%BA%E5%88%A0%E9%99%A4%E8%AF%AD%E5%8F%A5)
+    - [6.分页功能](#6%E5%88%86%E9%A1%B5%E5%8A%9F%E8%83%BD)
+    - [7.更多关键字](#7%E6%9B%B4%E5%A4%9A%E5%85%B3%E9%94%AE%E5%AD%97)
+- [【三.SQL构建器的执行功能】](#%E3%80%90%E4%B8%89sql%E6%9E%84%E5%BB%BA%E5%99%A8%E7%9A%84%E6%89%A7%E8%A1%8C%E5%8A%9F%E8%83%BD%E3%80%91)
+    - [1.设置查询模板](#1%E8%AE%BE%E7%BD%AE%E6%9F%A5%E8%AF%A2%E6%A8%A1%E6%9D%BF)
+    - [2.设置参数](#2%E8%AE%BE%E7%BD%AE%E5%8F%82%E6%95%B0)
+    - [3.基本查询：](#3%E5%9F%BA%E6%9C%AC%E6%9F%A5%E8%AF%A2%EF%BC%9A)
+    - [4.增删改操作：](#4%E5%A2%9E%E5%88%A0%E6%94%B9%E6%93%8D%E4%BD%9C%EF%BC%9A)
+    - [5.获取数据库元信息](#5%E8%8E%B7%E5%8F%96%E6%95%B0%E6%8D%AE%E5%BA%93%E5%85%83%E4%BF%A1%E6%81%AF)
+    - [6.事务管理](#6%E4%BA%8B%E5%8A%A1%E7%AE%A1%E7%90%86)
+    - [7.SQL类与SQLBuilder类的关系](#7sql%E7%B1%BB%E4%B8%8Esqlbuilder%E7%B1%BB%E7%9A%84%E5%85%B3%E7%B3%BB)
+- [【四.BaseDAO】](#%E3%80%90%E5%9B%9Bbasedao%E3%80%91)
+    - [1.数据准备](#1%E6%95%B0%E6%8D%AE%E5%87%86%E5%A4%87)
+        - [Entity实体类](#entity%E5%AE%9E%E4%BD%93%E7%B1%BB)
+        - [DAO类在Spring环境中](#dao%E7%B1%BB%E5%9C%A8spring%E7%8E%AF%E5%A2%83%E4%B8%AD)
+        - [DAO类在非Spring环境中](#dao%E7%B1%BB%E5%9C%A8%E9%9D%9Espring%E7%8E%AF%E5%A2%83%E4%B8%AD)
+    - [2.基本使用方法 CRUD](#2%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95-crud)
+        - [数据插入](#%E6%95%B0%E6%8D%AE%E6%8F%92%E5%85%A5)
+        - [数据修改](#%E6%95%B0%E6%8D%AE%E4%BF%AE%E6%94%B9)
+        - [数据删除](#%E6%95%B0%E6%8D%AE%E5%88%A0%E9%99%A4)
+        - [单条数据查询](#%E5%8D%95%E6%9D%A1%E6%95%B0%E6%8D%AE%E6%9F%A5%E8%AF%A2)
+        - [多条数据查询](#%E5%A4%9A%E6%9D%A1%E6%95%B0%E6%8D%AE%E6%9F%A5%E8%AF%A2)
+        - [分页查询](#%E5%88%86%E9%A1%B5%E6%9F%A5%E8%AF%A2)
+        - [其他查询](#%E5%85%B6%E4%BB%96%E6%9F%A5%E8%AF%A2)
+    - [3.定制你的ApplicationBaseDAO](#3%E5%AE%9A%E5%88%B6%E4%BD%A0%E7%9A%84applicationbasedao)
+        - [定制通用方法](#%E5%AE%9A%E5%88%B6%E9%80%9A%E7%94%A8%E6%96%B9%E6%B3%95)
+        - [改变BaseDAO的默认属性](#%E6%94%B9%E5%8F%98basedao%E7%9A%84%E9%BB%98%E8%AE%A4%E5%B1%9E%E6%80%A7)
+        - [设置多数据源支持](#%E8%AE%BE%E7%BD%AE%E5%A4%9A%E6%95%B0%E6%8D%AE%E6%BA%90%E6%94%AF%E6%8C%81)
+        - [设置BaseDAO中的拦截器](#%E8%AE%BE%E7%BD%AEbasedao%E4%B8%AD%E7%9A%84%E6%8B%A6%E6%88%AA%E5%99%A8)
+    - [4.SQL构建器在BaseDAO中的使用](#4sql%E6%9E%84%E5%BB%BA%E5%99%A8%E5%9C%A8basedao%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8)
+- [【五.通用工具】](#%E3%80%90%E4%BA%94%E9%80%9A%E7%94%A8%E5%B7%A5%E5%85%B7%E3%80%91)
+    - [获取sql的IN列表](#%E8%8E%B7%E5%8F%96sql%E7%9A%84in%E5%88%97%E8%A1%A8)
+    - [~~分页查询工具PageTemplate(不建议使用)~~](#%E5%88%86%E9%A1%B5%E6%9F%A5%E8%AF%A2%E5%B7%A5%E5%85%B7pagetemplate%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8)
+- [【基于SpringBoot的配置项 】](#%E3%80%90%E5%9F%BA%E4%BA%8Espringboot%E7%9A%84%E9%85%8D%E7%BD%AE%E9%A1%B9-%E3%80%91)
+# 【一.简介】
+FastSql一个基于spring-jdbc的简单ORM框架，它支持定制化SQL、自动映射。结合了hibernate/jpa快速开发和mybatis高效执行的优点，可以加速你的数据库访问层（DAO层）开发。
 
-<font color=red>11</font>
-<font color=red>内容</font>
+FastSql可以完全满足你控制欲，可以用Java代码方便写出sql并执行。我们倡导 :
 
-## 使用
-1.本地下载并安装到maven仓库 
+> Develop with sql happily!
+ 
+## 1.主要功能点介绍
+1. SQL构建器
+2. SQL执行器
+3. 通用工具
+4. 通用DAO
 
-mvn install -DskipTests=true
+## 2.如何安装
 
-2.在spring-boot项目中引入
-```
-<dependency>
-    <groupId>com.github.fast</groupId>
-    <artifactId>fastsql-starter</artifactId>
-    <version>0.2.1</version>
-</dependency>
-```
+>撰写中...
+
+## 3.与Jdbc,Mybatis,JPA进行对比
+
+>撰写中...
+
+# 【二.作为SQL构建器使用】
+Java程序员面对的最痛苦的事情之一就是在Java代码中嵌入SQL语句。FastSQL提供`cn.com.zdht.pavilion.fastsql.SQL`类和`cn.com.zdht.pavilion.fastsql.SQLBuilder`类简化你的构建过程。
 
 
-# 二.BaseDAO
-应用中数据访问类需要继承这个类，进行各种操作
 
-## 1.准备数据
-mysql新建表，student和city是多对一关系。
-```
+## 1.数据准备 
+
+在mysql数据库中新建表：
+
+student(学生表)，score（成绩表）,一个学生可以有多个成绩
+
+```sql
 CREATE TABLE `student` (
   `id` varchar(36) NOT NULL,
   `name` varchar(10) NOT NULL,
   `age` int(11) DEFAULT NULL,
   `birthday` date DEFAULT NULL,
   `home_address` varchar(255) DEFAULT NULL,
-  `city_id` varchar(36) NOT NULL,
    PRIMARY KEY (`id`)
 )
+```
 
-CREATE TABLE `city` (
+```sql
+CREATE TABLE `score` (
   `id` varchar(36) NOT NULL,
-  `name` varchar(20) NOT NULL,
+  `student_id` varchar(36) NOT NULL,
+  `subject_name` varchar(255) NOT NULL,
+  `score_value` int(11) NOT NULL,
    PRIMARY KEY (`id`)
 )
 ```
-新建java实体类，（同名或驼峰下转划线相同可以省略@Table）。
+插入数据
+```sql
+INSERT INTO `student` VALUES ('00000000-0000-0000-0000-000000000000', '小明', '13', '2004-06-15', '成都市高新区');
+INSERT INTO `student` VALUES ('11111111-1111-1111-1111-111111111111', '丁丁', '12', '2005-11-24', '成都市锦江区');
+INSERT INTO `student` VALUES ('22222222-2222-2222-2222-222222222222', '小红', '9', '2008-05-12', '上海市虹桥区');
+
+INSERT INTO `score` VALUES ('1a7ceefe-0785-4efb-8a52-25ab7936fa41', '00000000-0000-0000-0000-000000000000', '数学', '99');
+INSERT INTO `score` VALUES ('b5702d1e-1638-4013-ace5-0bb4a74eebb5', '00000000-0000-0000-0000-000000000000', '语文', '59');
+INSERT INTO `score` VALUES ('97ce41ac-b08b-4b46-8b46-e162d3ae0b3b', '11111111-1111-1111-1111-111111111111', '数学', '70');
+INSERT INTO `score` VALUES ('37d0d684-95df-40a6-a9ed-d2b97aa951fc', '11111111-1111-1111-1111-111111111111', '语文', '80');
 ```
+
+
+## 2.构建查询语句
+
+### 生成SQL字符串
+
+- build() 生成SQL
+- toString() 生成SQL
+- buildAndPrintSQL() 生成并打印SQL
+
+### 基本查询
+SELECT方法可以传入一个可变参数，以便选择多列。(FastSql中建议SQL关键字全部采用大写)
+```java
+SQL.SELECT("name", "age").FROM("student").WHERE("age>10").build();
+//==> SELECT name,age FROM student WHERE age>10
+SQL.SELECT("name", "age").FROM("student").WHERE("name='小红'").build();
+//==> SELECT name,age FROM student WHERE name='小红'
+```
+单独提供了WHERE()关键字方法，生成WHERE 1=1,如下
+```java
+SQLBuilder sqlBuilder = SQL.SELECT("name", "age").FROM("student").WHERE();
+if (true){//判断
+  sqlBuilder.AND("age > 10");
+}
+if (false){//判断
+  sqlBuilder.AND("age < 8");
+}
+
+//===>SELECT name,age  FROM student  WHERE 1 = 1  AND age > 10 
+```
+### 使用操作符方法
+FastSql提供了一些操作符方便SQL的构建，比如：
+
+```java
+SQL.SELECT("name", "age").FROM("student").WHERE("age").lt("10").AND("name").eq("'小明'").build();
+//==> SELECT name,age FROM student WHERE age > 10 AND name = '小明'
+```
+
+如下：
+
+| 方法               | 说明                                   |
+| :----------------- | :------------------------------------- |
+| eq(String value)   | 生成=，是equals的缩写                  |
+| gt(String value)   | 生成>，是greater than的缩写            |
+| gtEq(String value) | 生成>=，是greater than or equals的缩写 |
+| lt(String value)   | 生成<，是less than的缩写               |
+| ltEq(String value) | 生成<=，是less than or equals的缩写    |
+| nEq(String value)  | 生成!=，是not equals的缩写             |
+
+注意：
+`eq("1")`生成` = 1` ，`eq("'1'")`会生成` = '1'`
+
+### 使用LIKE
+```java
+SQL.SELECT("name", "age").FROM("student").WHERE("name").LIKE("'王%'").build();
+//==> SELECT name,age FROM student WHERE name LIKE '王%'
+```
+
+### 使用连接查询/排序
+
+查询不及格的成绩
+
+```java
+String sql = SQL.SELECT("s.name","c.subject_name","c.score_value")
+                .FROM("score c")
+                .LEFT_JOIN_ON("student s", "s.id=c.student_id")
+                .WHERE("c.score_value<60")
+                .ORDER_BY("c.score_value")
+                .build();
+/*
+SELECT s.name, c.subject,c.score_value
+FROM score c
+LEFT OUTER JOIN student s ON (s.id = c.student_id)
+WHERE c.score_value < 60
+ORDER BY c.score_value
+*/
+```
+### 分组查询
+查询每个学生总分数
+```java
+String sql =SQL.SELECT("s.name", "sum(c.score_value) total_score")
+               .FROM("score c")
+               .LEFT_JOIN_ON("student s", "s.id=c.student_id")
+               .GROUP_BY("s.name")
+               .build()
+/*
+SELECT s.name, sum(c.score_value) total_score
+FROM score c
+LEFT OUTER JOIN student s ON (s.id = c.student_id)
+GROUP BY s.name
+*/
+```
+
+### IN语句  
+FastSql支持几种IN语句拼写方式：
+```java
+//1.使用字符串
+SQL.SELECT("*")
+   .FROM("student")
+   .WHERE("name").IN("('小明','小红')")
+   .build();
+SQL.SELECT("*")
+   .FROM("student")
+   .WHERE("name").IN$_$("'小明','小红'")//IN$_$ 生成sql: IN (...)
+   .build();
+//2.使用集合（List,Set等）
+SQL.SELECT("*")
+   .FROM("student")
+   .WHERE("name").IN(Lists.newArrayList("小明","小红"))
+   .build();
+//3.IN_var 使用可变参数 ，仅支持int和String类型的可变参数
+SQL.SELECT("*")
+   .FROM("student")
+   .WHERE("name").IN_var("小明","小红")//
+   .build();
+
+//输出===>SELECT *  FROM student  WHERE name  IN ('小明','小红')
+```
+### 子查询subQuery
+查询大于平均分的成绩（可以使用subQuery()方法/$_$()方法）
+```java
+SQL.SELECT("*")
+   .FROM("score")
+   .WHERE("score_value >")
+   .subQuery(
+         SQL.SELECT("avg(score_value)").FROM("score")
+    )
+   .build();
+
+SQL.SELECT("*")
+   .FROM("score")
+   .WHERE("score_value >")
+   .$_$(
+         SQL.SELECT("avg(score_value)").FROM("score")
+    )
+   .build();
+//SELECT *  FROM score  
+//WHERE score_value >  ( SELECT avg(score_value)  FROM score  )
+```
+带有IN的子查询
+```java
+SQL.SELECT("*")
+    .FROM("score")
+    .WHERE()
+    .AND("score")
+    .IN$_$(
+         SQL.SELECT("DISTINCT score_value").FROM("score")
+    )
+    .build();
+//SELECT * FROM score WHERE 1 = 1 AND score IN (SELECT DISTINCT score_value FROM score)
+```
+
+### AND和OR结合使用
+如果查询年龄大于10岁，并且名字是小明或小红
+
+错误的写法：
+```java
+SQL.SELECT("*")
+   .FROM("student")
+   .WHERE("age>10")
+   .AND("name='小明' OR name='小红'")
+   .build();
+
+//SELECT *  FROM student  WHERE age>10  AND name='小明' OR name='小红'
+//OR条件少了括号
+```
+正确的写法：
+```java
+SQL.SELECT("*")
+   .FROM("student")
+   .WHERE("age>10")
+   .AND("(name='小明' OR name='小红')")//手动添加括号
+   .build();
+
+SQL.SELECT("*")
+   .FROM("student")
+   .WHERE("age>10")
+   .AND$_$("name='小明' OR name='小红'")//AND$_$生成 AND (...)
+   .build();
+
+SQL.SELECT("*")
+   .FROM("student")
+   .WHERE("age>10")
+   .AND().$_$("name='小明' OR name='小红'")//$_$ 生成左右括号
+   .build();
+```
+
+### 使用Lambda表达式简化判断语句
+- `ifTrue(boolean bool, Consumer<SQLBuilder> sqlBuilderConsumer)`:如果第1个参数为true，则执行第二个参数（Lambda表达式）
+- `ifNotEmpty(Collection<?> collection, Consumer<SQLBuilder> sqlBuilderConsumer)`:如果第1个参数长度大于0，则执行第二个参数（Lambda表达式）
+- `ifPresent(Object object, Consumer<SQLBuilder> sqlBuilderConsumer)`:如果第1个参数存在（不等于null且不为""），则执行第二个参数（Lambda表达式）
+
+```java
+SQL.SELECT("student")
+    .WHERE("id=:id")
+    .ifTrue(true, thisBuilder -> thisBuilder.AND("name=:name"))  //使用
+    .ifNotEmpty(names, thisBuilder -> {
+        System.out.println("ifNotEmpty?");
+        thisBuilder.AND("name").IN(Lists.newArrayList("小明", "小红"));
+    })
+    .ifPresent("",thisBuilder -> {
+        System.out.println("ifPresent?");
+        //...处理其他流程语句...
+    })
+    .build();
+```
+输出：
+```
+ifNotEmpty?
+SELECT student WHERE id=:id AND name=:name AND name  IN ('小明','小红')
+```
+##  3.构建插入语句
+使用 INSERT_INTO 和 VALUES
+```java
+//使用列
+SQL.INSERT_INTO("student", "id", "name", "age")
+                .VALUES(":id", ":name", ":age").build();
+//=>INSERT INTO student (id,name,age)  VALUES (:id,:name,:age)
+
+//不使用列
+SQL.INSERT_INTO("student").VALUES(":id", ":name", ":age").build();
+//=>INSERT INTO student VALUES (:id,:name,:age)
+```
+
+##  4.构建更新语句
+
+SET(String column, String value) :SET关键字
+
+setOne(String column, String value) :追加一个值
+
+
+```java
+SQL.UPDATE("student").SET("name","'Jack'").setOne("age","9").WHERE("name").eq("'Mike'").build();
+//=>  UPDATE student SET name='Jack',age=9 WHERE name = 'Mike'              
+```
+
+##  5.构建删除语句
+```java
+SQL.DELETE_FROM("student").WHERE("id=:id").build();
+//=>DELETE FROM student WHERE id=:id                
+```
+
+## 6.分页功能
+**使用原生关键字进行分页**
+```java
+SQL.SELECT("*").FROM("student").LIMIT(10).buildAndPrintSQL();
+SQL.SELECT("*").FROM("student").LIMIT(5, 10).buildAndPrintSQL();
+SQL.SELECT("*").FROM("student").LIMIT(10).OFFSET(5).buildAndPrintSQL();
+```
+生成如下SQL
+```sql
+SELECT * FROM student LIMIT 10
+SELECT * FROM student LIMIT 5,10
+SELECT * FROM student LIMIT 10 OFFSET 5
+```
+
+**分页方法进行分页**
+```
+//row方法第一个参数是第几页(从1开始)，第二个参数表示每页几条（从1开始），第三个参数可选，为数据库类型
+
+SQL.SELECT("*").FROM("student").rows(1,10).buildAndPrintSQL();//根据配置项来决定使用哪一种数据库分页方法
+SQL.SELECT("*").FROM("student").dbType(DbType.POSTGRSQL).rows(2,5).buildAndPrintSQL();//postgresql分页
+SQL.SELECT("*").FROM("student").dbType(DbType.ORACLE).rows(2,5).buildAndPrintSQL();//oracle
+SQL.SELECT("*").FROM("student").dbType(DbType.MY_SQL).rows(2,5).buildAndPrintSQL();//mysql分页
+```
+注意：如果不指定 dbType，将会使用 FastSqlConfig#dbType 的默认类型进行分页;
+
+**获取数量语句**
+```java
+SQL.SELECT("*").FROM("student").count().buildAndPrintSQL();
+```
+
+## 7.更多关键字
+
+
+| 方法                                         | 示例                   | 说明                    |
+| :------------------------------------------- | :--------------------- | :---------------------- |
+| append(String)                               |                        | 追加任意字符串          |
+| subQuery(SQLBuilder)                         |                        | 子查询 使用括号包裹参数 |
+| subQuery(String)                             |                        | 子查询 使用括号包裹参数 |
+| nl()                                         |                        | 回车换行                |
+| SELECT(String... columns)                    | SQL.SELECT("a","b")    | 查询列                  |
+| appendSELECT(String...)                      | .appendSELECT("c","d") | 追加查询列              |
+| FROM(String table)                           | .FROM("student")       | FROM                    |
+| DELETE_FROM(String table)                    |                        | 删除                    |
+| INSERT_INTO(String table, String... columns) |                        | 插入                    |
+| VALUES(String... columnValues)               |                        |                         |
+| UPDATE(String table)                         |                        |                         |
+| LEFT_JOIN_ON(String table, String on)        |                        |                         |
+| RIGHT_JOIN_ON(String table, String on)       |                        |                         |
+| LEFT_JOIN(String table  )                    |                        |                         |
+| RIGHT_JOIN(String table  )                   |                        |                         |
+| ON(String on)                                |                        |                         |
+| WHERE()                                      |                        | 生成WHERE 1=1           |
+| WHERE(String condition)                      |                        |                         |
+| AND(String condition)                        |                        |                         |
+| OR(String condition)                         |                        |                         |
+| ORDER_BY(String condition)                   |                        |                         |
+| GROUP_BY(String condition)                   |                        |                         |
+| comma()                                      |                        | 添加逗号                |
+| $_()                                         |                        | 左括号(                 |
+| _$()                                         |                        | 右括号)                 |
+| $_$(SQLBuilder)                              |                        | 使用括号包裹参数        |
+| AS(String value)                             |                        |                         |
+| ASC()                                        |                        |                         |
+| DESC()                                       |                        |                         |
+| IN()                                         |                        |                         |
+| IN(String sql)                               |                        |                         |
+| IN(Collection<?> collection)                 |                        |                         |
+| LIKE(String value)                           |                        |                         |
+| IS_NULL()                                    |                        |                         |
+| IS_NOT_NULL()                                |                        |                         |
+| LIMIT(Integer offset, Integer rows)          |                        |                         |
+| LIMIT(Integer rows)                          |                        |                         |
+| OFFSET(Integer offset)                       |                        |                         |
+| UNION()                                      |                        |                         |
+| UNION_ALL()                                  |                        |                         |
+| HAVING(String condition)                     |                        |                         |
+
+
+# 【三.SQL构建器的执行功能】
+
+SQL构建器支持SpringJDBC的NamedParameterJdbcTemplate类，并简化了它的API的使用：
+
+
+
+## 1.设置查询模板
+```java
+//创建任意DataSource对象（这里使用了spring自带的数据源SimpleDriverDataSource）
+DataSource dataSource = new SimpleDriverDataSource(
+                new Driver(), "jdbc:postgresql://192.168.0.226:5432/picasso_dev2?stringtype=unspecified", 
+                "developer", "password");
+
+//创建NamedParameterJdbcTemplate
+NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+
+```
+查询模板可通过template(),dataSource()等方法设置
+- `template(NamedParameterJdbcTemplate template)`方法传入namedParameterJdbcTemplate，内部使用这个对象进行查询
+- `dataSource(DataSource dataSource)`传入dataSource,内部会自动生成namedParameterJdbcTemplate
+
+```java
+//使用NamedParameterJdbcTemplate对象
+SQL.SELECT("name").FROM("student")
+    .template(namedParameterJdbcTemplate)//这里传入namedParameterJdbcTemplate
+    .queryList(String.class); 
+
+//使用DataSource对象,内部会自动生成NamedParameterJdbcTemplate对象
+ SQL.SELECT("name", "age")
+    .FROM("student")
+    .dataSource(dataSource)//这里传入dataSource 
+    .queryList(StudVO.class);     
+```
+
+##  2.设置参数
+FastSQL支持多种传入命名参数的方法：
+
+- `parameter(SqlParameterSource sqlParameterSource)` 支持传入SqlParameterSource类型的参数（兼容spring-jdbc）
+-  ~~`parameterDTO(Object dto)`方法可以传入对象参数~~(请使用beanParameter代替)
+- `beanParameter(Object dto)`方法可以传入对象参数
+-  ~~`parameterMap(Map<String, Object> map)`支持传入Map类型参数~~（请使用mapParameter）
+- `mapParameter(Map<String, Object> map)`支持传入Map类型参数
+- ~~`parameterMapItems(Object... param)`~~ (请使用mapItemsParameter代替)
+- `mapItemsParameter(Object... param)`支持多个key-value形式的参数，比如`mapItemsParameter("id", 12345,"name","小明")`
+- `beanAndMapParameter(Object dto, Map<String, Object> map)` 支持两种不同的参数组合
+- `addParameterMapItem(String key, Object value)`可以为以上几种传参方法追加参数
+
+FastSQL也支持?占位符和可变参数：
+- `varParameter(Object... vars)` 可以调用多次
+
+**示例**
+
+使用beanParameter方法支持传入一个参数bean
+```java
+@Data
+public class StudentDTO{
+    private String name;
+}
+```
+```java
+StudentDTO dto =new StudentDTO();
+dto.setName="小明";
+
+SQL.SELECT("name", "age")
+    .FROM("student")
+    .WHERE("name=:name")
+    .beanParameter(dto)  //设置一个DTO查询参数
+    .dataSource(dataSource)
+    .queryList(StudVO.class);
+
+```
+使用mapParameter方法并追加参数
+>撰写中
+
+使用varParameter方法--支持?占位符和可变参数 
+```
+String id = UUID.randomUUID().toString();
+SQL.INSERT_INTO("student", "id", "name", "age")
+    .VALUES("?", "?", "?")
+    .template(namedParameterJdbcTemplate)
+    .varParameter(id, "小明")
+    .varParameter(12)
+    .update();
+```
+
+##  3.基本查询：
+
+**查询方法解析**
+- `T queryOne(Class<T> returnClassType)`查询单行结果封装为一个对象,参数可以是可以为String/Integer/Long/Short/BigDecimal/BigInteger/Float/Double/Boolean或者任意POJO的class。
+- `Map<String, Object> queryMap()`查询单行结果封装为Map
+- `List<T> queryList(Class<T> returnClassType)`查询多行结果封装为一个对象列表
+- `List<Map<String, Object>> queryMapList()`查询多行结果封装为Map数组
+- `List<Object[]> queryArrayList()`查询结果封装为泛型为Object数组的列表
+- `ResultPage<T> queryPage(int page, int perPage, Class<T> returnClassType)`查询结果页
+
+**查询并打印结果**
+
+- `queryMapListAndPrint()` 
+- `queryArrayListAndPrint` 
+
+**示例**
+
+StudVO是查询视图类，包含name和age字段；StudentDTO是查询参数类，包含name字段。
+
+```java
+//queryList可以查询列表，可以是基本类型列表或对象列表
+List<String> strings = SQL.SELECT("name")
+                .FROM("student")
+                .template(namedParameterJdbcTemplate)
+                .queryList(String.class); //这里执行查询列表并指定返回类型
+
+List<StudVO> studVOList = SQL.SELECT("name", "age")
+                            .FROM("student")
+                            .WHERE("name=:name")
+                            .beanParameter(new StudentDTO())  //设置一个DTO查询参数
+                            .dataSource(dataSource)
+                            .queryList(StudVO.class);     //查询一个对象列表
+
+//queryOne可以查询一个值，可以是基本类型  或 对象 
+String name = SQL.SELECT("name")
+                 .FROM("student")
+                 .WHERE("id=:id")
+                 .AND("name=:name")
+                 .dataSource(dataSource)
+                 .mapItemsParameter("id", 12345) //可以传入多个k-v值，，还可以调用parameterMap传入Map参数，
+                 .addParameterMapItem("name", "Jack")// 使用addParameterMapItem追加k-v值
+                 .queryOne(String.class);  //这里执行查询一个对象（基本类型）并指定返回类型 
+                 
+StudVO studVO = SQL.SELECT("name", "age")
+                   .FROM("student")
+                   .WHERE("name=:name")
+                   .beanParameter(new StudentDTO())  //设置一个DTO
+                   .dataSource(dataSource)
+                   .queryOne(StudVO.class);     //查询一个对象
+
+//queryPage查询分页
+ResultPage<StudVO> studVOResultPage =SQL.SELECT("name", "age")
+                                        .FROM("student")
+                                        .dataSource(dataSource)
+                                        .queryPage(1, 10, StudVO.class);  //分页查询（第一页，每页10条记录）
+//根据特定数据库进行分页查询                    
+ResultPage<StudVO> studVOResultPage =SQL.SELECT("name", "age")
+                                        .FROM("student")
+                                        .dataSource(dataSource)
+                                        .queryPage(1, 10, StudVO.class, DbType.MY_SQL); 
+```
+注意1：queryOne调用后，如果查询的值不存在是不会抛出EmptyResultDataAccessException，而是返回null，所以要用包装类型接收他的值而不是基本类型，并判断非空性
+
+注意2：queryPage返回的是ResultPage对象
+
+
+## 4.增删改操作：
+使用update方法
+```java
+//插入
+SQL.INSERT_INTO("student", "id", "name", "age")
+        .VALUES(":id", ":name", ":age")
+        .template(namedParameterJdbcTemplate)
+        .mapItemsParameter("id", 678, "name", "kjs345a354dfk", "age", 123)
+        .update();
+                
+//修改
+SQL.UPDATE("student")
+        .SET("name",":name")
+        .WHERE("id=678")
+        .template(namedParameterJdbcTemplate)
+        .mapItemsParameter("id", 678, "name", "Rose", "age", 123)
+        .update();
+//删除
+SQL.DELETE_FROM("student")
+        .WHERE("id=:id")
+        .template(namedParameterJdbcTemplate)
+        .mapItemsParameter("id", 678)
+        .update();
+```
+
+## 5.获取数据库元信息
+```java
+//表名称
+List<String> tableNames = SQL.builder().dataSource(dataSource).getTableNames();
+//列名称
+List<String> columnNames = SQL.builder().dataSource(dataSource).getColumnNames("student");
+//列对象
+List<ColumnMetaData> columnMetaDataList = SQL.builder().dataSource(dataSource).getColumnMetaDataList("sys_dict");
+
+```
+
+## 6.事务管理
+
+手动事务：FastSQL事务管理使用Spring的工具类`org.springframework.jdbc.datasource.DataSourceUtils`
+```java
+Connection connection = DataSourceUtils.getConnection(dataSource);//开启事务
+connection.setAutoCommit(false);//关闭自动提交
+
+SQL.INSERT_INTO("sys_users", "id").VALUES(":id")
+     .mapItemsParameter("id", UUID.randomUUID().toString())
+     .dataSource(dataSource).update();
+
+SQL.INSERT_INTO("sys_users", "id").VALUES(":id")
+    .mapItemsParameter("id", UUID.randomUUID().toString() + UUID.randomUUID().toString())
+    .dataSource(dataSource).update();
+
+//connection.rollback(); //回滚
+
+connection.commit();//提交事务
+```
+
+在Spring环境中，可以直接使用注解@Transactional控制事务
+
+## 7.SQL类与SQLBuilder类的关系 
+
+SQL类是SQLBuilder类的工厂类，可以生成定制化的SQLBuilder示例（后续会添加更多方法）：
+```java
+SQLBuilder sqlBuilder1 = SQL.builder();  //代替new SQLBuilder()
+SQLBuilder sqlBuilder2 = SQL.SELECT("a");  //代替new SQLBuilder().SELECT("a")
+SQLBuilder sqlBuilder3 = SQL.SELECT_ALL_FROM("student");  //代替new SQLBuilder().SELECT("*").FROM("student")
+SQLBuilder sqlBuilder4 = SQL.DELETE_FROM("student");  //代替new SQLBuilder().DELETE_FROM("student")
+SQLBuilder sqlBuilder5 = SQL.UPDATE("student");  //代替new SQLBuilder().UPDATE("student")
+        SQLBuilder sqlBuilder6 = SQL.INSERT_INTO("student");  //代替new SQLBuilder().INSERT_INTO("student")
+
+SQLBuilder sqlBuilder7 = SQL.builder(dataSource);  //代替new SQLBuilder().template(namedParameterJdbcTemplate)
+SQLBuilder sqlBuilder8 = SQL.builder(namedParameterJdbcTemplate);  //代替new SQLBuilder().dataSource(dataSource);
+```
+ 
+
+# 【四.BaseDAO】
+
+## 1.数据准备
+### Entity实体类
+注解如下 
+
+1. @Table 非必需，如果不写表名称将会被解析为student（根据类名的下划线形式）
+2. @Id 必须存在，对应表的主键
+3. @Entity 非必需，标识一个实体，为了兼容JPA标准建议加上
+
+```java
+@Entity
 @Table(name="student") 
+@Data  //use lombok
 public class Student {
+    @Id
     private String id;
     private String name;
     private Integer age;
     private LocalDate birthday;
     private String homeAddress;
-    private String cityId;
-    //省略getter和setter
-}
-
-@Table(name="") 
-public class City {
-    private String id;
-    private String name;
-    //省略getter和setter
 }
 
 ```
+
 新建DAO层数据访问类, 并继承BaseDAO类，会自动继承BaseDAO中的方法(详见第2部分）
 
-```
+### DAO类在Spring环境中
+DAO层：
+
+```java
 @Repository
 public class StudentDAO extends BaseDAO<Student,String> {
      
 }
+```
+在Service中：
+```java
+@Service
+public class StudentService {
+    @Autowire
+    private StudentDAO studentDAO;
 
-@Repository
-public class CityDAO extends BaseDAO<City,String> {
+    @Transactional //如果需要事务--org.springframework.transaction.annotation.Transactional
+    public void test1(){
+        studentDAO.XXX();//调用任意方法
+    }
      
 }
 ```
 
-## 2.数据保存的方法 ，继承自BaseDAO
-
-####   `  int save(E entity) `
-插入对象中的值到数据库，null值在数据库中会设置为NULL
+### DAO类在非Spring环境中
+```java
+public class StudentDAO extends BaseDAO<Student,String> {
+     
+}
 ```
+
+```java
+public class Test  {
+    public static void main(String[] args) {
+        //构建NamedParameterJdbcTemplate
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate=...
+        //设置
+        studentDAO.setNamedParameterJdbcTemplate(namedParameterJdbcTemplate);
+        //执行操作
+        studentDAO.XXX();
+    }
+}
+```
+ 
+## 2.基本使用方法 CRUD 
+CRUD 是四种数据操作的简称：C 表示创建，R 表示读取，U 表示更新，D 表示删除。BaseDAO 自动创建了处理数据表中数据的方法。
+
+### 数据插入
+
+方法 ` int insert(E entity) `，插入对象中的值到数据库，null值在生成的sql语句中会设置为NULL
+```java
 Student student = new Student();
-//student.setId(UUID.randomUUID().toString()); 
+student.setId(UUID.randomUUID().toString()); 
 student.setName("小丽");
-student.setBirthday(LocalDate.now());
+student.setBirthday(LocalDate.now());//这里使用jdk8时间类型
 student.setHomeAddress("");
 
-studentDao.save(student);//获取保存成功的id
-```
-等价如下SQL语句（注意：age被设置为null）
-```
-INSERT INTO student(id,name,age,birthday,home_address,city_id) 
- VALUES 
-('622bca40-4c64-43aa-8819-447718bdafa5','小丽',NULL,'2017-07-11','',NULL)
+studentDao.insert(student);//获取保存成功的id
+
+//等价如下SQL语句（注意：age被设置为null）
+//INSERT INTO student(id,name,age,birthday,home_address) VALUES ('622bca40-4c64-43aa-8819-447718bdafa5','小丽',NULL,'2017-07-11','')
+
 ```
 
+方法 ` int insertSelective(E entity)  `，插入对象中非null的值到数据库
 
-####   `  int saveIgnoreNull(E entity)  `
-插入对象中非null的值到数据库
-```
+```java
 Student student = new Student();
 student.setId(UUID.randomUUID().toString());
 student.setName("小丽");
 student.setBirthday(new Date());
-student.setHomeAddress("");
- 
-studentDao.saveIgnoreNull(student);
-```
-等价如下SQL语句（注意：没有对age进行保存，在数据库层面age将会保存为该表设置的默认值，如果没有设置默认值，将会被保存为null ）
-```
-INSERT INTO student(id,name,birthday,home_address) 
- VALUES 
-('622bca40-4c64-43aa-8819-447718bdafa5','小丽','2017-07-11','')
+student.setHomeAddress(""); 
+studentDao.insertSelective(student);
 
-```
-## 3.数据删除的方法 ，继承自BaseDAO
-
-####   `int delete(String id) `
-根据id删除数据
-```
-int num = studentDao.delete("22b66bcf-1c2e-4713-b90d-eab17182b565");//获取删除的行数量
-```
-等价如下SQL语句
-```
-DELETE FROM student WHERE id='22b66bcf-1c2e-4713-b90d-eab17182b565'
+//等价如下SQL语句（注意：没有对age进行保存，在数据库层面age将会保存为该表设置的默认值，如果没有设置默认值，将会被保存为null ）
+//===>INSERT INTO student(id,name,birthday,home_address)  VALUES  ('622bca40-4c64-43aa-8819-447718bdafa5','小丽','2017-07-11','')
 ```
 
-####   `int deleteAll()`
-删除某个表所有行
+
+### 数据修改
+
+方法   `int update(E entity) ` ,根据对象进行更新（null字段在数据库中将会被设置为null），对象中@id字段不能为空 
+```java
+//待更新
 ```
+
+方法   `int updateSelective(E entity) `,根据对象进行更新（只更新实体中非null字段），对象中@id字段不能为空 
+```java
+//待更新
+```
+
+方法   `int updateByColumn(E entity, String... columns) `,根据id更新可变参数columns列，对象中@id字段不能为空 
+
+```
+Student student = studentDAO.selectOneById("11111111-1111-1111-1111-111111111111");
+student.setAge(19);
+studentDAO.updateByColumn(student,"age");
+
+//===>UPDATE student SET age=? WHERE id=?
+```
+### 数据删除
+
+方法 `int deleteOneById(String id) ` 根据id删除数据
+```java
+int num = studentDao.deleteOneById("22b66bcf-1c2e-4713-b90d-eab17182b565");//获取删除的行数量
+//===>DELETE FROM student WHERE id='22b66bcf-1c2e-4713-b90d-eab17182b565'
+```
+
+方法 `int deleteAll()`,删除某个表所有行
+
+```java
 int number = studentDao.deleteAll();//获取删除的行数量
+// ===>DELETE FROM student
 ```
 
-####  ` int  deleteInBatch(List<String> ids)` 和 `public int deleteInBatch(String... ids)`
-根据id列表批量删除数据(所有删除语句将会一次性提交到数据库)
-```
+方法 ` int[]  deleteInBatch(List<String> ids)` ,根据id列表批量删除数据(所有删除语句将会一次性提交到数据库)
+
+```java
 List<String> ids = new ArrayList<>();
 ids.add("467641d2-e344-45e9-9e0e-fd6152f80867");
 ids.add("881c80a1-8c93-4bb7-926e-9a8bc9799a72");
-int number = studentDao.deleteInBatch(ids);//返回成功删除的数量
+studentDao.deleteInBatch(ids);//返回成功删除的数量
 ```
-
-## 4.数据修改的方法 ，继承自BaseDAO中
-
-#### `String update(E entity) `
-根据对象进行更新（null字段在数据库中将会被设置为null），对象中id字段不能为空 
-
-#### `String updateIgnoreNull(E entity) `
-根据对象进行更新（只更新实体中非null字段），对象中id字段不能为空 
-
+方法` int deleteWhere(String sqlCondition, Object... values)`，根据条件删除
  
-## 5.单表查询,使用findXXX，继承自BaseDAO中的方法
+### 单条数据查询
 
-### 5.1 单个对象
-####   `E findOne(String id)` 
+方法     `E selectOneById(String id)` 
 通过id查询一个对象
+```java
+Student student = studentDao.selectOneById("12345678");//查询id为12345678的数据，并封装到Student类中
 ```
-Student student = studentDao.findOne("12345678");//查询id为12345678的数据，并封装到Student类中
-```
-####   `E findOneWhere(String sqlCondition, Object... values)`
-通过语句查询（返回多条数据将会抛出运行时异常）
-```
-Student student = studentDao.findOneWhere("name=?1 AND home_address=?2", "小明", "成都");   
+方法     `E selectOneWhere(String sqlCondition, Object... values)`,通过语句查询（返回多条数据将会抛出运行时异常,为了防止sql语句在service层滥用，可变参数最多支持三个）
+
+```java
+Student student = studentDao.selectOneWhere("name=? AND home_address=?", "小明", "成都");   
   
 ```
-小明将会被匹配到?1中，成都将会被匹配到?2中，查询的是名字的小明，家庭地址为成都的对象。
 
-### 5.2 多个对象
+方法     `protected E selectOneWhere(String sqlCondition, SqlParameterSource parameterSource)` 查询一条数据，protected，只能在子类中使用
+ 
+### 多条数据查询
 
-####   `List<E> findListWhere(String sqlCondition, Object... values)`
-用法与findOneWhere()相同，可以返回一条或多条数据
-```
-List<Student> studentList  =  studentDao.findListWhere("name=?1", "小明");
-List<Student> studentList  =  studentDao.findListWhere("ORDER BY age");
-List<Student> studentList  =  studentDao.findListWhere("home_address IS NULL ORDER BY age DESC");
+方法     `List<E> selectWhere(String sqlCondition, Object... values)`,用法与selectOneWhere()相同，可以返回一条或多条数据，可变参数最多支持三个
+
+```java
+List<Student> studentList  =  studentDao.selectWhere("name=?", "小明");
+List<Student> studentList  =  studentDao.selectWhere("ORDER BY age");
+List<Student> studentList  =  studentDao.selectWhere("home_address IS NULL ORDER BY age DESC");
 //...
 ```
 
-####   `List<E> findListWhere(String sqlCondition, BeanPropertySqlParameterSource parameterSource)`
+方法     `List<E> selectAll()` 查询所有
+```java
+List<Student> allStudents  =  studentDao.selectAll();
 ```
-class StudentIndexDTO{
-    private String name;
-    private LocalDate birthday;
-    //getter setter
-}
+方法     `protected List<E> selectWhere(String sqlCondition, SqlParameterSource parameterSource)`可以返回一条或多条数据， protected，只能在子类中使用
 
-StudentIndexDTO dto = new StudentIndexDTO();
-dto.setName("%小%");
-dto.setBirthday(LocalDate.of(1991,10,10));
+### 分页查询
 
-List<Student> studentList = studentDao.findListWhere(
-                "name LIKE :name AND  birthday < :birthday ",
-                new BeanPropertySqlParameterSource(dto));
-);
-```
-####   `List<E> findListWhere(String sqlCondition, Map<String, Object> parameterMap)`
-使用Map作为命名参数
-```
-Map<String, Object> map = new HashMap<>();
-map.put("name", "%小%");
- 
-List<Student> studentList = studentDao.findListWhere(
-      "name LIKE :name  ORDER BY age DESC" , map
-);
-```
-### 5.3 统计对象
-####   `int countWhere(String sqlCondition, Object... values)`
-通过条件查询数量
-```
+方法     `ResultPage<E> selectPageWhere(String sqlCondition, int pageNumber, int perPage, Object... values)` 
+
+方法     `protected ResultPage<E> selectPageWhere(String sqlCondition, int pageNumber, int perPage, SqlParameterSource parameterSource)` ， protected，只能在子类中使用
+
+方法     `ResultPage<E> selectPage(int pageNumber, int perPage)` 
+
+### 其他查询
+方法     `int countWhere(String sqlCondition, Object... values)`,通过条件查询数量
+
+```java
 int countWhere = studentDao.countWhere("age >= 20"); //查找年龄大于等于20的学生
-int countWhere = studentDao.countWhere("age > ?1" , 10); //查找年龄大于10的学生
-
-```
-# 四.通过sql查询（通过BaseDao中的queryXXX方法）
-
-## 把结果封装到Map中
-以下方法可以获取Map对象（由column和值组成的）
-```
-Map<String, Object> queryMapBySql(String sql)
-Map<String, Object> queryMapBySql(String sql, SqlParameterSource paramSource) 
-Map<String, Object> queryMapBySql(String sql, Map<String, ?> paramMap)
+int countWhere = studentDao.countWhere("age > ?" , 10); //查找年龄大于10的学生
 ```
 
-
-以下方法获取Map对象的列表（每个map由column和值组成的）
-```
-List<Map<String, Object>> queryMapListBySql(String sql)
-List<Map<String, Object>> queryMapListBySql(String sql, SqlParameterSource paramSource) 
-List<Map<String, Object>> queryMapListBySql(String sql, Map<String, ?> paramMap)
-```
- 
-
-## 把结果封装到对象中
-
-新建数据传入类StudentIndexDTO
-```
-public class StudentIndexDTO {
-    private Integer age;
-    private String cityName;
-    //getter.setter
-}
-```
-新建数据展示对象StudentVO
-```
-public class StudentVO extends Student {
-    private String cityName;
-
-    //getter.setter
-}
-
-```
-在StudentDAO中增加方法
-```
-public class StudentDAO extends BaseDAO<Student> {
-
-    public List<StudentVO> findStudentVOList(StudentIndexDTO dto) {
-        String sql = "SELECT s.*,c.name AS cityName FROM student s " +//template可以直接使用
-                "LEFT JOIN city c ON s.city_id = c.id " +
-                "WHERE s.age = :age AND c.name = :cityName ";//命名参数
-
-        List<StudentVO> studentVOList = template.query(
-                sql,//命名参数
-                new BeanPropertySqlParameterSource(dto), //传入参数***
-                new BeanPropertyRowMapper<>(StudentVO.class));//匹配传出参数***
-        return studentVOList;
+方法     `protected int countWhere(String sqlCondition, SqlParameterSource parameterSource)`,通过条件查询数量， protected，只能在子类中使用
+```java
+@Repository
+public class BizPhotoDAO extends ApplicationBaseDAO<BizPhotoPO, String> {
+    public int countByName() {
+        return countWhere("photo_name=:name", new MapSqlParameterSource().addValue("name", "物品照片"));
     }
 }
 ```
-# 四.SQLBuilder--SQL构建器
-Java程序员面对的最痛苦的事情之一就是在Java代码中嵌入SQL语句。提供SQLBuilder简化你的构建过程。
-## DEMO 1
-```
-String sql_1 = new SQLBuilder()
-        .SELECT("name", "age")
-        .FROM("student")
-        .WHERE("age>10")
-        .build();
-```
-生成如下SQL
-```
-SELECT name,age
-FROM student
-WHERE age>10
-```
-## DEMO 2
-```
-String city = "成都";
-String sql_2 = new SQLBuilder()
-      .SELECT("s.name", "s.age")
-      .FROM("student s")
-      .LEFT_JOIN_ON("city c", "c.id=s.id")
-      .WHERE("s.age>10")
-      .IF_PRESENT_AND(city, "city.name LIKE :city")//如果把city改为null或者"" 这句话将不会添加
-      .build();
-```
-生成如下SQL
-```
-SELECT s.name,s.age
-   FROM student s
-   LEFT OUTER JOIN city c ON ( c.id=s.id ) 
-   WHERE s.age>10  AND city.name LIKE :city 
-```
-## DEMO 3
-```
-String sql_3 = new SQLBuilder()
-      .SELECT("s.name", "s.age")
-      .FROM("student s")
-      .LEFT_JOIN_ON("city c", "c.id=s.id")
-      .WHERE()
-      .AND("(age>10 OR age<5)")
-      .ORDER_BY("s.age")
-      .build();
-```
-生成如下SQL
-```
-SELECT s.name,s.age
-FROM student s
-LEFT OUTER JOIN city c ON ( c.id=s.id ) 
-WHERE 1=1   AND (age>10 OR age<5)  ORDER BY s.age 
-```
-# 五.分页工具PageSqlUtils和分页查询
-分页工具支持mysql/postgresql/oracle
 
-public static String findSQL(String sql, int pageNumber, int perPageSize) 会返回查找行sql
+方法   `int count()` 查询表总数量
 
-public static String countSQL(String sql) 会返回查找数量sql
+## 3.定制你的ApplicationBaseDAO
+建议在你的程序中实现ApplicationBaseDAO，可以
 
-以mysql为例
-```
-String baseSql = new SQLBuilder()
-        .SELECT("name", "age")
-        .FROM("student")
-        .WHERE("age>10")
-        .build();
-        
-String rowsSql = PageSqlUtils.getRowsSQL(baseSql,1,10);   //生成=> SELECT name,age FROM student WHERE age>10 LIMIT 0,10
+1. 定制一些通用方法
+2. 改变BaseDAO的默认属性
+3. 设置多数据库支持
+4. 设置BaseDAO中的触发器
 
-String numberSql = PageSqlUtils.getNumberSQL(baseSql);       //生成=> SELECT count(*) ( SELECT name,age   FROM student WHERE age>10 )
-```
-分页API
-```
-DbPageResult<E> queryPageBySql(String baseSql, int pageNumber, int perPage, Map<String, ?> paramMap)
-DbPageResult<E> queryPageBySql(String baseSql, int pageNumber, int perPage, BeanPropertySqlParameterSource parameterSource)
-```
-示例
-```
-public class StudentDAO extends BaseDAO<Student,String> {
-     /**
-      * 查询前十条数据
-      */
-     public DbPageResult<StudentVO> findStudentVOPage(StudentIndexDTO dto) {
-         String sql = "SELECT s.*,c.name AS cityName FROM student s " +//template可以直接使用
-                 "LEFT JOIN city c ON s.city_id = c.id " +
-                 "WHERE s.age = :age AND c.name = :cityName ";//命名参数
- 
-         DbPageResult<StudentVO> studentDbPageResult = queryPageBySql(
-                 sql, 1, 10,  //sql ,页数 ，和每页条数
-                 new BeanPropertySqlParameterSource(dto), //匹配传入参数 
-                 new BeanPropertyRowMapper<>(StudentVO.class));//匹配传出参数 
-         return studentDbPageResult;
-     }
+```java
+public abstract class ApplicationBaseDAO<E, ID> extends BaseDAO<E, ID> {
+  //添加方法等
+}
+
+////我们的StudentDAO此时应该继承ApplicationBaseDAO
+@Repository
+public class StudentDAO extends ApplicationBaseDAO<Student,String> {
+     
 }
 ```
- 
- 
-# 六.配置项 
-
-1.配置数据库类型 可选mysql postgresql oracle
+###  定制通用方法
+如下，增加了一个名为logicDelete的逻辑删除方法，将会作用于继承于它的每个DAO
+```java
+public abstract class ApplicationBaseDAO<E, ID> extends BaseDAO<E, ID> {
+  //...其他方法
+  
+  public void logicDelete(ID id) {
+      //每个表都有一个defunct，1表示已（逻辑）删除
+      namedParameterJdbcTemplate.getJdbcOperations().update("UPDATE " + this.tableName + " SET defunct = 1");
+  }
+  
+  //...其他方法
+}
 ```
-fastsql.db-type=mysql  
+上面的logicDelete方法使用了tableName这个变量，BaseDAO中的部分可用变量为
+```
+Class<E> entityClass; //DAO对应的实体类
+Class<ID> idClass;  //标识为@Id的主键类型
+
+Logger log; //日志，可以在实现类中直接使用
+
+String className; //实体类名
+String tableName; //表名
+ 
+Field idField;  //@Id对应的字段引用
+String idColumnName; //表主键列名
+
+namedParameterJdbcTemplate //jdbc模板
+
+//...待更新
+
+```
+
+### 改变BaseDAO的默认属性
+```java
+public abstract class ApplicationBaseDAO<E, ID> extends BaseDAO<E, ID> {
+    public ApplicationBaseDAO() {
+        //BaseDAO中方法（比如selectWhere等）允许最大的可变参数最大个数
+        this.variableParameterLimit = 3;
+        
+        //修改默认的类型，1.集成这个类的子类分页方法使用 2.this.SELECT 分页使用
+        this.dbType = DbType.MY_SQL; 
+    }
+}
+```
+
+### 设置多数据源支持
+```java
+public abstract class OracleApplicationBaseDAO<E, ID> extends BaseDAO<E, ID> {
+      //重写setNamedParameterJdbcTemplate方法
+      @Autowired
+      @Qualifier("oracleNamedParameterJdbcTemplate")//===>根据名称注入
+      @Override
+      protected void setNamedParameterJdbcTemplate(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+          super.setNamedParameterJdbcTemplate(namedParameterJdbcTemplate);
+          //同样需要设置 this.dbType
+      }
+}
+public abstract class MySqlApplicationBaseDAO<E, ID> extends BaseDAO<E, ID> {
+      //重写setNamedParameterJdbcTemplate方法
+      @Autowired
+      @Qualifier("mysqlNamedParameterJdbcTemplate")//===>根据名称注入
+      @Override
+      protected void setNamedParameterJdbcTemplate(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+          super.setNamedParameterJdbcTemplate(namedParameterJdbcTemplate);
+          // 同样需要设置 this.dbType
+      }}
+}
+```
+
+### 设置BaseDAO中的拦截器
+
+```java
+public abstract class ApplicationBaseDAO<E, ID> extends BaseDAO<E, ID> {
+    public ApplicationBaseDAO() {
+         // 1.设置触发器开关
+         this.useBeforeInsert = true; //在插入前执行
+         this.useBeforeUpdate = true; //在更新前执行
+    }
+
+    //2.重写触发器相关方法
+    @Override
+    protected void beforeInsert(E object) {
+        EntityRefelectUtils.setFieldValue(object, idField, UUID.randomUUID().toString());
+        EntityRefelectUtils.setFieldValue(object, "createdAt", LocalDateTime.now());
+        EntityRefelectUtils.setFieldValue(object, "updatedAt", LocalDateTime.now());//在插入数据时自动更新id,createdAt,updatedAt
+    }
+
+    @Override
+    protected void beforeUpdate(E object) {
+        EntityRefelectUtils.setFieldValue(object, "updatedAt", LocalDateTime.now());//在更新数据时自动更新updatedAt
+    }
+}
+```
+对应关系如下:
+
+count 参数表示执行成功的条数 
+
+| 启用            | 需重写的方法                      | 作用于                                                        |
+| :-------------- | :-------------------------------- | :------------------------------------------------------------ |
+| useBeforeInsert | beforeInsert(E entity)            | insertSelective(..)/insert(..)执行插入之前                    |
+| useAfterInsert  | afterInsert(E entity,int count)   | insertSelective(..)/insert(..)执行插入之后                    |
+| useBeforeUpdate | beforeUpdate(E entity)            | updateSelective(..)/update(..)执行更新之前                    |
+| useAfterUpdate  | afterUpdate(E entity,int count)   | updateSelective(..)/update(..)/updateByColumn(..)执行更新之后 |
+| useBeforeDelete | beforeDelete(ID id)               | deleteOneById(..)执行删除之前                                 |
+| useAfterDelete  | void afterDelete(ID id,int count) | deleteOneById(..)执行删除之后                                 |
+
+##  4.SQL构建器在BaseDAO中的使用
+BaseDAO整合了SQL构建器，在继承BaseDAO的类中你可以你可以直接调用 `this.SELECT(..)/this.UPDATE(..) /this.DELETE(..) /this.INSERT(..)` , 注意：不用设置 **namedParameterJdbcTemplate**或者**dataSource**
+
+```java
+@Repository
+public class StudentDAO extends ApplicationBaseDAO<Student, String> {
+    public void queryListByName() {
+        List<Student> list = this.SELECT("*").FROM(this.tableName)
+                                        .WHERE("name").LIKE("'李%'")
+                                        .queryList(Student.class);//查询列表
+    }
+    public void updateById() {
+        this.UPDATE(this.tableName).SET("name","Jakk").WHERE("id").eq("'22222222-2222-2222-2222-222222222222'").update();
+    }
+}
+```
+
+# 【五.通用工具】
+
+## 获取sql的IN列表
+
+~~字符串型（已过时）~~
+```java
+List<String> idList = ...
+String sql = "SELECT * FROM sys_users WHERE id IN "+FastSqlUtils.getStringInClause(idList)
+```
+
+~~数字型（已过时）~~
+```java
+List<Integer> stateList = ...
+String sql = "SELECT * FROM sys_users WHERE state IN "+FastSqlUtils.getIntegerInClause(stateList)
+
+```
+通用
+ 
+`FastSqlUtils.getInClause(Collection<?> collection) `,会根据Collection的类型自动判断使用什么样的分隔符:
+
+```java
+FastSqlUtils.getInClause(Lists.newArrayList(1, 23, 4, 15))  //生成=>(1,23,4,15)
+FastSqlUtils.getInClause(Lists.newArrayList("dog", "people", "food", "apple")) //生成=> ('dog','people','food','apple')
+```
+
+说明：IN功能已经整合到SQL构建器的IN方法
+
+
+## ~~分页查询工具PageTemplate(不建议使用)~~
+分页工具支持mysql/postgresql/oracle
+
+1.使用？占位符
+```java
+ResultPage<TmpWarningCondition> conditionResultPage = new PageTemplate(namedParameterJdbcTemplate).queryPage(
+                        "SELECT * FROM students WHERE name=? AND age=?", 1, 10,
+                        new Object[]{"jack",10},
+                        new BeanPropertyRowMapper<>(TmpWarningCondition.class)
+);
+
+```
+2.使用命名参数
+
+```java
+ResultPage<TmpWarningCondition> conditionResultPage = new PageTemplate(namedParameterJdbcTemplate).queryPage(
+                        "SELECT * FROM students WHERE name=:name AND age=:age", 1, 10,
+                        new BeanPropertySqlParameterSource(dto),,
+                        new BeanPropertyRowMapper<>(TmpWarningCondition.class)
+);
+```
+说明：分页功能已经整合到SQL构建器的分页查询方法
+
+# 【基于SpringBoot的配置项 】
+
+1.配置数据库类型 可选mysql/postgresql/oracle  （影响到BaseDAO/SQLBuilder的默认分页方法）
+```properties
+fastsql.db-type=mysql
 ```
 2.显示sql日志
-```
+```properties
+#显示sql
 logging.level.org.springframework.jdbc.core.JdbcTemplate=debug
+#显示绑定的参数
 logging.level.org.springframework.jdbc.core.StatementCreatorUtils=trace
 ```
-

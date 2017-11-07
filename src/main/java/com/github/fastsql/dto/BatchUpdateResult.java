@@ -1,6 +1,8 @@
 package com.github.fastsql.dto;
 
 /**
+ * 批量修改的结果
+ *
  * @author 陈佳志
  * 2017-10-30
  */

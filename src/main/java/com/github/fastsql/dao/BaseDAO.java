@@ -30,12 +30,11 @@ import static com.github.fastsql.util.StringExtUtils.camelToUnderline;
 @SuppressWarnings({"unchecked", "StringConcatenationInsideStringBufferAppend", "SqlNoDataSourceInspection",
         "ConstantConditions", "WeakerAccess", "Duplicates"})
 public abstract class BaseDAO<E, ID> {
-//        implements IBaseDAO<E, ID>
 
     protected Class<E> entityClass;
     protected Class<ID> idClass;
 
-    protected Logger log;
+    protected Logger log;//TODO 重写
 
     protected String className;
     protected String tableName;
@@ -571,10 +570,7 @@ public abstract class BaseDAO<E, ID> {
     }
 
 
-
-
     ////////////////////////////////////拦截器///////////////////////////
-
 
 
     protected void beforeInsert(E entity) {

@@ -15,7 +15,7 @@ public class ResultPage<T> implements Iterable<T> {
     /**
      * 总长度
      */
-    private int totalElements;
+    private int totalElements; //TODO 考虑改为long?
 
     public ResultPage(List<T> content, int totalElements) {
         this.content = content;
