@@ -2,7 +2,6 @@ package com.github.fastsql.dao;
 
 
 import com.github.fastsql.dto.StudentIndexDTO;
-import com.github.fastsql.dto.DbPageResult;
 import com.github.fastsql.vo.StudentVO;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
