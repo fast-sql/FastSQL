@@ -8,14 +8,11 @@ import com.github.fastsql.mapper.OraclePagingSingleColumnRowMapper;
 import com.github.fastsql.util.FastSqlUtils;
 import com.github.fastsql.util.PageTemplate;
 import com.github.fastsql.util.PageUtils;
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.*;
 import org.springframework.jdbc.core.namedparam.*;
-import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
@@ -50,14 +47,10 @@ public class SQL {
 
     private DatabaseType databaseType;
 
-    public SQL() {
-        userDefaultDbType();//使用默认的数据类类型
+    SQL() {
+
     }
 
-    public SQL(String sql) {
-        userDefaultDbType();//使用默认的数据类类型
-        this.strBuilder.append(sql).append(" ");
-    }
 
     /**
      * 追加任意字符串
@@ -133,7 +126,7 @@ public class SQL {
 
 
     public SQL SELECT(String... columns) {
-        String columnsStr = Joiner.on(",").join(columns);
+        String columnsStr = String.join(",", columns);
         strBuilder.append("SELECT ").append(columnsStr);
         return this;
     }
@@ -147,7 +140,7 @@ public class SQL {
     }
 
     public SQL appendSELECT(String... columns) {
-        String columnsStr = Joiner.on(",").join(columns);
+        String columnsStr = String.join(",", columns);
         strBuilder.append(",").append(columnsStr);
         return this;
     }
@@ -163,7 +156,7 @@ public class SQL {
         if (columns.length == 0) {
             strBuilder.append("INSERT INTO ").append(table);
         } else {
-            String columnsStr = Joiner.on(",").join(columns);
+            String columnsStr = String.join(",", columns);
             strBuilder.append("INSERT INTO ").append(table).append(" (").append(columnsStr).append(")");
         }
 
@@ -171,14 +164,14 @@ public class SQL {
     }
 
     public SQL VALUES(String... columnValues) {
-        String columnsStr = Joiner.on(",").join(columnValues);
+        String columnsStr = String.join(",", columnValues);
         strBuilder.append(" VALUES ").append("(").append(columnsStr).append(")");
         return this;
     }
 
     public SQL INSERT_byMap(String table, Map<String, Object> columnValueMap) {
-        String columnsStr = Joiner.on(",").join(columnValueMap.keySet());
-        String valueStr = ":" + Joiner.on(",:").join(columnValueMap.keySet());
+        String columnsStr = String.join(",", columnValueMap.keySet());
+        String valueStr = ":" + String.join(",:", columnValueMap.keySet());
 
         strBuilder.append("INSERT INTO ").append(table).append(" (").append(columnsStr).append(")");
         strBuilder.append(" VALUES (").append(valueStr);
@@ -190,8 +183,8 @@ public class SQL {
     }
 
     public SQL INSERT_byList(String table, List<String> columns) {
-        String columnsStr = Joiner.on(",").join(columns);
-        String valueStr = ":" + Joiner.on(",:").join(columns);
+        String columnsStr = String.join(",", columns);
+        String valueStr = ":" + String.join(",:", columns);
         strBuilder.append("INSERT INTO ").append(table).append(" (").append(columnsStr).append(")");
         strBuilder.append(" VALUES (").append(valueStr);
         strBuilder.append(")");
@@ -736,43 +729,43 @@ public class SQL {
     }
 
 
-    private SQL userDefaultDbType() {
-        this.databaseType = DatabaseType.POSTGRESQL;
-        return this;
-    }
+//    private SQL userDefaultDbType() {
+//        this.databaseType = DatabaseType.POSTGRESQL;
+//        return this;
+//    }
 
 
     ///////////////other////////////////////////////
-    public SQL template(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
-        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
-        return this;
-    }
+//      SQL template(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+//        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+//        return this;
+//    }
 
-    public SQL template(JdbcTemplate jdbcTemplate) {
+    SQL template(JdbcTemplate jdbcTemplate) {
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
         return this;
     }
 
-    public SQL dataSourceConfig(Driver driver, String url, String username, String password) {
-        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(
-                new SimpleDriverDataSource(driver, url, username, password)
-        );
-        return this;
-    }
-
-    public SQL dataSource(DataSource dataSource) {
-        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(
-                dataSource
-        );
-        return this;
-    }
+//    public SQL dataSourceConfig(Driver driver, String url, String username, String password) {
+//        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(
+//                new SimpleDriverDataSource(driver, url, username, password)
+//        );
+//        return this;
+//    }
+//
+//    public SQL dataSource(DataSource dataSource) {
+//        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(
+//                dataSource
+//        );
+//        return this;
+//    }
 
     public SQL parameter(SqlParameterSource sqlParameterSource) {
         this.sqlParameterSource = sqlParameterSource;
         return this;
     }
 
-    public SQL dbType(DatabaseType databaseType) {
+    public SQL databaseType(DatabaseType databaseType) {
         this.databaseType = databaseType;
         return this;
     }
@@ -1335,7 +1328,7 @@ public class SQL {
         RowMapper<T> rowMapper;
 
         List<Class<?>> classArrayList =
-                Lists.newArrayList(String.class,
+                Arrays.asList(String.class,
                         Integer.class, int.class, Long.class, long.class,
                         Short.class, short.class,
                         BigDecimal.class,
