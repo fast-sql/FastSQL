@@ -1,4 +1,4 @@
-package com.github.fastsql;
+package org.fastsql;
 
 public class FastSQLException extends RuntimeException {
 

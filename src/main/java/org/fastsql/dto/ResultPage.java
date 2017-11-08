@@ -1,4 +1,4 @@
-package com.github.fastsql.dto;
+package org.fastsql.dto;
 
 import java.util.Iterator;
 import java.util.List;

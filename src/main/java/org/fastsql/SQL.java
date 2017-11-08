@@ -1,13 +1,13 @@
-package com.github.fastsql;
+package org.fastsql;
 
-import com.github.fastsql.config.DatabaseType;
-import com.github.fastsql.dto.BatchUpdateResult;
-import com.github.fastsql.dto.ColumnMetaData;
-import com.github.fastsql.dto.ResultPage;
-import com.github.fastsql.mapper.OraclePagingSingleColumnRowMapper;
-import com.github.fastsql.util.FastSqlUtils;
-import com.github.fastsql.util.PageTemplate;
-import com.github.fastsql.util.PageUtils;
+import org.fastsql.config.DatabaseType;
+import org.fastsql.dto.BatchUpdateResult;
+import org.fastsql.dto.ColumnMetaData;
+import org.fastsql.dto.ResultPage;
+import org.fastsql.mapper.OraclePagingSingleColumnRowMapper;
+import org.fastsql.util.FastSqlUtils;
+import org.fastsql.util.PageTemplate;
+import org.fastsql.util.PageUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;

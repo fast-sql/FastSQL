@@ -1,6 +1,6 @@
-package com.github.fastsql.util;
+package org.fastsql.util;
 
-import com.github.fastsql.config.DatabaseType;
+import org.fastsql.config.DatabaseType;
 
 import java.util.Objects;
 

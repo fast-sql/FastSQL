@@ -1,6 +1,6 @@
-package com.github.fastsql;
+package org.fastsql;
 
-import com.github.fastsql.config.DatabaseType;
+import org.fastsql.config.DatabaseType;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;

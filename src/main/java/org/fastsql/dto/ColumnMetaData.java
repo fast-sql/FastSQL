@@ -1,4 +1,4 @@
-package com.github.fastsql.dto;
+package org.fastsql.dto;
 
 /**
  * 表元数据

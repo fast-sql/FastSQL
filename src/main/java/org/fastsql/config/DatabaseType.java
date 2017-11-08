@@ -1,4 +1,4 @@
-package com.github.fastsql.config;
+package org.fastsql.config;
 
 /**
  * 数据库类型

@@ -1,4 +1,4 @@
-package com.github.fastsql.util;
+package org.fastsql.util;
 
 import java.util.ArrayList;
 import java.util.Collection;

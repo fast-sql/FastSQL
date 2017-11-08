@@ -1,4 +1,4 @@
-package com.github.fastsql.mapper;
+package org.fastsql.mapper;
 
 import org.springframework.jdbc.core.RowMapper;
 

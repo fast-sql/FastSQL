@@ -1,4 +1,4 @@
-package com.github.fastsql.util;
+package org.fastsql.util;
 
 /**
  * @author 陈佳志

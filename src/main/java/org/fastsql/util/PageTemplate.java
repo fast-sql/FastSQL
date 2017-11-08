@@ -1,7 +1,7 @@
-package com.github.fastsql.util;
+package org.fastsql.util;
 
-import com.github.fastsql.config.DatabaseType;
-import com.github.fastsql.dto.ResultPage;
+import org.fastsql.config.DatabaseType;
+import org.fastsql.dto.ResultPage;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
