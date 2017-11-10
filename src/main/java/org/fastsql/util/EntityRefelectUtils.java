@@ -18,19 +18,28 @@ import java.util.List;
  */
 public class EntityRefelectUtils {
 
+    /**
+     * 获取指定实体类对应的表名
+     *
+     * @param entityClass 实体类的类型令牌
+     * @return 若指定的类中含有{@code javax.persistence.Table}注解，则返回注解的name字段的值
+     */
     public static String getTableNameFromEntityClass(Class<?> entityClass) {
-        String className = entityClass.getSimpleName();
-
+        //获取类名
+        final String className = entityClass.getSimpleName();
+        //通过将类名由驼峰转为蛇形获取表名
         String tableName = StringExtUtils.camelToUnderline(className);
-
-        Table table = entityClass.getAnnotation(Table.class);
-
+        //获取实体类中的Table注解实例
+        final Table table = entityClass.getAnnotation(Table.class);
+        //判断实例是否非空
         if (table != null) {
+            //若非空，判断元数据name是否不为空字符串
             if (!StringUtils.isEmpty(table.name())) {
+                //若是，则使用name的值覆盖表名
                 tableName = table.name();
             }
         }
-
+        //返回表名
         return tableName;
     }
 
