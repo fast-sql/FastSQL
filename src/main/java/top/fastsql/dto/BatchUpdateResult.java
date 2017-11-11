@@ -1,4 +1,4 @@
-package org.fastsql.dto;
+package top.fastsql.dto;
 
 /**
  * 批量修改的结果

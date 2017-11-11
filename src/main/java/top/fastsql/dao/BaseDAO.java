@@ -1,12 +1,12 @@
-package org.fastsql.dao;
+package top.fastsql.dao;
 
-import org.fastsql.SQL;
-import org.fastsql.SQLFactory;
-import org.fastsql.config.DatabaseType;
-import org.fastsql.dto.ResultPage;
-import org.fastsql.util.EntityRefelectUtils;
-import org.fastsql.util.PageUtils;
-import org.fastsql.util.StringExtUtils;
+import top.fastsql.SQL;
+import top.fastsql.SQLFactory;
+import top.fastsql.config.DatabaseType;
+import top.fastsql.dto.ResultPage;
+import top.fastsql.util.EntityRefelectUtils;
+import top.fastsql.util.PageUtils;
+import top.fastsql.util.StringExtUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.fastsql.util.StringExtUtils.camelToUnderline;
+import static top.fastsql.util.StringExtUtils.camelToUnderline;
 
 /**
  * 基础DAO 提供CRUD等操作

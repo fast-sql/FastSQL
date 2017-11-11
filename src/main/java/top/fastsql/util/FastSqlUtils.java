@@ -1,4 +1,4 @@
-package org.fastsql.util;
+package top.fastsql.util;
 
 import java.util.ArrayList;
 import java.util.Collection;

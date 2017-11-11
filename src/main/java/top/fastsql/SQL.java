@@ -1,13 +1,13 @@
-package org.fastsql;
+package top.fastsql;
 
-import org.fastsql.config.DatabaseType;
-import org.fastsql.dto.BatchUpdateResult;
-import org.fastsql.dto.ColumnMetaData;
-import org.fastsql.dto.ResultPage;
-import org.fastsql.mapper.OraclePagingSingleColumnRowMapper;
-import org.fastsql.util.FastSqlUtils;
-import org.fastsql.util.PageTemplate;
-import org.fastsql.util.PageUtils;
+import top.fastsql.config.DatabaseType;
+import top.fastsql.dto.BatchUpdateResult;
+import top.fastsql.dto.ColumnMetaData;
+import top.fastsql.dto.ResultPage;
+import top.fastsql.mapper.OraclePagingSingleColumnRowMapper;
+import top.fastsql.util.FastSqlUtils;
+import top.fastsql.util.PageTemplate;
+import top.fastsql.util.PageUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;

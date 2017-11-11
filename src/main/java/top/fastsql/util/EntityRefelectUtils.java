@@ -1,4 +1,4 @@
-package org.fastsql.util;
+package top.fastsql.util;
 
 import org.springframework.util.StringUtils;
 

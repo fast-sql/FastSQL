@@ -1,7 +1,7 @@
-package org.fastsql.util;
+package top.fastsql.util;
 
-import org.fastsql.config.DatabaseType;
-import org.fastsql.dto.ResultPage;
+import top.fastsql.config.DatabaseType;
+import top.fastsql.dto.ResultPage;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;

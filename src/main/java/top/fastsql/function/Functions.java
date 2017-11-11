@@ -1,4 +1,4 @@
-package org.fastsql.function;
+package top.fastsql.function;
 
 /**
  * 数据库函数

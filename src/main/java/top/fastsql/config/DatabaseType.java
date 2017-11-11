@@ -1,4 +1,4 @@
-package org.fastsql.config;
+package top.fastsql.config;
 
 /**
  * 数据库类型

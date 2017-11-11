@@ -1,6 +1,6 @@
-package org.fastsql.util;
+package top.fastsql.util;
 
-import org.fastsql.config.DatabaseType;
+import top.fastsql.config.DatabaseType;
 
 import java.util.Objects;
 
