@@ -26,22 +26,45 @@ compile 'top.fastsql:fastsql:x.x.x'
 ```
 
 ## 构建 SQLFactory
+你可以直接从 Java 程序构建一个 SQLFactory ，至少需要一个 DataSource 。
 ```
-DataSource dataSource = new SimpleDriverDataSource();
+//新建一个DataSource（这里使用了Spring-Jdbc的SimpleDriverDataSource）
+DataSource dataSource = new SimpleDriverDataSource([传入url,username等]);
 
 SQLFactory sqlFactory = new SQLFactory();
 sqlFactory.setDataSource(dataSource);
 ```
 
+## 从 SQLFactory 中获取 SQL
 
->撰写中...
+既然有了 SQLFactory ，我们就可以从中获得 SQL 的实例了。SQL 完全包含了面向数据库执行 sql 命令所需的所有方法。
+你可以通过 SQL 实例来构建并直接执行 SQL 语句。例如：
+```
+SQL sql = sqlFactory.createSQL();
+Student student = sql.SELECT("*").FROM("student").WHERE("id=101").queryOne(Student.class);
+```
+## 作用域（Scope）和生命周期
 
-# 2.作为SQL构建器使用
+**SQLFactory**
+
+SQLFactory 一旦被创建就应该在应用的运行期间一直存在，没有任何理由对它进行清除或重建。
+使用 SQLFactory 的最佳实践是在应用运行期间不要重复创建多次，多次重建 SQLFactory 被视为一种代码“坏味道（bad smell）”。
+因此 SQLFactory 的最佳作用域是应用作用域。有很多方法可以做到，最简单的就是使用单例模式或者静态单例模式。
+
+**SQL**
+
+SQL 实例是有状态的 ，也不是线程安全的，因此是不能被共享的。绝对不能将 SQL 实例的引用放在一个类的静态域，甚至一个类的实例变量也不行。 
+每执行SQL语句一次，都需要构建一个 SQL 实例，返回一个结果。
+
+# 3.SQLFactory 配置
+
+
+# 4.SQL类作为sql语句构建器使用
 Java程序员面对的最痛苦的事情之一就是在Java代码中嵌入SQL语句。FastSQL提供`cn.com.zdht.pavilion.FastSQL.SQL`类和`cn.com.zdht.pavilion.FastSQL.SQL`类简化你的构建过程。
 
 
 
-## 1.数据准备 
+## 4.1.数据准备 
 
 在mysql数据库中新建表：
 
@@ -80,7 +103,7 @@ INSERT INTO `score` VALUES ('37d0d684-95df-40a6-a9ed-d2b97aa951fc', '11111111-11
 ```
 
 
-## 2.构建查询语句
+## 4.2.构建查询语句
 
 ### 生成SQL字符串
 
@@ -289,7 +312,7 @@ new SQL().SELECT("student")
 ifNotEmpty?
 SELECT student WHERE id=:id AND name=:name AND name  IN ('小明','小红')
 ```
-##  3.构建插入语句
+##  4.3.构建插入语句
 使用 INSERT_INTO 和 VALUES
 ```java
 //使用列
@@ -302,7 +325,7 @@ new SQL().INSERT_INTO("student").VALUES(":id", ":name", ":age").build();
 //=>INSERT INTO student VALUES (:id,:name,:age)
 ```
 
-##  4.构建更新语句
+##  4.4.构建更新语句
 
 SET(String column, String value) :SET关键字
 
@@ -314,13 +337,13 @@ new SQL().UPDATE("student").SET("name","'Jack'").setOne("age","9").WHERE("name")
 //=>  UPDATE student SET name='Jack',age=9 WHERE name = 'Mike'              
 ```
 
-##  5.构建删除语句
+##  4.5.构建删除语句
 ```java
 new SQL().DELETE_FROM("student").WHERE("id=:id").build();
 //=>DELETE FROM student WHERE id=:id                
 ```
 
-## 6.分页功能
+## 4.6.分页功能
 **使用原生关键字进行分页**
 ```java
 new SQL().SELECT("*").FROM("student").LIMIT(10).buildAndPrintSQL();
@@ -350,7 +373,7 @@ SQL.SELECT("*").FROM("student").databaseType(DbType.MY_SQL).rows(2,5).buildAndPr
 new SQL().SELECT("*").FROM("student").count().buildAndPrintSQL();
 ```
 
-## 7.更多关键字
+## 4.7.更多关键字
 
 
 | 方法                                         | 示例                   | 说明                    |
@@ -398,13 +421,13 @@ new SQL().SELECT("*").FROM("student").count().buildAndPrintSQL();
 | HAVING(String condition)                     |                        |                         |
 
 
-# 3.SQL构建器的执行功能
+# 5.SQL构建器的执行功能
 
 SQL构建器支持SpringJDBC的NamedParameterJdbcTemplate类，并简化了它的API的使用：
 
 
 
-## 1.设置查询模板
+## 5.1.设置查询模板
 ```java
 //创建任意DataSource对象（这里使用了spring自带的数据源SimpleDriverDataSource）
 DataSource dataSource = new SimpleDriverDataSource(
@@ -432,7 +455,7 @@ new SQL().SELECT("name", "age")
     .queryList(StudVO.class);     
 ```
 
-##  2.设置参数
+##  5.2.设置参数
 FastSQL支持多种传入命名参数的方法：
 
 - `parameter(SqlParameterSource sqlParameterSource)` 支持传入SqlParameterSource类型的参数（兼容spring-jdbc）
@@ -483,7 +506,7 @@ SQL.INSERT_INTO("student", "id", "name", "age")
     .update();
 ```
 
-##  3.基本查询：
+##  5.3.基本查询：
 
 **查询方法解析**
 - `T queryOne(Class<T> returnClassType)`查询单行结果封装为一个对象,参数可以是可以为String/Integer/Long/Short/BigDecimal/BigInteger/Float/Double/Boolean或者任意POJO的class。
@@ -549,7 +572,7 @@ ResultPage<StudVO> studVOResultPage =new SQL().SELECT("name", "age")
 注意2：queryPage返回的是ResultPage对象
 
 
-## 4.增删改操作：
+## 5.4.增删改操作：
 使用update方法
 ```java
 //插入
@@ -574,7 +597,7 @@ new SQL().DELETE_FROM("student")
         .update();
 ```
 
-## 5.获取数据库元信息
+## 5.5.获取数据库元信息
 ```java
 //表名称
 List<String> tableNames = new SQL().dataSource(dataSource).getTableNames();
@@ -585,7 +608,7 @@ List<ColumnMetaData> columnMetaDataList = new SQL().dataSource(dataSource).getCo
 
 ```
 
-## 6.事务管理
+## 5.6.事务管理
 
 手动事务：FastSQL事务管理使用Spring的工具类`org.springframework.jdbc.datasource.DataSourceUtils`
 ```java
@@ -609,9 +632,9 @@ connection.commit();//提交事务
 
  
 
-# 4.BaseDAO
+# 6.BaseDAO
 
-## 1.数据准备
+## 6.1.数据准备
 ### Entity实体类
 注解如下 
 
@@ -680,7 +703,7 @@ public class Test  {
 }
 ```
  
-## 2.基本使用方法 CRUD 
+## 6.2.基本使用方法 CRUD 
 CRUD 是四种数据操作的简称：C 表示创建，R 表示读取，U 表示更新，D 表示删除。BaseDAO 自动创建了处理数据表中数据的方法。
 
 ### 数据插入
@@ -822,7 +845,7 @@ public class BizPhotoDAO extends ApplicationBaseDAO<BizPhotoPO, String> {
 
 方法   `int count()` 查询表总数量
 
-## 3.定制你的ApplicationBaseDAO
+##  定制你的ApplicationBaseDAO
 建议在你的程序中实现ApplicationBaseDAO，可以
 
 1. 定制一些通用方法
@@ -945,7 +968,7 @@ count 参数表示执行成功的条数
 | useBeforeDelete | beforeDelete(ID id)               | deleteOneById(..)执行删除之前                                 |
 | useAfterDelete  | void afterDelete(ID id,int count) | deleteOneById(..)执行删除之后                                 |
 
-##  4.SQL构建器在BaseDAO中的使用
+##   SQL构建器在BaseDAO中的使用
 BaseDAO整合了SQL构建器，在继承BaseDAO的类中你可以你可以直接调用 `this.SELECT(..)/this.UPDATE(..) /this.DELETE(..) /this.INSERT(..)` , 注意：不用设置 **namedParameterJdbcTemplate**或者**dataSource**
 
 ```java
@@ -962,7 +985,7 @@ public class StudentDAO extends ApplicationBaseDAO<Student, String> {
 }
 ```
 
-# 5.通用工具
+#  通用工具
 
 ## 获取sql的IN列表
 
@@ -978,7 +1001,7 @@ FastSQLUtils.getInClause(Lists.newArrayList("dog", "people", "food", "apple")) /
 说明：IN功能已经整合到SQL构建器的IN方法
 
 
-# 6.配置项 
+#  配置项 
 显示sql日志
 ```properties
 #显示sql
