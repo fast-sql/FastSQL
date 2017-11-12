@@ -1,5 +1,11 @@
 package top.fastsql;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.*;
+import org.springframework.jdbc.core.namedparam.*;
+import org.springframework.util.StringUtils;
 import top.fastsql.config.DatabaseType;
 import top.fastsql.dto.BatchUpdateResult;
 import top.fastsql.dto.ColumnMetaData;
@@ -8,12 +14,6 @@ import top.fastsql.mapper.OraclePagingSingleColumnRowMapper;
 import top.fastsql.util.FastSqlUtils;
 import top.fastsql.util.PageTemplate;
 import top.fastsql.util.PageUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.*;
-import org.springframework.jdbc.core.namedparam.*;
-import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
 import java.math.BigDecimal;
@@ -467,6 +467,8 @@ public class SQL {
         return this;
     }
 
+    //////////////////////////////////IN///////////////////////////////////////
+
     public SQL IN() {
         strBuilder.append(" IN ");
         return this;
@@ -523,22 +525,11 @@ public class SQL {
         return this;
     }
 
-    public SQL LIKE(String value) {
-        strBuilder.append(" LIKE ").append(value);
-        return this;
-    }
 
-
-    public SQL NOT_LIKE(String value) {
-        strBuilder.append(" LIKE ").append(value);
-        return this;
-    }
-
-
-    //-----------------  operator --------------------------------
+    //-----------------  operator method--------------------------------
 
     /**
-     * =
+     * Generate equal operator and append the param
      */
     public SQL eq(String value) {
         strBuilder.append(" = ").append(value);
@@ -546,62 +537,58 @@ public class SQL {
     }
 
     /**
-     * 根据类型判断如何拼接SQL
-     *
-     * @param value 值
-     * @see SQL#eq(String)
+     * Generate equal operator
      */
-    public SQL eqByType(Object value) {
-        if (value == null) {
-            strBuilder.append(" IS NULL");
-        } else {
-            //TODO 1.日期 还不支持oracle 使用 this.databaseType 判断
-            strBuilder.append(" = ").append(getStrByType(value));
-//            getStrByType(value);
-        }
+    public SQL eq() {
+        strBuilder.append(" = ");
         return this;
-    }
-
-    private String getStrByType(Object value) {
-        if (value instanceof Number) {
-            return value + "";
-        } else if (value instanceof java.util.Date) {
-            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(value);
-        } else if (value instanceof LocalDateTime) {
-            return ((LocalDateTime) value).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        } else if (value instanceof LocalDate) {
-            return ((LocalDate) value).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        } else if (value instanceof String) {
-            return "'" + value + "'";
-        } else {
-            return "'" + value + "'";
-        }
     }
 
 
     /**
-     * >
+     * Generate '>' operator and append the param
      */
     public SQL gt(String value) {
         strBuilder.append(" > ").append(value);
         return this;
     }
 
+    /**
+     * Generate '>' operator
+     */
+    public SQL gt() {
+        strBuilder.append(" > ");
+        return this;
+    }
+
 
     /**
-     * >=
+     * >= operator
      */
     public SQL gtEq(String value) {
         strBuilder.append(" >= ").append(value);
         return this;
     }
 
+    /**
+     * >= operator
+     */
+    public SQL gtEq() {
+        strBuilder.append(" >= ");
+        return this;
+    }
+
 
     /**
-     * <
+     * <= operator
      */
     public SQL lt(String value) {
         strBuilder.append(" < ").append(value);
+        return this;
+    }
+
+    public SQL lt() {
+        strBuilder.append(" < ");
         return this;
     }
 
@@ -614,8 +601,13 @@ public class SQL {
         return this;
     }
 
-
-    // ------------------------------------------------------
+    /**
+     *
+     */
+    public SQL ltEq() {
+        strBuilder.append(" <= ");
+        return this;
+    }
 
     public SQL IS_NULL() {
         strBuilder.append(" IS NULL");
@@ -632,6 +624,77 @@ public class SQL {
         strBuilder.append(" != ").append(value);
         return this;
     }
+
+    public SQL nEq() {
+        strBuilder.append(" != ");
+        return this;
+    }
+
+    public SQL LIKE(String value) {
+        strBuilder.append(" LIKE ").append(value);
+        return this;
+    }
+
+    public SQL LIKE() {
+        strBuilder.append(" LIKE ");
+        return this;
+    }
+
+
+    public SQL NOT_LIKE(String value) {
+        strBuilder.append(" LIKE ").append(value);
+        return this;
+    }
+
+    public SQL NOT_LIKE() {
+        strBuilder.append(" LIKE ");
+        return this;
+    }
+
+
+    /**
+     * 根据类型判断如何拼接SQL
+     *
+     * @param value 值
+     * @see SQL#eq(String)
+     */
+    public SQL eqByType(Object value) {
+        if (value == null) {
+            strBuilder.append(" IS NULL");
+        } else {
+            //TODO 1.日期 还不支持oracle 使用 this.databaseType 判断
+            strBuilder.append(" = ").append(getStringByType(value));
+        }
+        return this;
+    }
+
+    public SQL byType(Object value) {
+        if (value == null) {
+            strBuilder.append(" NULL");
+        } else {
+            //TODO 1.日期 还不支持oracle 使用 this.databaseType 判断
+            strBuilder.append(getStringByType(value));
+        }
+        return this;
+    }
+
+    private String getStringByType(Object value) {
+        if (value instanceof Number) {
+            return value + "";
+        } else if (value instanceof java.util.Date) {
+            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(value);
+        } else if (value instanceof LocalDateTime) {
+            return ((LocalDateTime) value).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        } else if (value instanceof LocalDate) {
+            return ((LocalDate) value).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        } else if (value instanceof CharSequence) {
+            return "'" + value + "'";
+        } else {
+            return "'" + value + "'";
+        }
+    }
+
+    ///////////////////////////分页关键字///////////////////////////
 
 
     public SQL LIMIT(Integer offset, Integer rows) {
@@ -736,13 +799,10 @@ public class SQL {
     }
 
 
-
-
     SQL template(JdbcTemplate jdbcTemplate) {
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
         return this;
     }
-
 
 
     public SQL parameter(SqlParameterSource sqlParameterSource) {

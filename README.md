@@ -121,8 +121,20 @@ sqlFactory.createSQL()
 - 这些方法仅仅是字符串连接：`eq("1")`生成` = 1` ，`eq("'1'")`会生成` = '1'`。
 - 同样提供无参数方法 eq()/gt()/... 不会追加参数。
 
-### `byType(Object)`方法 ：
+### 操作符方法 结合 byType(Object)方法：
+
+操作符方法仅仅是字符串连接，`byType(Object)`方法会根据类型生成你想要的结果，上面的例子改写如下
+```java
+sqlFactory.createSQL()
+                .SELECT("name", "age")
+                .FROM("student")
+                .WHERE("age").lt().byType(10)
+                .AND("name").eq().byType("小明")
+                .build();
+//==>SELECT name,age FROM student WHERE age < 10 AND name = '小明'
+```
+eq().byType("小明") 也可简写为 eqByType("小明")
 
 
  
-/////////////////////////////////未完待续///////////////////////////////
+#  /////////////////////////////////未完待续///////////////////////////////

@@ -28,9 +28,9 @@ public class SQLFactory {
     private boolean resultsMapCaseInsensitive = false;
 
     public SQL createSQL() {
-        if (dataSource == null) {
-            throw new FastSQLException("SQLFactory的dataSource不能为null");
-        }
+//        if (dataSource == null) {
+//            throw new FastSQLException("SQLFactory的dataSource不能为null");
+//        }
         JdbcTemplate jdbcTemplate = new JdbcTemplate();
         jdbcTemplate.setIgnoreWarnings(ignoreWarnings);
         jdbcTemplate.setFetchSize(fetchSize);
