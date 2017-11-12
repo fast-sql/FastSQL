@@ -1,6 +1,6 @@
 package top.fastsql.util;
 
-import top.fastsql.config.DatabaseType;
+import top.fastsql.config.DataSourceType;
 
 import java.util.Objects;
 
@@ -11,16 +11,16 @@ public class PageUtils {
 
 //    public static String getRowsSQL(String sql, int pageNumber, int perPageSize) {
 //        //没指定dbType，使用FastSqlConfig配置项中默认的
-//        return getRowsSQL(sql, pageNumber, perPageSize, FastSqlConfig.databaseType);
+//        return getRowsSQL(sql, pageNumber, perPageSize, FastSqlConfig.dataSourceType);
 //    }
 
 
-    public static String getRowsSQL(String sql, int pageNumber, int perPageSize, DatabaseType databaseType) {
-        if (Objects.equals(databaseType, DatabaseType.MY_SQL)) {
+    public static String getRowsSQL(String sql, int pageNumber, int perPageSize, DataSourceType dataSourceType) {
+        if (Objects.equals(dataSourceType, DataSourceType.MY_SQL)) {
             return mysql(sql, pageNumber, perPageSize);
-        } else if (Objects.equals(databaseType, DatabaseType.POSTGRESQL)) {
+        } else if (Objects.equals(dataSourceType, DataSourceType.POSTGRESQL)) {
             return postgresql(sql, pageNumber, perPageSize);
-        } else if (Objects.equals(databaseType, DatabaseType.ORACLE)) {
+        } else if (Objects.equals(dataSourceType, DataSourceType.ORACLE)) {
             return oracle(sql, pageNumber, perPageSize);
         } else {
             throw new RuntimeException("不支持的数据库类型");
@@ -64,9 +64,9 @@ public class PageUtils {
         int endRowNum = limit + perPageSize;
 
         return "SELECT * FROM" +
-                "  (  " +
-                "     SELECT t.*, ROWNUM RN FROM  ( " + sql + " ) t  WHERE ROWNUM  <= " + endRowNum +
-                "   ) " +
+                " (" +
+                " SELECT t.*, ROWNUM RN FROM ( " + sql + " ) t WHERE ROWNUM <= " + endRowNum +
+                " ) " +
                 "WHERE RN >= " + limit;
     }
 }

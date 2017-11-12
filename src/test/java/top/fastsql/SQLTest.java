@@ -1,6 +1,7 @@
 package top.fastsql;
 
 import org.junit.Test;
+import top.fastsql.config.DataSourceType;
 
 public class SQLTest {
 
@@ -29,6 +30,14 @@ public class SQLTest {
                 .FROM("student")
                 .WHERE("name").IN(new Object[]{"小红", "小明"})
                 .build();
+    }
+
+    @Test
+    public void pageSQLTest() {
+        sqlFactory.setLogSQLWhenBuild(true);
+
+        sqlFactory.setDataSourceType(DataSourceType.ORACLE);
+        sqlFactory.createSQL().SELECT("*").FROM("student").pageThis(1,10).build();
     }
 
 

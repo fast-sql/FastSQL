@@ -328,11 +328,11 @@ SELECT * FROM student LIMIT 10 OFFSET 5
 //row方法第一个参数是第几页(从1开始)，第二个参数表示每页几条（从1开始），第三个参数可选，为数据库类型
 
 SQL.SELECT("*").FROM("student").rows(1,10).buildAndPrintSQL();//根据配置项来决定使用哪一种数据库分页方法
-SQL.SELECT("*").FROM("student").databaseType(DbType.POSTGRSQL).rows(2,5).buildAndPrintSQL();//postgresql分页
-SQL.SELECT("*").FROM("student").databaseType(DbType.ORACLE).rows(2,5).buildAndPrintSQL();//oracle
-SQL.SELECT("*").FROM("student").databaseType(DbType.MY_SQL).rows(2,5).buildAndPrintSQL();//mysql分页
+SQL.SELECT("*").FROM("student").dataSourceType(DbType.POSTGRSQL).rows(2,5).buildAndPrintSQL();//postgresql分页
+SQL.SELECT("*").FROM("student").dataSourceType(DbType.ORACLE).rows(2,5).buildAndPrintSQL();//oracle
+SQL.SELECT("*").FROM("student").dataSourceType(DbType.MY_SQL).rows(2,5).buildAndPrintSQL();//mysql分页
 ```
-注意：如果不指定 databaseType，将会使用 FastSQLConfig#databaseType 的默认类型进行分页;
+注意：如果不指定 dataSourceType，将会使用 FastSQLConfig#dataSourceType 的默认类型进行分页;
 
 **获取数量语句**
 ```java
@@ -871,7 +871,7 @@ public abstract class ApplicationBaseDAO<E, ID> extends BaseDAO<E, ID> {
         this.variableParameterLimit = 3;
         
         //修改默认的类型，1.集成这个类的子类分页方法使用 2.this.SELECT 分页使用
-        this.databaseType = DbType.MY_SQL; 
+        this.dataSourceType = DbType.MY_SQL; 
     }
 }
 ```
@@ -885,8 +885,8 @@ public abstract class OracleApplicationBaseDAO<E, ID> extends BaseDAO<E, ID> {
       @Override
       protected void setNamedParameterJdbcTemplate(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
           super.setNamedParameterJdbcTemplate(namedParameterJdbcTemplate);
-          databaseType
- databaseType
+          dataSourceType
+ dataSourceType
 }
 public abstract class MySqlApplicationBaseDAO<E, ID> extends BaseDAO<E, ID> {
       //重写setNamedParameterJdbcTemplate方法
@@ -895,9 +895,9 @@ public abstract class MySqlApplicationBaseDAO<E, ID> extends BaseDAO<E, ID> {
       @Override
       protected void setNamedParameterJdbcTemplate(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
           super.setNamedParameterJdbcTemplate(namedParameterJdbcTemplate);
-          databaseType
+          dataSourceType
       }}
-}databaseType### 设置BaseDAO中的拦截器
+}dataSourceType### 设置BaseDAO中的拦截器
 
 ```java
 public abstract class ApplicationBaseDAO<E, ID> extends BaseDAO<E, ID> {

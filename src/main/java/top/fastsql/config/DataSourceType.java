@@ -6,21 +6,21 @@ package top.fastsql.config;
  * @author 陈佳志
  * 2017-08-17
  */
-public enum DatabaseType {
+public enum DataSourceType {
     MY_SQL("mysql"),
     POSTGRESQL("postgresql"),
     ORACLE("oracle");
 
     public String code;
 
-    DatabaseType(String code) {
+    DataSourceType(String code) {
         this.code = code;
     }
 
 
-    public static DatabaseType getByCode(String paramCode) {
-        DatabaseType[] values = DatabaseType.values();
-        for (DatabaseType value : values) {
+    public static DataSourceType getByCode(String paramCode) {
+        DataSourceType[] values = DataSourceType.values();
+        for (DataSourceType value : values) {
             if (value.code.equals(paramCode)) {
                 return value;
             }

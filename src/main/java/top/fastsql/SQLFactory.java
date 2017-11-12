@@ -1,7 +1,7 @@
 package top.fastsql;
 
-import top.fastsql.config.DatabaseType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import top.fastsql.config.DataSourceType;
 
 import javax.sql.DataSource;
 
@@ -11,7 +11,7 @@ import javax.sql.DataSource;
 public class SQLFactory {
     private DataSource dataSource;
 
-    private DatabaseType databaseType = DatabaseType.POSTGRESQL;
+    private DataSourceType dataSourceType = DataSourceType.POSTGRESQL;
 
     private boolean ignoreWarnings = true;
 
@@ -27,6 +27,8 @@ public class SQLFactory {
 
     private boolean resultsMapCaseInsensitive = false;
 
+    private boolean logSQLWhenBuild = false;
+
     public SQL createSQL() {
 //        if (dataSource == null) {
 //            throw new FastSQLException("SQLFactory的dataSource不能为null");
@@ -39,7 +41,7 @@ public class SQLFactory {
         jdbcTemplate.setSkipResultsProcessing(skipResultsProcessing);
         jdbcTemplate.setSkipUndeclaredResults(skipUndeclaredResults);
         jdbcTemplate.setResultsMapCaseInsensitive(resultsMapCaseInsensitive);
-        return new SQL().template(jdbcTemplate).databaseType(databaseType);
+        return new SQL(jdbcTemplate, dataSourceType, logSQLWhenBuild);
     }
 
 
@@ -51,12 +53,12 @@ public class SQLFactory {
         this.dataSource = dataSource;
     }
 
-    public DatabaseType getDatabaseType() {
-        return databaseType;
+    public DataSourceType getDataSourceType() {
+        return dataSourceType;
     }
 
-    public void setDatabaseType(DatabaseType databaseType) {
-        this.databaseType = databaseType;
+    public void setDataSourceType(DataSourceType dataSourceType) {
+        this.dataSourceType = dataSourceType;
     }
 
     public boolean isIgnoreWarnings() {
@@ -113,5 +115,13 @@ public class SQLFactory {
 
     public void setResultsMapCaseInsensitive(boolean resultsMapCaseInsensitive) {
         this.resultsMapCaseInsensitive = resultsMapCaseInsensitive;
+    }
+
+    public boolean isLogSQLWhenBuild() {
+        return logSQLWhenBuild;
+    }
+
+    public void setLogSQLWhenBuild(boolean logSQLWhenBuild) {
+        this.logSQLWhenBuild = logSQLWhenBuild;
     }
 }

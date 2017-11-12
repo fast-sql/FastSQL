@@ -6,7 +6,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.*;
 import org.springframework.jdbc.core.namedparam.*;
 import org.springframework.util.StringUtils;
-import top.fastsql.config.DatabaseType;
+import top.fastsql.config.DataSourceType;
 import top.fastsql.dto.BatchUpdateResult;
 import top.fastsql.dto.ColumnMetaData;
 import top.fastsql.dto.ResultPage;
@@ -41,14 +41,22 @@ public class SQL {
 
     private boolean useClassicJdbcTemplate = false;
 
+    private boolean logSqlWhenBuild = false;
+
     private SqlParameterSource sqlParameterSource = new EmptySqlParameterSource();
 
     private Object[] varParams;
 
-    private DatabaseType databaseType;
+    private DataSourceType dataSourceType;
 
-    SQL() {
-
+    //    SQL(JdbcTemplate jdbcTemplate, DataSourceType dataSourceType) {
+//        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
+//        this.dataSourceType = dataSourceType;
+//    }
+    SQL(JdbcTemplate jdbcTemplate, DataSourceType dataSourceType, boolean logSqlWhenBuild) {
+        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
+        this.dataSourceType = dataSourceType;
+        this.logSqlWhenBuild = logSqlWhenBuild;
     }
 
 
@@ -113,8 +121,8 @@ public class SQL {
     /**
      * 生成左括号和右括号
      */
-    public SQL $_$(String sql) {
-        strBuilder.append(" (").append(sql).append(")");
+    public SQL $_$(String sqlStr) {
+        strBuilder.append(" (").append(sqlStr).append(")");
         return this;
     }
 
@@ -145,6 +153,11 @@ public class SQL {
         return this;
     }
 
+    public SQL AS(String value) {
+        strBuilder.append(" AS ").append(value);
+        return this;
+    }
+
 
     public SQL DELETE_FROM(String table) {
         strBuilder.append("DELETE FROM ").append(table);
@@ -163,62 +176,40 @@ public class SQL {
         return this;
     }
 
+    public SQL INSERT_INTO(String table, List<String> columns) {
+        String columnsStr = String.join(",", columns);
+        strBuilder.append("INSERT INTO ").append(table).append(" (").append(columnsStr).append(")");
+        return this;
+    }
+
     public SQL VALUES(String... columnValues) {
         String columnsStr = String.join(",", columnValues);
         strBuilder.append(" VALUES ").append("(").append(columnsStr).append(")");
         return this;
     }
 
-    public SQL INSERT_byMap(String table, Map<String, Object> columnValueMap) {
-        String columnsStr = String.join(",", columnValueMap.keySet());
-        String valueStr = ":" + String.join(",:", columnValueMap.keySet());
-
-        strBuilder.append("INSERT INTO ").append(table).append(" (").append(columnsStr).append(")");
-        strBuilder.append(" VALUES (").append(valueStr);
-
-        strBuilder.append(")");
-
-        this.sqlParameterSource = new MapSqlParameterSource(columnValueMap);
+    public SQL VALUES(List<String> columnValues) {
+        String columnsStr = String.join(",", columnValues);
+        strBuilder.append(" VALUES ").append("(").append(columnsStr).append(")");
         return this;
     }
 
-    public SQL INSERT_byList(String table, List<String> columns) {
-        String columnsStr = String.join(",", columns);
-        String valueStr = ":" + String.join(",:", columns);
-        strBuilder.append("INSERT INTO ").append(table).append(" (").append(columnsStr).append(")");
-        strBuilder.append(" VALUES (").append(valueStr);
-        strBuilder.append(")");
-        return this;
+
+    public SQL VALUES_byType(Object... columnValues) {
+        return this.VALUES_byType(Arrays.asList(columnValues));
     }
 
-    public SQL UPDATE_byMap(String table, Map<String, Object> columnValueMap) {
-        strBuilder.append("UPDATE ").append(table);
-
+    public SQL VALUES_byType(List<Object> columnValues) {
+        strBuilder.append(" VALUES ").append("(");
         int i = 0;
-        for (String key : columnValueMap.keySet()) {
-            if (i == 0) {
-                strBuilder.append(" SET ").append(key).append("=:").append(key);
-            } else {
-                strBuilder.append(",").append(key).append("=:").append(key);
+        for (Object value : columnValues) {
+            if (i != 0) {
+                strBuilder.append(",");
             }
+            strBuilder.append(getStringByType(value));
             i++;
         }
-
-        this.sqlParameterSource = new MapSqlParameterSource(columnValueMap);
-        return this;
-    }
-
-    public SQL UPDATE_byList(String table, List<String> columns) {
-        strBuilder.append("UPDATE ").append(table);
-        int i = 0;
-        for (String key : columns) {
-            if (i == 0) {
-                strBuilder.append(" SET ").append(key).append("=:").append(key);
-            } else {
-                strBuilder.append(", ").append(key).append("=:").append(key);
-            }
-            i++;
-        }
+        strBuilder.append(")");
         return this;
     }
 
@@ -231,20 +222,26 @@ public class SQL {
 
     public SQL SET(String... columnOrValue) {
         strBuilder.append(" SET ");
-
         for (int i = 0; i < columnOrValue.length; i = i + 2) {
             if (i != 0) {
                 strBuilder.append(",");
             }
-            strBuilder.append(columnOrValue[i]).append("=").append(columnOrValue[i + 1]);
+            strBuilder.append(columnOrValue[i]).append(" = ").append(columnOrValue[i + 1]);
         }
         return this;
     }
 
-    public SQL append_SET(String column, String value) {
-        strBuilder.append(",").append(column).append("=").append(value);
+    public SQL SET_byType(String... columnOrValue) {
+        strBuilder.append(" SET ");
+        for (int i = 0; i < columnOrValue.length; i = i + 2) {
+            if (i != 0) {
+                strBuilder.append(",");
+            }
+            strBuilder.append(columnOrValue[i]).append(" = ").append(getStringByType(columnOrValue[i + 1]));
+        }
         return this;
     }
+
 
     /////////////////////////////////////
     public SQL FROM(String table) {
@@ -366,15 +363,6 @@ public class SQL {
         return this;
     }
 
-//    public SQL AND$_$(String condition) {
-//        strBuilder.append(" AND (").append(condition).append(")");
-//        return this;
-//    }
-
-//    public SQL AND$_$(SQL SQL) {
-//        strBuilder.append(" AND (").append(SQL.build()).append(")");
-//        return this;
-//    }
 
     public SQL OR(String condition) {
         strBuilder.append(" OR ").append(condition);
@@ -387,75 +375,17 @@ public class SQL {
         return this;
     }
 
-    public SQL ORDER_BY(String condition) {
-        strBuilder.append(" ORDER BY ").append(condition);
-        return this;
-    }
-
-    public SQL ORDER_BY(String condition1, String condition2) {
-        strBuilder.append(" ORDER BY ")
-                .append(condition1)
-                .append(",")
-                .append(condition2);
-        return this;
-    }
-
-    public SQL ORDER_BY(String condition1, String condition2, String condition3) {
-        strBuilder.append(" ORDER BY ")
-                .append(condition1)
-                .append(",")
-                .append(condition2)
-                .append(",")
-                .append(condition3);
-        return this;
-    }
-
-    public SQL ORDER_BY(String condition1, String condition2, String condition3, String condition4) {
-        strBuilder.append(" ORDER BY ")
-                .append(condition1)
-                .append(",")
-                .append(condition2)
-                .append(",")
-                .append(condition3).append(",")
-                .append(condition4);
-        return this;
-    }
-
-    public SQL GROUP_BY(String condition) {
-        strBuilder.append(" GROUP BY ").append(condition);
-        return this;
-    }
-
-    public SQL GROUP_BY(String condition1, String condition2) {
-        strBuilder.append(" GROUP BY ").append(condition1).append(",").append(condition2);
-        return this;
-    }
-
-    public SQL GROUP_BY(String condition1, String condition2, String condition3) {
-        strBuilder.append(" GROUP BY ").append(condition1).append(",").append(condition2).append(",").append(condition3);
+    public SQL ORDER_BY(String... condition) {
+        strBuilder.append(" ORDER BY ").append(String.join(",", condition));
         return this;
     }
 
 
-//    public SQL $_() {
-//        strBuilder.append(" (");
-//        return this;
-//    }
-//
-//    public SQL $_(String sql) {
-//        strBuilder.append(" (").append(sql);
-//        return this;
-//    }
-//
-//    public SQL _$() {
-//        strBuilder.append(" )");
-//        return this;
-//    }
-
-    public SQL AS(String value) {
-        strBuilder.append(" AS ").append(value);
+    public SQL GROUP_BY(String... condition) {
+        strBuilder.append(" GROUP BY ").append(String.join(",", condition));
         return this;
     }
+
 
     public SQL ASC() {
         strBuilder.append(" ASC");
@@ -646,7 +576,7 @@ public class SQL {
         if (value == null) {
             strBuilder.append(" IS NULL");
         } else {
-            //TODO 1.日期 还不支持oracle 使用 this.databaseType 判断
+            //TODO 1.日期 还不支持oracle 使用 this.dataSourceType 判断
             strBuilder.append(" = ").append(getStringByType(value));
         }
         return this;
@@ -656,7 +586,7 @@ public class SQL {
         if (value == null) {
             strBuilder.append(" NULL");
         } else {
-            //TODO 1.日期 还不支持oracle 使用 this.databaseType 判断
+            //TODO 1.日期 还不支持oracle 使用 this.dataSourceType 判断
             strBuilder.append(getStringByType(value));
         }
         return this;
@@ -718,60 +648,31 @@ public class SQL {
     }
 
     public String build() {
-        System.out.println(strBuilder);
+        if (logSqlWhenBuild) {
+            logger.info(strBuilder.toString());
+        }
         return strBuilder.toString();
     }
 
-    public String buildAndPrintSQL() {
-        String sql = strBuilder.toString();
-        logger.info(sql);
-        return sql;
-    }
 
-
-    public SQL count() {
+    public SQL countThis() {
         this.strBuilder = new StringBuilder(PageUtils.getNumberSQL(strBuilder.toString()));
         return this;
     }
 
 
-    public SQL rows(int pageNumber, int perPageSize) {
-        this.strBuilder = new StringBuilder(PageUtils.getRowsSQL(strBuilder.toString(), pageNumber, perPageSize, this.databaseType));
+    public SQL pageThis(int pageNumber, int perPageSize) {
+        this.strBuilder = new StringBuilder(PageUtils.getRowsSQL(strBuilder.toString(), pageNumber, perPageSize, this.dataSourceType));
         return this;
     }
 
     public SQL top(int number) {
-        this.rows(1, number);
+        this.pageThis(1, number);
         return this;
     }
 
     public SQL top1() {
-        this.rows(1, 1);
-        return this;
-    }
-
-    public SQL top5() {
-        this.rows(1, 1);
-        return this;
-    }
-
-    public SQL top10() {
-        this.rows(1, 10);
-        return this;
-    }
-
-    public SQL top20() {
-        this.rows(1, 10);
-        return this;
-    }
-
-    public SQL top50() {
-        this.rows(1, 50);
-        return this;
-    }
-
-    public SQL top100() {
-        this.rows(1, 100);
+        this.top(1);
         return this;
     }
 
@@ -779,24 +680,13 @@ public class SQL {
      * 2.16 is my birthday !
      */
     public SQL top216() {
-        this.rows(1, 216);
-        return this;
-    }
-
-
-    SQL template(JdbcTemplate jdbcTemplate) {
-        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
+        this.top(216);
         return this;
     }
 
 
     public SQL parameter(SqlParameterSource sqlParameterSource) {
         this.sqlParameterSource = sqlParameterSource;
-        return this;
-    }
-
-    public SQL databaseType(DatabaseType databaseType) {
-        this.databaseType = databaseType;
         return this;
     }
 
@@ -1139,10 +1029,10 @@ public class SQL {
 
         if (useClassicJdbcTemplate) {
             return new PageTemplate(namedParameterJdbcTemplate)
-                    .queryPage(strBuilder.toString(), page, perPage, varParams, rowMapper, this.databaseType);
+                    .queryPage(strBuilder.toString(), page, perPage, varParams, rowMapper, this.dataSourceType);
         }
         return new PageTemplate(namedParameterJdbcTemplate)
-                .queryPage(strBuilder.toString(), page, perPage, sqlParameterSource, rowMapper, this.databaseType);
+                .queryPage(strBuilder.toString(), page, perPage, sqlParameterSource, rowMapper, this.dataSourceType);
     }
 
     public <T> ResultPage<T> queryPage(int page, int perPage, RowMapper<T> rowMapper) {
@@ -1150,10 +1040,10 @@ public class SQL {
 
         if (useClassicJdbcTemplate) {
             return new PageTemplate(namedParameterJdbcTemplate)
-                    .queryPage(strBuilder.toString(), page, perPage, varParams, rowMapper, this.databaseType);
+                    .queryPage(strBuilder.toString(), page, perPage, varParams, rowMapper, this.dataSourceType);
         }
         return new PageTemplate(namedParameterJdbcTemplate)
-                .queryPage(strBuilder.toString(), page, perPage, sqlParameterSource, rowMapper, this.databaseType);
+                .queryPage(strBuilder.toString(), page, perPage, sqlParameterSource, rowMapper, this.dataSourceType);
     }
 
 
@@ -1195,7 +1085,7 @@ public class SQL {
     }
 
 
-    public BatchUpdateResult batchUpdateByMaps(List<Map<String, Object>> mapParamList) {
+    public BatchUpdateResult batchUpdateByMapParams(List<Map<String, Object>> mapParamList) {
         checkNull();
         String sql = strBuilder.toString();
         SqlParameterSource[] batchArgs = new SqlParameterSource[mapParamList.size()];
@@ -1205,12 +1095,12 @@ public class SQL {
         return new BatchUpdateResult(this.namedParameterJdbcTemplate.batchUpdate(sql, batchArgs));
     }
 
-    public BatchUpdateResult batchUpdateWithSqls(String... sql) {
+    public BatchUpdateResult batchUpdateWithSql(String... sql) {
         checkNull();
         return new BatchUpdateResult(this.namedParameterJdbcTemplate.getJdbcOperations().batchUpdate(sql));
     }
 
-    public BatchUpdateResult batchUpdateWithSqls(List<String> sqls) {
+    public BatchUpdateResult batchUpdateWithSql(List<String> sqls) {
         checkNull();
         String[] sqlArray = new String[sqls.size()];
         int i = 0;
@@ -1327,29 +1217,29 @@ public class SQL {
         }
     }
 
-    public SQL ifPresent(Object object, Consumer<SQL> SQLConsumer) {
-        return ifTrue(!StringUtils.isEmpty(object), SQLConsumer);
+    public SQL ifPresent(Object object, Consumer<SQL> sQLConsumer) {
+        return ifTrue(!StringUtils.isEmpty(object), sQLConsumer);
     }
 
-    public SQL ifNotEmpty(Collection<?> collection, Consumer<SQL> SQLConsumer) {
-        return ifTrue(collection.size() > 0, SQLConsumer);
+    public SQL ifNotEmpty(Collection<?> collection, Consumer<SQL> sQLConsumer) {
+        return ifTrue(collection.size() > 0, sQLConsumer);
     }
 
-    public SQL ifTrue(boolean bool, Consumer<SQL> SQLConsumer) {
+    public SQL ifTrue(boolean bool, Consumer<SQL> sQLConsumer) {
         if (bool) {
-            SQLConsumer.accept(this);
+            sQLConsumer.accept(this);
         }
         return this;
     }
 
     //////////////////////////////////////private////////////////////////
-    public void checkNull() {
+    private void checkNull() {
         if (this.namedParameterJdbcTemplate == null) {
-            throw new RuntimeException("实例变量namedParameterJdbcTemplate不能为空，请使用template方法设置");
+            throw new RuntimeException("数据库没有指定");
         }
     }
 
-    public DataSource getDataSource() {
+    private DataSource getDataSource() {
         checkNull();
         return ((JdbcTemplate) namedParameterJdbcTemplate.getJdbcOperations()).getDataSource();
     }
@@ -1369,7 +1259,7 @@ public class SQL {
                         byte[].class, Blob.class, Clob.class);
 
         if (classArrayList.contains(returnClassType)) {
-            if (this.databaseType.equals(DatabaseType.ORACLE)) {
+            if (this.dataSourceType.equals(DataSourceType.ORACLE)) {
                 return new OraclePagingSingleColumnRowMapper<>(returnClassType);
             }
             return new SingleColumnRowMapper<>(returnClassType);
@@ -1384,5 +1274,4 @@ public class SQL {
     public String toString() {
         return this.build();
     }
-
 }

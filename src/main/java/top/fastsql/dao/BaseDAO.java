@@ -2,7 +2,7 @@ package top.fastsql.dao;
 
 import top.fastsql.SQL;
 import top.fastsql.SQLFactory;
-import top.fastsql.config.DatabaseType;
+import top.fastsql.config.DataSourceType;
 import top.fastsql.dto.ResultPage;
 import top.fastsql.util.EntityRefelectUtils;
 import top.fastsql.util.PageUtils;
@@ -64,7 +64,7 @@ public abstract class BaseDAO<E, ID> {
     protected boolean useBeforeDelete = false;
     protected boolean useAfterDelete = true;//
 
-    protected DatabaseType databaseType;
+    protected DataSourceType dataSourceType;
 
     protected NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
@@ -119,7 +119,7 @@ public abstract class BaseDAO<E, ID> {
         this.columnNames.add(0, camelToUnderline(this.idField.getName()));
 
         //使用默认配置
-        this.databaseType = DatabaseType.POSTGRESQL;
+        this.dataSourceType = DataSourceType.POSTGRESQL;
 
         //sql工厂
         this.sqlFactory = new SQLFactory();
@@ -583,7 +583,7 @@ public abstract class BaseDAO<E, ID> {
         //sql
         String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition;
         List<E> list = namedParameterJdbcTemplate.getJdbcOperations().query(
-                PageUtils.getRowsSQL(sql, pageNumber, perPage, this.databaseType),
+                PageUtils.getRowsSQL(sql, pageNumber, perPage, this.dataSourceType),
                 values,
                 new BeanPropertyRowMapper<>(entityClass)
         );
@@ -600,7 +600,7 @@ public abstract class BaseDAO<E, ID> {
         String sql = "SELECT * FROM " + tableName + " WHERE 1=1 AND " + sqlCondition;
 
         List<E> coll = namedParameterJdbcTemplate.query(
-                PageUtils.getRowsSQL(sql, pageNumber, perPage, this.databaseType),
+                PageUtils.getRowsSQL(sql, pageNumber, perPage, this.dataSourceType),
                 parameterSource,
                 new BeanPropertyRowMapper<>(entityClass)
         );
@@ -618,7 +618,7 @@ public abstract class BaseDAO<E, ID> {
         String sql = "SELECT * FROM " + tableName;
 
         List<E> coll = namedParameterJdbcTemplate.query(
-                PageUtils.getRowsSQL(sql, pageNumber, perPage, this.databaseType),
+                PageUtils.getRowsSQL(sql, pageNumber, perPage, this.dataSourceType),
                 EmptySqlParameterSource.INSTANCE,
                 new BeanPropertyRowMapper<>(entityClass)
         );

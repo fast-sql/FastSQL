@@ -1,6 +1,6 @@
 package top.fastsql.util;
 
-import top.fastsql.config.DatabaseType;
+import top.fastsql.config.DataSourceType;
 import top.fastsql.dto.ResultPage;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -36,8 +36,8 @@ public class PageTemplate {
 //        return new ResultPage<T>(list, number);
 //    }
 //
-    public <T> ResultPage<T> queryPage(String sql, int page, int perPage, SqlParameterSource paramSource, RowMapper<T> rowMapper, DatabaseType databaseType) {
-        String rowsSQL = PageUtils.getRowsSQL(sql, page, perPage, databaseType);
+    public <T> ResultPage<T> queryPage(String sql, int page, int perPage, SqlParameterSource paramSource, RowMapper<T> rowMapper, DataSourceType dataSourceType) {
+        String rowsSQL = PageUtils.getRowsSQL(sql, page, perPage, dataSourceType);
         List<T> list = namedParameterJdbcTemplate.query(
                 rowsSQL,
                 paramSource,
@@ -68,8 +68,8 @@ public class PageTemplate {
 //        return new ResultPage<T>(list, number);
 //    }
 
-    public <T> ResultPage<T> queryPage(String sql, int page, int perPage, Object[] objects, RowMapper<T> rowMapper, DatabaseType databaseType) {
-        String rowsSQL = PageUtils.getRowsSQL(sql, page, perPage, databaseType);
+    public <T> ResultPage<T> queryPage(String sql, int page, int perPage, Object[] objects, RowMapper<T> rowMapper, DataSourceType dataSourceType) {
+        String rowsSQL = PageUtils.getRowsSQL(sql, page, perPage, dataSourceType);
         List<T> list = namedParameterJdbcTemplate.getJdbcOperations().query(
                 rowsSQL,
                 objects,

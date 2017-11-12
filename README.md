@@ -58,6 +58,22 @@ SQL 实例是有状态的 ，不是线程安全的，是不能被共享的。绝
 
 # 3.SQLFactory 配置
 
+指定DataSource
+````
+sqlFactory.setDataSource(dataSource);
+````
+设置数据源类型
+````
+sqlFactory.setDataSourceType(DataSourceType.POSTGRESQL);
+sqlFactory.setDataSourceType(DataSourceType.MY_SQL);
+sqlFactory.setDataSourceType(DataSourceType.ORACLE);
+````
+
+设置打印sql
+```
+sqlFactory.setLogSQLWhenBuild(true);
+
+```
 
 # 4.SQL类作为sql语句构建器使用
 Java程序员面对的最痛苦的事情之一就是在Java代码中嵌入SQL语句。FastSQL提供`SQL`类简化你构建sql语句的过程。
@@ -292,5 +308,33 @@ sqlFactory.createSQL().UPDATE("student").SET("name","'Jack'").setOne("age","9").
 sqlFactory.createSQL().DELETE_FROM("student").WHERE("id=:id").build();
 //=>DELETE FROM student WHERE id=:id                
 ```
+
+4.6.分页功能
+**使用原生关键字进行分页**
+```java
+sqlFactory.createSQL().SELECT("*").FROM("student").LIMIT(10).build();
+sqlFactory.createSQL().SELECT("*").FROM("student").LIMIT(5, 10).build();  //postgresql中的写法
+sqlFactory.createSQL().SELECT("*").FROM("student").LIMIT(10).OFFSET(5).build(); //mysql中的写法
+```
+生成如下SQL
+```sql
+SELECT * FROM student LIMIT 10
+SELECT * FROM student LIMIT 5,10
+SELECT * FROM student LIMIT 10 OFFSET 5
+```
+
+**分页方法进行分页**
+```
+//pageThis
+sqlFactory.setDataSourceType(DataSourceType.POSTGRESQL); //制定Pgsql
+sqlFactory.createSQL().SELECT("*").FROM("student").pageThis(1,10).build();
+```
+注意：如果不指定 dataSourceType，将会使用 FastSQLConfig#dataSourceType 的默认类型进行分页;
+
+**生成获取数量语句**
+```java
+//countThis
+sqlFactory.createSQL().SELECT("*").FROM("student").countThis().buildAndPrintSQL();
+```
  
-#  /////////////////////////////////未完待续///////////////////////////////
+#  '                         未完待续 
