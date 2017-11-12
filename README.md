@@ -194,16 +194,8 @@ sqlFactory.createSQL().SELECT("*")
 //输出===>SELECT *  FROM student  WHERE name  IN ('小明','小红')
 ```
 ### 子查询subQuery
-查询大于平均分的成绩（可以使用subQuery()方法/$_$()方法）
+查询大于平均分的成绩（可以使用 $_$()方法）
 ```java
-sqlFactory.createSQL().SELECT("*")
-   .FROM("score")
-   .WHERE("score_value >")
-   .subQuery(
-         sqlFactory.createSQL().SELECT("avg(score_value)").FROM("score")
-    )
-   .build();
-
 sqlFactory.createSQL().SELECT("*")
    .FROM("score")
    .WHERE("score_value >")
@@ -230,31 +222,13 @@ sqlFactory.createSQL().SELECT("*")
 ### AND和OR结合使用
 如果查询年龄大于10岁，并且名字是小明或小红
 
-错误的写法：
-```java
-sqlFactory.createSQL().SELECT("*")
-   .FROM("student")
-   .WHERE("age>10")
-   .AND("name='小明' OR name='小红'")
-   .build();
-
-//SELECT *  FROM student  WHERE age>10  AND name='小明' OR name='小红'
-//OR条件少了括号
-```
-正确的写法：
 ```java
 sqlFactory.createSQL().SELECT("*")
    .FROM("student")
    .WHERE("age>10")
    .AND("(name='小明' OR name='小红')")//手动添加括号
    .build();
-
-sqlFactory.createSQL().SELECT("*")
-   .FROM("student")
-   .WHERE("age>10")
-   .AND().$_$("name='小明' OR name='小红'")//AND$_$生成 AND (...)
-   .build();
-
+//或者
 sqlFactory.createSQL().SELECT("*")
    .FROM("student")
    .WHERE("age>10")
@@ -285,6 +259,38 @@ sqlFactory.createSQL().SELECT("student")
 ```
 ifNotEmpty?
 SELECT student WHERE id=:id AND name=:name AND name  IN ('小明','小红')
+```
+
+
+##  2).构建插入/修改、删除语句
+使用 INSERT_INTO 和 VALUES
+
+```java
+//使用列
+sqlFactory.createSQL().INSERT_INTO("student", "id", "name", "age")
+                .VALUES(":id", ":name", ":age").build();
+//=>INSERT INTO student (id,name,age)  VALUES (:id,:name,:age)
+
+//不使用列
+sqlFactory.createSQL().INSERT_INTO("student").VALUES(":id", ":name", ":age").build();
+//=>INSERT INTO student VALUES (:id,:name,:age)
+```
+
+SET(String column, String value) :SET关键字
+
+setOne(String column, String value) :追加一个值
+
+
+```java
+sqlFactory.createSQL().UPDATE("student").SET("name","'Jack'").setOne("age","9").WHERE("name").eq("'Mike'").build();
+//=>  UPDATE student SET name='Jack',age=9 WHERE name = 'Mike'              
+```
+
+构建删除语句
+
+```java
+sqlFactory.createSQL().DELETE_FROM("student").WHERE("id=:id").build();
+//=>DELETE FROM student WHERE id=:id                
 ```
  
 #  /////////////////////////////////未完待续///////////////////////////////

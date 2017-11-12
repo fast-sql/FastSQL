@@ -85,21 +85,21 @@ public class SQL {
         return this;
     }
 
-    /**
-     * 生成左括号和右括号
-     */
-    public SQL subQuery(SQL SQL) {
-        strBuilder.append(" (").append(SQL.build()).append(")");
-        return this;
-    }
-
-    /**
-     * 生成左括号和右括号
-     */
-    public SQL subQuery(String sql) {
-        strBuilder.append(" (").append(sql).append(")");
-        return this;
-    }
+//    /**
+//     * 生成左括号和右括号
+//     */
+//    public SQL subQuery(SQL SQL) {
+//        strBuilder.append(" (").append(SQL.build()).append(")");
+//        return this;
+//    }
+//
+//    /**
+//     * 生成左括号和右括号
+//     */
+//    public SQL subQuery(String sql) {
+//        strBuilder.append(" (").append(sql).append(")");
+//        return this;
+//    }
 
 
     /**
