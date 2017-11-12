@@ -92,7 +92,12 @@ if (false){
 FastSQL提供了一些操作符方便SQL的构建，比如：
 
 ```java
-sqlFactory.createSQL().SELECT("name", "age").FROM("student").WHERE("age").lt("10").AND("name").eq("'小明'").build();
+sqlFactory.createSQL()
+    .SELECT("name", "age")
+    .FROM("student")
+    .WHERE("age").lt("10")
+    .AND("name").eq("'小明'")
+    .build();
 //==> SELECT name,age FROM student WHERE age > 10 AND name = '小明'
 ```
 
