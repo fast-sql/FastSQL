@@ -100,17 +100,23 @@ sqlFactory.createSQL().SELECT("name", "age").FROM("student").WHERE("age").lt("10
 
 | 方法         | 说明                                  |
 | :----------- | :----------------------------------- |
-| eq(String)   | 生成=，是equals的缩写                  |
-| gt(String)   | 生成>，是greater than的缩写            |
-| gtEq(String) | 生成>=，是greater than or equals的缩写 |
-| lt(String)   | 生成<，是less than的缩写               |
-| ltEq(String) | 生成<=，是less than or equals的缩写    |
-| nEq(String)  | 生成!=，是not equals的缩写             |
+| eq(String)   | 生成=，并追加参数（equals的缩写）                  |
+| gt(String)   | 生成>，并追加参数（是greater than的缩写）            |
+| gtEq(String) | 生成>=，并追加参数（是greater than or equals的缩写） |
+| lt(String)   | 生成<，并追加参数（是less than的缩写 ）              |
+| ltEq(String) | 生成<=，并追加参数（是less than or equals的缩写）    |
+| nEq(String)  | 生成!=，并追加参数（是not equals的缩写  ）           |
+| LIKE(String)  | 生成LIKE 并追加参数，                  |
+| NOT_LIKE(String)  | 生成NOT LIKE ,并追加参数           |
+| NOT_LIKE(String)  | 生成NOT LIKE ，并追加参数          |
+| IS_NULL()         | 生成IS NULL                |
+| IS_NOT_NULL()     | 生成IS NOT NULL            |
 
 注意：
-`eq("1")`生成` = 1` ，`eq("'1'")`会生成` = '1'`
+- 这些方法仅仅是字符串连接：`eq("1")`生成` = 1` ，`eq("'1'")`会生成` = '1'`。
+- 同样提供无参数方法 eq()/gt()/... 不会追加参数。
 
-`XXXByType(Object)`方法 ：
+### `byType(Object)`方法 ：
 
 
 ### 使用LIKE
