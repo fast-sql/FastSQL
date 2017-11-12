@@ -1,78 +1,38 @@
-- [【一.简介】](#%E3%80%90%E4%B8%80%E7%AE%80%E4%BB%8B%E3%80%91)
-    - [1.主要功能点介绍](#1%E4%B8%BB%E8%A6%81%E5%8A%9F%E8%83%BD%E7%82%B9%E4%BB%8B%E7%BB%8D)
-    - [2.如何安装](#2%E5%A6%82%E4%BD%95%E5%AE%89%E8%A3%85)
-    - [3.与Jdbc,Mybatis,JPA进行对比](#3%E4%B8%8Ejdbcmybatisjpa%E8%BF%9B%E8%A1%8C%E5%AF%B9%E6%AF%94)
-- [【二.作为SQL构建器使用】](#%E3%80%90%E4%BA%8C%E4%BD%9C%E4%B8%BAsql%E6%9E%84%E5%BB%BA%E5%99%A8%E4%BD%BF%E7%94%A8%E3%80%91)
-    - [1.数据准备](#1%E6%95%B0%E6%8D%AE%E5%87%86%E5%A4%87)
-    - [2.构建查询语句](#2%E6%9E%84%E5%BB%BA%E6%9F%A5%E8%AF%A2%E8%AF%AD%E5%8F%A5)
-        - [生成SQL字符串](#%E7%94%9F%E6%88%90sql%E5%AD%97%E7%AC%A6%E4%B8%B2)
-        - [基本查询](#%E5%9F%BA%E6%9C%AC%E6%9F%A5%E8%AF%A2)
-        - [使用操作符方法](#%E4%BD%BF%E7%94%A8%E6%93%8D%E4%BD%9C%E7%AC%A6%E6%96%B9%E6%B3%95)
-        - [使用LIKE](#%E4%BD%BF%E7%94%A8like)
-        - [使用连接查询/排序](#%E4%BD%BF%E7%94%A8%E8%BF%9E%E6%8E%A5%E6%9F%A5%E8%AF%A2%E6%8E%92%E5%BA%8F)
-        - [分组查询](#%E5%88%86%E7%BB%84%E6%9F%A5%E8%AF%A2)
-        - [IN语句](#in%E8%AF%AD%E5%8F%A5)
-        - [子查询subQuery](#%E5%AD%90%E6%9F%A5%E8%AF%A2subquery)
-        - [AND和OR结合使用](#and%E5%92%8Cor%E7%BB%93%E5%90%88%E4%BD%BF%E7%94%A8)
-        - [使用Lambda表达式简化判断语句](#%E4%BD%BF%E7%94%A8lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E7%AE%80%E5%8C%96%E5%88%A4%E6%96%AD%E8%AF%AD%E5%8F%A5)
-    - [3.构建插入语句](#3%E6%9E%84%E5%BB%BA%E6%8F%92%E5%85%A5%E8%AF%AD%E5%8F%A5)
-    - [4.构建更新语句](#4%E6%9E%84%E5%BB%BA%E6%9B%B4%E6%96%B0%E8%AF%AD%E5%8F%A5)
-    - [5.构建删除语句](#5%E6%9E%84%E5%BB%BA%E5%88%A0%E9%99%A4%E8%AF%AD%E5%8F%A5)
-    - [6.分页功能](#6%E5%88%86%E9%A1%B5%E5%8A%9F%E8%83%BD)
-    - [7.更多关键字](#7%E6%9B%B4%E5%A4%9A%E5%85%B3%E9%94%AE%E5%AD%97)
-- [【三.SQL构建器的执行功能】](#%E3%80%90%E4%B8%89sql%E6%9E%84%E5%BB%BA%E5%99%A8%E7%9A%84%E6%89%A7%E8%A1%8C%E5%8A%9F%E8%83%BD%E3%80%91)
-    - [1.设置查询模板](#1%E8%AE%BE%E7%BD%AE%E6%9F%A5%E8%AF%A2%E6%A8%A1%E6%9D%BF)
-    - [2.设置参数](#2%E8%AE%BE%E7%BD%AE%E5%8F%82%E6%95%B0)
-    - [3.基本查询：](#3%E5%9F%BA%E6%9C%AC%E6%9F%A5%E8%AF%A2%EF%BC%9A)
-    - [4.增删改操作：](#4%E5%A2%9E%E5%88%A0%E6%94%B9%E6%93%8D%E4%BD%9C%EF%BC%9A)
-    - [5.获取数据库元信息](#5%E8%8E%B7%E5%8F%96%E6%95%B0%E6%8D%AE%E5%BA%93%E5%85%83%E4%BF%A1%E6%81%AF)
-    - [6.事务管理](#6%E4%BA%8B%E5%8A%A1%E7%AE%A1%E7%90%86)
-- [【四.BaseDAO】](#%E3%80%90%E5%9B%9Bbasedao%E3%80%91)
-    - [1.数据准备](#1%E6%95%B0%E6%8D%AE%E5%87%86%E5%A4%87)
-        - [Entity实体类](#entity%E5%AE%9E%E4%BD%93%E7%B1%BB)
-        - [DAO类在Spring环境中](#dao%E7%B1%BB%E5%9C%A8spring%E7%8E%AF%E5%A2%83%E4%B8%AD)
-        - [DAO类在非Spring环境中](#dao%E7%B1%BB%E5%9C%A8%E9%9D%9Espring%E7%8E%AF%E5%A2%83%E4%B8%AD)
-    - [2.基本使用方法 CRUD](#2%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95-crud)
-        - [数据插入](#%E6%95%B0%E6%8D%AE%E6%8F%92%E5%85%A5)
-        - [数据修改](#%E6%95%B0%E6%8D%AE%E4%BF%AE%E6%94%B9)
-        - [数据删除](#%E6%95%B0%E6%8D%AE%E5%88%A0%E9%99%A4)
-        - [单条数据查询](#%E5%8D%95%E6%9D%A1%E6%95%B0%E6%8D%AE%E6%9F%A5%E8%AF%A2)
-        - [多条数据查询](#%E5%A4%9A%E6%9D%A1%E6%95%B0%E6%8D%AE%E6%9F%A5%E8%AF%A2)
-        - [分页查询](#%E5%88%86%E9%A1%B5%E6%9F%A5%E8%AF%A2)
-        - [其他查询](#%E5%85%B6%E4%BB%96%E6%9F%A5%E8%AF%A2)
-    - [3.定制你的ApplicationBaseDAO](#3%E5%AE%9A%E5%88%B6%E4%BD%A0%E7%9A%84applicationbasedao)
-        - [定制通用方法](#%E5%AE%9A%E5%88%B6%E9%80%9A%E7%94%A8%E6%96%B9%E6%B3%95)
-        - [改变BaseDAO的默认属性](#%E6%94%B9%E5%8F%98basedao%E7%9A%84%E9%BB%98%E8%AE%A4%E5%B1%9E%E6%80%A7)
-        - [设置多数据源支持](#%E8%AE%BE%E7%BD%AE%E5%A4%9A%E6%95%B0%E6%8D%AE%E6%BA%90%E6%94%AF%E6%8C%81)
-        - [设置BaseDAO中的拦截器](#%E8%AE%BE%E7%BD%AEbasedao%E4%B8%AD%E7%9A%84%E6%8B%A6%E6%88%AA%E5%99%A8)
-    - [4.SQL构建器在BaseDAO中的使用](#4sql%E6%9E%84%E5%BB%BA%E5%99%A8%E5%9C%A8basedao%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8)
-- [【五.通用工具】](#%E3%80%90%E4%BA%94%E9%80%9A%E7%94%A8%E5%B7%A5%E5%85%B7%E3%80%91)
-    - [获取sql的IN列表](#%E8%8E%B7%E5%8F%96sql%E7%9A%84in%E5%88%97%E8%A1%A8)
-- [【配置项 】](#%E3%80%90%E5%9F%BA%E4%BA%8Espringboot%E7%9A%84%E9%85%8D%E7%BD%AE%E9%A1%B9-%E3%80%91)
+# 1.简介
+FastSQL一个基于spring-jdbc的简单ORM框架，它支持SQL构建、SQL执行、自动映射和通用DAO。结合了Hibernate/JPA快速开发和Mybatis高效执行的优点。
 
-# 【一.简介】
-FastSql一个基于spring-jdbc的简单ORM框架，它支持定制化SQL、自动映射。结合了hibernate/jpa快速开发和mybatis高效执行的优点，可以加速你的数据库访问层（DAO层）开发。
+FastSQL可以完全满足你控制欲，可以用Java代码清晰又方便写出SQL并执行。 
 
-FastSql可以完全满足你控制欲，可以用Java代码方便写出sql并执行。我们倡导 :
 
-> Develop with sql happily!
- 
-## 1.主要功能点介绍
-1. SQL构建器
-2. SQL执行器
-3. 通用工具
-4. 通用DAO
+# 2.入门
 
-## 2.如何安装
+## 安装
+
+要使用 FastSQL， 只需将 fastsql-x.x.x.jar 文件置于 classpath 中即可（x.x.x为对应的版本号，下同）。
+
+如果使用 Maven 来构建项目，则需将下面的 dependency 代码置于 pom.xml 文件中：
+
+```
+<dependency>
+    <groupId>top.fastsql</groupId>
+    <artifactId>fastsql</artifactId>
+    <version>x.x.x</version>
+</dependency>
+```
+
+如果使用 Gradle 来构建项目，则需将下面的代码置于 build.gradle 文件中：
+```
+compile 'top.fastsql:fastsql:x.x.x'
+```
+
+## 构建 SQLFactory
+
+
 
 >撰写中...
 
-## 3.与Jdbc,Mybatis,JPA进行对比
-
->撰写中...
-
-# 【二.作为SQL构建器使用】
-Java程序员面对的最痛苦的事情之一就是在Java代码中嵌入SQL语句。FastSQL提供`cn.com.zdht.pavilion.fastsql.SQL`类和`cn.com.zdht.pavilion.fastsql.SQL`类简化你的构建过程。
+# 2.作为SQL构建器使用
+Java程序员面对的最痛苦的事情之一就是在Java代码中嵌入SQL语句。FastSQL提供`cn.com.zdht.pavilion.FastSQL.SQL`类和`cn.com.zdht.pavilion.FastSQL.SQL`类简化你的构建过程。
 
 
 
@@ -124,7 +84,7 @@ INSERT INTO `score` VALUES ('37d0d684-95df-40a6-a9ed-d2b97aa951fc', '11111111-11
 - buildAndPrintSQL() 生成并打印SQL
 
 ### 基本查询
-SELECT方法可以传入一个可变参数，以便选择多列。(FastSql中建议SQL关键字全部采用大写)
+SELECT方法可以传入一个可变参数，以便选择多列。(FastSQL中建议SQL关键字全部采用大写)
 ```java
 new SQL().SELECT("name", "age").FROM("student").WHERE("age>10").build();
 //==> SELECT name,age FROM student WHERE age>10
@@ -144,7 +104,7 @@ if (false){//判断
 //===>SELECT name,age  FROM student  WHERE 1 = 1  AND age > 10 
 ```
 ### 使用操作符方法
-FastSql提供了一些操作符方便SQL的构建，比如：
+FastSQL提供了一些操作符方便SQL的构建，比如：
 
 ```java
 new SQL().SELECT("name", "age").FROM("student").WHERE("age").lt("10").AND("name").eq("'小明'").build();
@@ -207,7 +167,7 @@ GROUP BY s.name
 ```
 
 ### IN语句  
-FastSql支持几种IN语句拼写方式：
+FastSQL支持几种IN语句拼写方式：
 ```java
 //1.使用字符串
 new SQL().SELECT("*")
@@ -378,7 +338,7 @@ SQL.SELECT("*").FROM("student").databaseType(DbType.POSTGRSQL).rows(2,5).buildAn
 SQL.SELECT("*").FROM("student").databaseType(DbType.ORACLE).rows(2,5).buildAndPrintSQL();//oracle
 SQL.SELECT("*").FROM("student").databaseType(DbType.MY_SQL).rows(2,5).buildAndPrintSQL();//mysql分页
 ```
-注意：如果不指定 databaseType，将会使用 FastSqlConfig#databaseType 的默认类型进行分页;
+注意：如果不指定 databaseType，将会使用 FastSQLConfig#databaseType 的默认类型进行分页;
 
 **获取数量语句**
 ```java
@@ -433,7 +393,7 @@ new SQL().SELECT("*").FROM("student").count().buildAndPrintSQL();
 | HAVING(String condition)                     |                        |                         |
 
 
-# 【三.SQL构建器的执行功能】
+# 3.SQL构建器的执行功能
 
 SQL构建器支持SpringJDBC的NamedParameterJdbcTemplate类，并简化了它的API的使用：
 
@@ -644,7 +604,7 @@ connection.commit();//提交事务
 
  
 
-# 【四.BaseDAO】
+# 4.BaseDAO
 
 ## 1.数据准备
 ### Entity实体类
@@ -997,23 +957,23 @@ public class StudentDAO extends ApplicationBaseDAO<Student, String> {
 }
 ```
 
-# 【五.通用工具】
+# 5.通用工具
 
 ## 获取sql的IN列表
 
 ```
  
-`FastSqlUtils.getInClause(Collection<?> collection) `,会根据Collection的类型自动判断使用什么样的分隔符:
+`FastSQLUtils.getInClause(Collection<?> collection) `,会根据Collection的类型自动判断使用什么样的分隔符:
 
 ```java
-FastSqlUtils.getInClause(Lists.newArrayList(1, 23, 4, 15))  //生成=>(1,23,4,15)
-FastSqlUtils.getInClause(Lists.newArrayList("dog", "people", "food", "apple")) //生成=> ('dog','people','food','apple')
+FastSQLUtils.getInClause(Lists.newArrayList(1, 23, 4, 15))  //生成=>(1,23,4,15)
+FastSQLUtils.getInClause(Lists.newArrayList("dog", "people", "food", "apple")) //生成=> ('dog','people','food','apple')
 ```
 
 说明：IN功能已经整合到SQL构建器的IN方法
 
 
-# 【配置项 】
+# 6.配置项 
 显示sql日志
 ```properties
 #显示sql
