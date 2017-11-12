@@ -23,6 +23,6 @@ public class SQLFactoryTest {
         sqlFactory.setDataSource(dataSource);
 
         SQL sql = sqlFactory.createSQL();
-        Student student = sql.SELECT("*").FROM("student").WHERE("id=101").queryOne(Student.class);
+//        Student student = sql.SELECT("*").FROM("student").WHERE("id=101").queryOne(Student.class);
     }
 }
