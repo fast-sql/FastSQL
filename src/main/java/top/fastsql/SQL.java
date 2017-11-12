@@ -105,8 +105,8 @@ public class SQL {
     /**
      * 生成左括号和右括号
      */
-    public SQL $_$(SQL SQL) {
-        strBuilder.append(" (").append(SQL.build()).append(")");
+    public SQL $_$(SQL sql) {
+        strBuilder.append(" (").append(sql.build()).append(")");
         return this;
     }
 
@@ -366,15 +366,15 @@ public class SQL {
         return this;
     }
 
-    public SQL AND$_$(String condition) {
-        strBuilder.append(" AND (").append(condition).append(")");
-        return this;
-    }
+//    public SQL AND$_$(String condition) {
+//        strBuilder.append(" AND (").append(condition).append(")");
+//        return this;
+//    }
 
-    public SQL AND$_$(SQL SQL) {
-        strBuilder.append(" AND (").append(SQL.build()).append(")");
-        return this;
-    }
+//    public SQL AND$_$(SQL SQL) {
+//        strBuilder.append(" AND (").append(SQL.build()).append(")");
+//        return this;
+//    }
 
     public SQL OR(String condition) {
         strBuilder.append(" OR ").append(condition);
@@ -437,20 +437,20 @@ public class SQL {
     }
 
 
-    public SQL $_() {
-        strBuilder.append(" (");
-        return this;
-    }
-
-    public SQL $_(String sql) {
-        strBuilder.append(" (").append(sql);
-        return this;
-    }
-
-    public SQL _$() {
-        strBuilder.append(" )");
-        return this;
-    }
+//    public SQL $_() {
+//        strBuilder.append(" (");
+//        return this;
+//    }
+//
+//    public SQL $_(String sql) {
+//        strBuilder.append(" (").append(sql);
+//        return this;
+//    }
+//
+//    public SQL _$() {
+//        strBuilder.append(" )");
+//        return this;
+//    }
 
     public SQL AS(String value) {
         strBuilder.append(" AS ").append(value);
@@ -484,29 +484,18 @@ public class SQL {
         return this;
     }
 
-    public SQL IN$_$(String sql) {
-        strBuilder.append(" IN (").append(sql).append(")");
+    public SQL NOT_IN(String sql) {
+        strBuilder.append(" NOT IN ").append(sql);
         return this;
     }
-
-    public SQL IN$_$(SQL sql) {
-        strBuilder.append(" IN (").append(sql).append(")");
-        return this;
-    }
-
 
     public SQL IN(Collection<?> collection) {
         strBuilder.append(" IN ").append(FastSqlUtils.getInClause(collection));
         return this;
     }
 
-    public SQL IN_var(String... items) {
-        strBuilder.append(" IN ").append(FastSqlUtils.getInClause(Arrays.asList(items)));
-        return this;
-    }
-
-    public SQL IN_var(Integer... items) {
-        strBuilder.append(" IN ").append(FastSqlUtils.getInClause(Arrays.asList(items)));
+    public SQL IN(Object[] array) {
+        strBuilder.append(" IN ").append(FastSqlUtils.getInClause(Arrays.asList(array)));
         return this;
     }
 
@@ -515,13 +504,8 @@ public class SQL {
         return this;
     }
 
-    public SQL NOT_IN_var(String... items) {
-        strBuilder.append(" NOT IN ").append(FastSqlUtils.getInClause(Arrays.asList(items)));
-        return this;
-    }
-
-    public SQL NOT_IN_var(Integer... items) {
-        strBuilder.append(" NOT IN ").append(FastSqlUtils.getInClause(Arrays.asList(items)));
+    public SQL NOT_IN(Object[] array) {
+        strBuilder.append(" NOT IN ").append(FastSqlUtils.getInClause(Arrays.asList(array)));
         return this;
     }
 
@@ -734,6 +718,7 @@ public class SQL {
     }
 
     public String build() {
+        System.out.println(strBuilder);
         return strBuilder.toString();
     }
 

@@ -135,6 +135,156 @@ sqlFactory.createSQL()
 ```
 eq().byType("小明") 也可简写为 eqByType("小明")
 
+## 使用连接查询/排序
 
+查询不及格的成绩
+
+```java
+String sql = sqlFactory.createSQL().SELECT("s.name","c.subject_name","c.score_value")
+                .FROM("score c")
+                .LEFT_JOIN_ON("student s", "s.id=c.student_id")
+                .WHERE("c.score_value<60")
+                .ORDER_BY("c.score_value")
+                .build();
+/*
+SELECT s.name, c.subject,c.score_value
+FROM score c
+LEFT OUTER JOIN student s ON (s.id = c.student_id)
+WHERE c.score_value < 60
+ORDER BY c.score_value
+*/
+```
+### 分组查询
+查询每个学生总分数
+```java
+String sql =sqlFactory.createSQL().SELECT("s.name", "sum(c.score_value) total_score")
+               .FROM("score c")
+               .LEFT_JOIN_ON("student s", "s.id=c.student_id")
+               .GROUP_BY("s.name")
+               .build()
+/*
+SELECT s.name, sum(c.score_value) total_score
+FROM score c
+LEFT OUTER JOIN student s ON (s.id = c.student_id)
+GROUP BY s.name
+*/
+```
+
+### IN语句  
+FastSQL支持几种IN语句拼写方式：
+```java
+//1.使用字符串
+sqlFactory.createSQL().SELECT("*")
+   .FROM("student")
+   .WHERE("name").IN("('小明','小红')")
+   .build();
+
+//2.使用集合（List,Set等）
+sqlFactory.createSQL().SELECT("*")
+   .FROM("student")
+   .WHERE("name").IN(Lists.newArrayList("小明","小红"))
+   .build();
+
+//3.使用数组
+sqlFactory.createSQL().SELECT("*")
+   .FROM("student")
+   .WHERE("name").IN(new Object[]{"小明","小红"})//
+   .build();
+
+//输出===>SELECT *  FROM student  WHERE name  IN ('小明','小红')
+```
+### 子查询subQuery
+查询大于平均分的成绩（可以使用subQuery()方法/$_$()方法）
+```java
+sqlFactory.createSQL().SELECT("*")
+   .FROM("score")
+   .WHERE("score_value >")
+   .subQuery(
+         sqlFactory.createSQL().SELECT("avg(score_value)").FROM("score")
+    )
+   .build();
+
+sqlFactory.createSQL().SELECT("*")
+   .FROM("score")
+   .WHERE("score_value >")
+   .$_$(
+         sqlFactory.createSQL().SELECT("avg(score_value)").FROM("score")
+    )
+   .build();
+//SELECT *  FROM score  
+//WHERE score_value >  ( SELECT avg(score_value)  FROM score  )
+```
+带有IN的子查询
+```java
+sqlFactory.createSQL().SELECT("*")
+    .FROM("score")
+    .WHERE()
+    .AND("score")
+    .IN().$_$(
+         sqlFactory.createSQL().SELECT("DISTINCT score_value").FROM("score")
+    )
+    .build();
+//SELECT * FROM score WHERE 1 = 1 AND score IN (SELECT DISTINCT score_value FROM score)
+```
+
+### AND和OR结合使用
+如果查询年龄大于10岁，并且名字是小明或小红
+
+错误的写法：
+```java
+sqlFactory.createSQL().SELECT("*")
+   .FROM("student")
+   .WHERE("age>10")
+   .AND("name='小明' OR name='小红'")
+   .build();
+
+//SELECT *  FROM student  WHERE age>10  AND name='小明' OR name='小红'
+//OR条件少了括号
+```
+正确的写法：
+```java
+sqlFactory.createSQL().SELECT("*")
+   .FROM("student")
+   .WHERE("age>10")
+   .AND("(name='小明' OR name='小红')")//手动添加括号
+   .build();
+
+sqlFactory.createSQL().SELECT("*")
+   .FROM("student")
+   .WHERE("age>10")
+   .AND().$_$("name='小明' OR name='小红'")//AND$_$生成 AND (...)
+   .build();
+
+sqlFactory.createSQL().SELECT("*")
+   .FROM("student")
+   .WHERE("age>10")
+   .AND().$_$("name='小明' OR name='小红'")//$_$ 生成左右括号
+   .build();
+```
+
+### 使用Lambda表达式简化构建动态sql
+- `ifTrue(boolean bool, Consumer<SQL> sqlConsumer)`:如果第1个参数为true，则执行第二个参数（Lambda表达式）
+- `ifNotEmpty(Collection<?> collection, Consumer<SQL> sqlConsumer)`:如果第1个参数长度大于0，则执行第二个参数（Lambda表达式）
+- `ifPresent(Object object, Consumer<SQL> sqlConsumer)`:如果第1个参数存在（不等于null且不为""），则执行第二个参数（Lambda表达式）
+
+```java
+sqlFactory.createSQL().SELECT("student")
+    .WHERE("id=:id")
+    .ifTrue(true, thisBuilder -> thisBuilder.AND("name=:name"))  //使用
+    .ifNotEmpty(names, thisBuilder -> {
+        System.out.println("ifNotEmpty?");
+        thisBuilder.AND("name").IN(Lists.newArrayList("小明", "小红"));
+    })
+    .ifPresent("",thisBuilder -> {
+        System.out.println("ifPresent?");
+        //...处理其他流程语句...
+    })
+    .build();
+```
+输出：
+```
+ifNotEmpty?
+SELECT student WHERE id=:id AND name=:name AND name  IN ('小明','小红')
+```
  
 #  /////////////////////////////////未完待续///////////////////////////////
