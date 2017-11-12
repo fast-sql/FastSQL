@@ -26,7 +26,12 @@ compile 'top.fastsql:fastsql:x.x.x'
 ```
 
 ## 构建 SQLFactory
+```
+DataSource dataSource = new SimpleDriverDataSource();
 
+SQLFactory sqlFactory = new SQLFactory();
+sqlFactory.setDataSource(dataSource);
+```
 
 
 >撰写中...
