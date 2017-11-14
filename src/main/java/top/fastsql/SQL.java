@@ -810,6 +810,7 @@ public class SQL {
     /**
      * @see SQL#beanParameter(Object)
      */
+    @Deprecated
     public SQL parameterDTO(Object beanParam) {
         this.sqlParameterSource = new BeanPropertySqlParameterSource(beanParam);
         return this;
@@ -885,6 +886,7 @@ public class SQL {
                 return this.namedParameterJdbcTemplate.queryForObject(sql, this.sqlParameterSource, rowMapper);
             }
         } catch (EmptyResultDataAccessException e) {
+            logger.warn("Get a empty result from database,it will be mapped a null object or value");
             return null;
         }
     }
@@ -903,6 +905,7 @@ public class SQL {
                 return this.namedParameterJdbcTemplate.queryForMap(strBuilder.toString(), this.sqlParameterSource);
             }
         } catch (EmptyResultDataAccessException e) {
+            logger.warn("Get a empty result from database,it will be mapped a null object or value");
             return null;
         }
     }

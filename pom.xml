@@ -9,7 +9,7 @@
     <version>0.9.0</version>
 
     <name>fastsql</name>
-    <description>Smart is a lightweight database operate library.</description>
+    <description>FastSQL is a lightweight database operate library.</description>
     <url>http://www.fastsql.top/</url>
 
     <dependencies>
