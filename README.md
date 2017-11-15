@@ -74,7 +74,7 @@ compile 'top.fastsql:fastsql:x.x.x'
 ```
 
 ## 构建 SQLFactory
-你可以直接从 Java 程序构建一个 SQLFactory ，至少需要一个 DataSource 。
+你可以直接从 Java 程序构建一个 SQLFactory ，如果使用SQL的执行功能，至少需要设置 DataSource 。
 ```
 //新建一个DataSource（这里使用了Spring-Jdbc的SimpleDriverDataSource）
 DataSource dataSource = new SimpleDriverDataSource([传入url,username等]);
@@ -85,7 +85,7 @@ sqlFactory.setDataSource(dataSource);
 
 ## 从 SQLFactory 中获取 SQL
 
-既然有了 SQLFactory ，我们就可以从中获得 SQL 的实例了。SQL 完全包含了面向数据库执行 sql 命令所需的所有方法。
+既然有了 SQLFactory ，我们就可以从中获得 SQL 的实例了。SQL类完全包含了面向数据库执行 sql 命令所需的所有方法。
 你可以通过 SQL 实例来构建并直接执行 SQL 语句。例如：
 ```
 SQL sql = sqlFactory.createSQL();
@@ -97,37 +97,36 @@ Student student = sql.SELECT("*").FROM("student").WHERE("id=101").queryOne(Stude
 
 SQLFactory 一旦被创建就应该在应用的运行期间一直存在，没有任何理由对它进行清除或重建。
 使用 SQLFactory 的最佳实践是在应用运行期间不要重复创建多次，多次重建 SQLFactory 被视为一种代码“坏味道（bad smell）”。
-因此 SQLFactory 的最佳作用域是应用的作用域。有很多方法可以做到，最简单的就是使用单例模式或者静态单例模式。
+因此 SQLFactory 的最佳作用域是应用的作用域。有很多方法可以做到，最简单的就是使用单例模式或者静态单例模式
+（如果在Spring环境中，利用Spring容器的功能，你完全可以把它设置为一个单例bean）。
 
 **SQL**
 
-SQL 实例是有状态的 ，不是线程安全的，是不能被共享的。绝对不能将 SQL 实例的引用放在一个类的静态域，甚至一个类的实例变量也不行。 
-每执行SQL语句一次，都需要构建一个 SQL 实例，返回一个结果。
+SQL 实例是有状态的 ，不是线程安全的，是不能被共享的。即使在同一个线程中每执行sql语句一次，都需要构建一个 SQL 实例。
+绝对不能将 SQL 实例的引用放在一个类的静态域，甚至一个类的实例变量也不行。 
+
 
 # 3. SQLFactory 配置
 
+新建SQLFactory
+```
+SQLFactory sqlFactory = new SQLFactory();
+```
 指定DataSource
 ````
+DataSource dataSource =  ... ;//新建任意类型一个DataSource，如SimpleDriverDataSource（Spring内部简单的DataSource）或者支持连接池的DataSource
 sqlFactory.setDataSource(dataSource);
 ````
 设置数据源类型
 ````
-sqlFactory.setDataSourceType(DataSourceType.POSTGRESQL);
-sqlFactory.setDataSourceType(DataSourceType.MY_SQL);
-sqlFactory.setDataSourceType(DataSourceType.ORACLE);
+sqlFactory.setDataSourceType(DataSourceType.POSTGRESQL);//默认
+//sqlFactory.setDataSourceType(DataSourceType.MY_SQL);
+//sqlFactory.setDataSourceType(DataSourceType.ORACLE);
 ````
 
-设置打印sql
-```
-sqlFactory.setLogSQLWhenBuild(true);
-
-```
 
 # 4. SQL类作为sql语句构建器使用
 Java程序员面对的最痛苦的事情之一就是在Java代码中嵌入SQL语句。FastSQL提供`SQL`类简化你构建sql语句的过程。
-```
-SQLFactory sqlFactory = new SQLFactory();
-```
 
 ## 基本查询
 SELECT方法可以传入一个可变参数，以便选择多列。(FastSQL中建议SQL关键字全部采用大写)
@@ -174,9 +173,13 @@ sqlFactory.createSQL()
 | nEq(String)      | 生成!=，并追加参数（是not equals的缩写  ）           |
 | LIKE(String)     | 生成LIKE 并追加参数，                                |
 | NOT_LIKE(String) | 生成NOT LIKE ,并追加参数                             |
-| NOT_LIKE(String) | 生成NOT LIKE ，并追加参数                            |
 | IS_NULL()        | 生成IS NULL                                          |
 | IS_NOT_NULL()    | 生成IS NOT NULL                                      |
+| eq()             | 生成 =                                               |
+| gt()             | 生成 >                                               |
+| gtEq()           | 生成 >=                                              |
+| lt()             | 生成 <                                               |
+| ltEq()           | 生成 <=                                              |
 
 注意：
 - 这些方法仅仅是字符串连接：`eq("1")`生成` = 1` ，`eq("'1'")`会生成` = '1'`。
