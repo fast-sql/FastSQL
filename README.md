@@ -42,7 +42,7 @@
         - [设置多数据源支持](#%E8%AE%BE%E7%BD%AE%E5%A4%9A%E6%95%B0%E6%8D%AE%E6%BA%90%E6%94%AF%E6%8C%81)
         - [设置BaseDAO中的拦截器](#%E8%AE%BE%E7%BD%AEbasedao%E4%B8%AD%E7%9A%84%E6%8B%A6%E6%88%AA%E5%99%A8)
     - [SQL构建器在BaseDAO中的使用](#sql%E6%9E%84%E5%BB%BA%E5%99%A8%E5%9C%A8basedao%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8)
-- [7.通用工具](#7%E9%80%9A%E7%94%A8%E5%B7%A5%E5%85%B7)
+- [7. 通用工具](#7-%E9%80%9A%E7%94%A8%E5%B7%A5%E5%85%B7)
     - [获取sql的IN列表](#%E8%8E%B7%E5%8F%96sql%E7%9A%84in%E5%88%97%E8%A1%A8)
     - [获取LIKE通配符](#%E8%8E%B7%E5%8F%96like%E9%80%9A%E9%85%8D%E7%AC%A6)
 - [8. 配置项](#8-%E9%85%8D%E7%BD%AE%E9%A1%B9)
@@ -60,7 +60,7 @@ FastSQL可以完全满足你控制欲，可以用Java代码清晰又方便地写
 
 如果使用 Maven 来构建项目，则需将下面的 dependency 代码置于 pom.xml 文件中：
 
-```
+```xml
 <dependency>
     <groupId>top.fastsql</groupId>
     <artifactId>fastsql</artifactId>
@@ -69,13 +69,14 @@ FastSQL可以完全满足你控制欲，可以用Java代码清晰又方便地写
 ```
 
 如果使用 Gradle 来构建项目，则需将下面的代码置于 build.gradle 文件的 dependencies 代码块中：
-```
+
+```groovy
 compile 'top.fastsql:fastsql:x.x.x'
 ```
 
 ## 构建 SQLFactory
 你可以直接从 Java 程序构建一个 SQLFactory ，如果使用SQL的执行功能，至少需要设置 DataSource 。
-```
+```java
 //新建一个DataSource（这里使用了Spring-Jdbc的SimpleDriverDataSource）
 DataSource dataSource = new SimpleDriverDataSource([传入url,username等]);
 
@@ -87,10 +88,11 @@ sqlFactory.setDataSource(dataSource);
 
 既然有了 SQLFactory ，我们就可以从中获得 SQL 的实例了。SQL类完全包含了面向数据库执行 sql 命令所需的所有方法。
 你可以通过 SQL 实例来构建并直接执行 SQL 语句。例如：
-```
+```java
 SQL sql = sqlFactory.createSQL();
 Student student = sql.SELECT("*").FROM("student").WHERE("id=101").queryOne(Student.class);
 ```
+
 ## 作用域（Scope）和生命周期
 
 **SQLFactory**
@@ -102,23 +104,23 @@ SQLFactory 一旦被创建就应该在应用的运行期间一直存在，没有
 
 **SQL**
 
-SQL 实例是有状态的 ，不是线程安全的，是不能被共享的。即使在同一个线程中每执行sql语句一次，都需要构建一个 SQL 实例。
+SQL 实例是有状态的 ，不是线程安全的，是不能被共享的。即使在同一个线程中每执行sql语句一次，都需要重新构建一个 SQL 实例。
 绝对不能将 SQL 实例的引用放在一个类的静态域，甚至一个类的实例变量也不行。 
 
 
 # 3. SQLFactory 配置
 
 新建SQLFactory
-```
+```java
 SQLFactory sqlFactory = new SQLFactory();
 ```
 指定DataSource
-````
+````java
 DataSource dataSource =  ... ;//新建任意类型一个DataSource，如SimpleDriverDataSource（Spring内部简单的DataSource）或者支持连接池的DataSource
 sqlFactory.setDataSource(dataSource);
 ````
 设置数据源类型
-````
+````java
 sqlFactory.setDataSourceType(DataSourceType.POSTGRESQL);//默认
 //sqlFactory.setDataSourceType(DataSourceType.MY_SQL);
 //sqlFactory.setDataSourceType(DataSourceType.ORACLE);
@@ -126,9 +128,11 @@ sqlFactory.setDataSourceType(DataSourceType.POSTGRESQL);//默认
 
 
 # 4. SQL类作为sql语句构建器使用
-Java程序员面对的最痛苦的事情之一就是在Java代码中嵌入SQL语句。FastSQL提供`SQL`类简化你构建sql语句的过程。
+
+Java程序员面对的最痛苦的事情之一就是在Java代码中嵌入SQL语句。`SQL`类可以简化你构建sql语句的过程。
 
 ## 基本查询
+
 SELECT方法可以传入一个可变参数，以便选择多列。(FastSQL中建议SQL关键字全部采用大写)
 ```java
 sqlFactory.createSQL().SELECT("name", "age").FROM("student").WHERE("age>10").build();
@@ -148,7 +152,9 @@ if (false){
 
 //===>SELECT name,age  FROM student  WHERE 1 = 1  AND age > 10 
 ```
+
 ## 使用操作符方法
+
 FastSQL提供了一些操作符方便SQL的构建，比如：
 
 ```java
@@ -216,6 +222,7 @@ sqlFactory.createSQL().SELECT("s.name","c.subject_name","c.score_value")
         .build();
 /*
 生成sql==>
+
 SELECT s.name, c.subject,c.score_value
 FROM score c
 LEFT OUTER JOIN student s ON (s.id = c.student_id)
@@ -223,8 +230,11 @@ WHERE c.score_value < 60
 ORDER BY c.score_value
 */
 ```
+
 ## 分组查询
+
 查询每个学生总分数
+
 ```java
 sqlFactory.createSQL().SELECT("s.name", "sum(c.score_value) total_score")
         .FROM("score c")
@@ -233,6 +243,7 @@ sqlFactory.createSQL().SELECT("s.name", "sum(c.score_value) total_score")
         .build()
 /*
 生成sql==>
+
 SELECT s.name, sum(c.score_value) total_score
 FROM score c
 LEFT OUTER JOIN student s ON (s.id = c.student_id)
@@ -241,7 +252,9 @@ GROUP BY s.name
 ```
 
 ## IN语句  
+
 由于Jdbc规范不支持IN参数绑定，FastSQL提供了几种IN语句直接拼接的方式：
+
 ```java
 //1.使用字符串
 sqlFactory.createSQL().SELECT("*")
@@ -261,10 +274,13 @@ sqlFactory.createSQL().SELECT("*")
    .WHERE("name").IN(new Object[]{"小明","小红"})//
    .build();
 
-//生成sql==>SELECT *  FROM student  WHERE name  IN ('小明','小红')
+//生成sql==> SELECT *  FROM student  WHERE name  IN ('小明','小红')
 ```
+
 ## 使用$_$()方法进行子查询 
+
 查询大于平均分的成绩（可以使用 $_$()方法）
+
 ```java
 sqlFactory.createSQL().SELECT("*")
    .FROM("score")
@@ -277,7 +293,9 @@ sqlFactory.createSQL().SELECT("*")
 //SELECT *  FROM score  
 //WHERE score_value >  ( SELECT avg(score_value)  FROM score  )
 ```
+
 带有IN的子查询
+
 ```java
 sqlFactory.createSQL().SELECT("*")
     .FROM("score")
@@ -291,6 +309,7 @@ sqlFactory.createSQL().SELECT("*")
 ```
 
 ## AND和OR结合使用
+
 如果查询年龄大于10岁，并且名字是小明或小红
 
 ```java
@@ -308,6 +327,7 @@ sqlFactory.createSQL().SELECT("*")
 ```
 
 ## 使用Lambda表达式简化构建动态sql
+
 - `ifTrue(boolean bool, Consumer<SQL> sqlConsumer)`:如果第1个参数为true，则执行第二个参数（Lambda表达式）
 - `ifNotEmpty(Collection<?> collection, Consumer<SQL> sqlConsumer)`:如果第1个参数长度大于0，则执行第二个参数（Lambda表达式）
 - `ifPresent(Object object, Consumer<SQL> sqlConsumer)`:如果第1个参数存在（不等于null且不为""），则执行第二个参数（Lambda表达式）
@@ -716,6 +736,7 @@ studentDAO.updateByColumn(student,"age");
 
 //===>UPDATE student SET age=? WHERE id=?
 ```
+
 ### 数据删除
 
 方法 `int deleteOneById(String id) ` 根据id删除数据
@@ -731,7 +752,7 @@ int number = studentDao.deleteAll();//获取删除的行数量
 // ===>DELETE FROM student
 ```
 
-方法 ` int[]  deleteInBatch(List<String> ids)` ,根据id列表批量删除数据(所有删除语句将会一次性提交到数据库)
+方法 `int[]  deleteInBatch(List<String> ids)` ,根据id列表批量删除数据(所有删除语句将会一次性提交到数据库)
 
 ```java
 List<String> ids = new ArrayList<>();
@@ -740,11 +761,13 @@ ids.add("881c80a1-8c93-4bb7-926e-9a8bc9799a72");
 studentDao.deleteInBatch(ids);//返回成功删除的数量
 ```
 方法` int deleteWhere(String sqlCondition, Object... values)`，根据条件删除
- 
+
 ### 单条数据查询
 
 方法     `E selectOneById(String id)` 
+
 通过id查询一个对象
+
 ```java
 Student student = studentDao.selectOneById("12345678");//查询id为12345678的数据，并封装到Student类中
 ```
@@ -752,11 +775,10 @@ Student student = studentDao.selectOneById("12345678");//查询id为12345678的�
 
 ```java
 Student student = studentDao.selectOneWhere("name=? AND home_address=?", "小明", "成都");   
-  
 ```
 
 方法     `protected E selectOneWhere(String sqlCondition, SqlParameterSource parameterSource)` 查询一条数据，protected，只能在子类中使用
- 
+
 ### 多条数据查询
 
 方法     `List<E> selectWhere(String sqlCondition, Object... values)`,用法与selectOneWhere()相同，可以返回一条或多条数据，可变参数最多支持三个
@@ -769,9 +791,11 @@ List<Student> studentList  =  studentDao.selectWhere("home_address IS NULL ORDER
 ```
 
 方法     `List<E> selectAll()` 查询所有
+
 ```java
 List<Student> allStudents  =  studentDao.selectAll();
 ```
+
 方法     `protected List<E> selectWhere(String sqlCondition, SqlParameterSource parameterSource)`可以返回一条或多条数据， protected，只能在子类中使用
 
 ### 分页查询
@@ -783,6 +807,7 @@ List<Student> allStudents  =  studentDao.selectAll();
 方法     `ResultPage<E> selectPage(int pageNumber, int perPage)` 
 
 ### 其他查询
+
 方法     `int countWhere(String sqlCondition, Object... values)`,通过条件查询数量
 
 ```java
@@ -803,6 +828,7 @@ public class BizPhotoDAO extends ApplicationBaseDAO<BizPhotoPO, String> {
 方法   `int count()` 查询表总数量
 
 ##  定制你的ApplicationBaseDAO
+
 建议在你的程序中实现ApplicationBaseDAO，可以
 
 1. 定制一些通用方法
@@ -820,7 +846,9 @@ public class StudentDAO extends ApplicationBaseDAO<Student,String> {
      
 }
 ```
+
 ###  定制通用方法
+
 如下，增加了一个名为logicDelete的逻辑删除方法，将会作用于继承于它的每个DAO
 ```java
 public abstract class ApplicationBaseDAO<E, ID> extends BaseDAO<E, ID> {
@@ -835,6 +863,7 @@ public abstract class ApplicationBaseDAO<E, ID> extends BaseDAO<E, ID> {
 }
 ```
 上面的logicDelete方法使用了tableName这个变量，BaseDAO中的部分可用变量为
+
 ```
 Class<E> entityClass; //DAO对应的实体类
 Class<ID> idClass;  //标识为@Id的主键类型
@@ -853,8 +882,8 @@ namedParameterJdbcTemplate //jdbc模板
 
 ```
 
-
 ### 设置多数据源支持
+
 ```java
 public abstract class OracleApplicationBaseDAO<E, ID> extends BaseDAO<E, ID> {
       //重写setSqlFactory方法
@@ -875,7 +904,6 @@ public abstract class MySqlApplicationBaseDAO<E, ID> extends BaseDAO<E, ID> {
        }}
 }
 ```
-
 
 ### 设置BaseDAO中的拦截器
 
@@ -901,6 +929,7 @@ public abstract class ApplicationBaseDAO<E, ID> extends BaseDAO<E, ID> {
     }
 }
 ```
+
 对应关系如下:
 
 count 参数表示执行成功的条数 
@@ -915,6 +944,7 @@ count 参数表示执行成功的条数
 | useAfterDelete  | void afterDelete(ID id,int count) | deleteOneById(..)执行删除之后                                 |
 
 ##   SQL构建器在BaseDAO中的使用
+
 BaseDAO整合了SQL构建器，在继承BaseDAO的类中你可以你可以直接调用 `this.SELECT(..)/this.UPDATE(..) /this.DELETE(..) /this.INSERT(..)` , 注意：不用设置 **namedParameterJdbcTemplate**或者**dataSource**
 
 ```java
@@ -931,13 +961,11 @@ public class StudentDAO extends ApplicationBaseDAO<Student, String> {
 }
 ```
 
-#  7.通用工具
+# 7. 通用工具
 
 ## 获取sql的IN列表
 
-```
- 
-`FastSQLUtils.getInClause(Collection<?> collection) `,会根据Collection的类型自动判断使用什么样的分隔符:
+`FastSQLUtils.getInClause(Collection<?> collection)`,会根据Collection的类型自动判断使用什么样的分隔符:
 
 ```java
 FastSQLUtils.getInClause(Lists.newArrayList(1, 23, 4, 15))  //生成=>(1,23,4,15)
@@ -948,8 +976,7 @@ FastSQLUtils.getInClause(Lists.newArrayList("dog", "people", "food", "apple")) /
 
 ## 获取LIKE通配符
 
-
-#  8. 配置项 
+# 8. 配置项
 
 显示sql日志,需要调节相应的类日志级别：
 org.springframework.jdbc.core.JdbcTemplate 日志级别调整为 debug 会显示SQL语句
