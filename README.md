@@ -16,7 +16,6 @@ FastSQL一个基于spring-jdbc的简单ORM框架，它支持sql构建、sql执�
 SqlFactory sqlFactory = ...
 
 // 第二步.获取SQL实例，构建sql语句并执行
-SQL sql = ;
 Student student = sqlFactory.createSQL()
                        .SELECT("*").FROM("student").WHERE("id=:id") //拼接sql语句
                        .mapItemsParameter("id",101) //绑定参数
