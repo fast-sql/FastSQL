@@ -15,8 +15,8 @@
     - [使用$_$()方法进行子查询](#%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95%E8%BF%9B%E8%A1%8C%E5%AD%90%E6%9F%A5%E8%AF%A2)
     - [AND和OR结合使用](#and%E5%92%8Cor%E7%BB%93%E5%90%88%E4%BD%BF%E7%94%A8)
     - [使用Lambda表达式简化构建动态sql](#%E4%BD%BF%E7%94%A8lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E7%AE%80%E5%8C%96%E6%9E%84%E5%BB%BA%E5%8A%A8%E6%80%81sql)
-    - [构建插入insert/修改update/删除delete语句](#%E6%9E%84%E5%BB%BA%E6%8F%92%E5%85%A5insert%E4%BF%AE%E6%94%B9update%E5%88%A0%E9%99%A4delete%E8%AF%AD%E5%8F%A5)
     - [分页功能](#%E5%88%86%E9%A1%B5%E5%8A%9F%E8%83%BD)
+    - [构建插入insert/修改update/删除delete语句](#%E6%9E%84%E5%BB%BA%E6%8F%92%E5%85%A5insert%E4%BF%AE%E6%94%B9update%E5%88%A0%E9%99%A4delete%E8%AF%AD%E5%8F%A5)
 - [5. SQL构建器的执行功能](#5-sql%E6%9E%84%E5%BB%BA%E5%99%A8%E7%9A%84%E6%89%A7%E8%A1%8C%E5%8A%9F%E8%83%BD)
     - [创建SqlFactory](#%E5%88%9B%E5%BB%BAsqlfactory)
     - [设置参数方法](#%E8%AE%BE%E7%BD%AE%E5%8F%82%E6%95%B0%E6%96%B9%E6%B3%95)
@@ -333,6 +333,35 @@ SELECT student WHERE id=:id AND name=:name AND name  IN ('小明','小红')
 ```
 
 
+
+
+## 分页功能
+**使用原生关键字进行分页**
+```java
+sqlFactory.createSQL().SELECT("*").FROM("student").LIMIT(10).build();
+sqlFactory.createSQL().SELECT("*").FROM("student").LIMIT(5, 10).build();  //postgresql中的写法
+sqlFactory.createSQL().SELECT("*").FROM("student").LIMIT(10).OFFSET(5).build(); //mysql中的写法
+```
+生成如下SQL
+```sql
+SELECT * FROM student LIMIT 10
+SELECT * FROM student LIMIT 5,10
+SELECT * FROM student LIMIT 10 OFFSET 5
+```
+
+**使用** `pageThis(int,int)` **分页方法进行分页**
+```
+//
+sqlFactory.setDataSourceType(DataSourceType.POSTGRESQL); //使用枚举指定数据源类型
+sqlFactory.createSQL().SELECT("*").FROM("student").pageThis(1,10).build();
+```
+注意：如果不指定 dataSourceType，将会使用 FastSQLConfig#dataSourceType 的默认类型进行分页;
+
+**使用** `countThis()` **生成获取数量语句**
+```java
+//countThis
+sqlFactory.createSQL().SELECT("*").FROM("student").countThis().buildAndPrintSQL();
+```
 ## 构建插入insert/修改update/删除delete语句
 **插入**
 
@@ -366,36 +395,10 @@ sqlFactory.createSQL().DELETE_FROM("student").WHERE("id=:id").build();
 //=>DELETE FROM student WHERE id=:id                
 ```
 
-## 分页功能
-**使用原生关键字进行分页**
-```java
-sqlFactory.createSQL().SELECT("*").FROM("student").LIMIT(10).build();
-sqlFactory.createSQL().SELECT("*").FROM("student").LIMIT(5, 10).build();  //postgresql中的写法
-sqlFactory.createSQL().SELECT("*").FROM("student").LIMIT(10).OFFSET(5).build(); //mysql中的写法
-```
-生成如下SQL
-```sql
-SELECT * FROM student LIMIT 10
-SELECT * FROM student LIMIT 5,10
-SELECT * FROM student LIMIT 10 OFFSET 5
-```
 
-**使用** `pageThis(int,int)` **分页方法进行分页**
-```
-//
-sqlFactory.setDataSourceType(DataSourceType.POSTGRESQL); //使用枚举指定数据源类型
-sqlFactory.createSQL().SELECT("*").FROM("student").pageThis(1,10).build();
-```
-注意：如果不指定 dataSourceType，将会使用 FastSQLConfig#dataSourceType 的默认类型进行分页;
 
-**使用** `countThis()` **生成获取数量语句**
-```java
-//countThis
-sqlFactory.createSQL().SELECT("*").FROM("student").countThis().buildAndPrintSQL();
-```
  
 # 5. SQL构建器的执行功能
-
 
 ##  创建SqlFactory
 ```java
