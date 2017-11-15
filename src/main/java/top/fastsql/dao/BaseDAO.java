@@ -67,8 +67,9 @@ public abstract class BaseDAO<E, ID> {
     protected boolean useBeforeDelete = false;
     protected boolean useAfterDelete = true;//
 
-    protected DataSourceType dataSourceType;
-
+    /**
+     * 执行引擎
+     */
     protected SQLFactory sqlFactory;
 
 
@@ -117,11 +118,7 @@ public abstract class BaseDAO<E, ID> {
         //TODO 现在反射了两次 需要重写为一次
         //没有主键
         this.fieldsWithoutId = EntityRefelectUtils.getAllFieldWithoutIdByClass(entityClass);
-        /*
-        for (Field field : this.fieldsWithoutId) {
-            this.columnNamesWithoutId.add(camelToUnderline(field.getName()));
-        }
-        */
+
         this.fieldsWithoutId.forEach(field -> this.columnNamesWithoutId.add(camelToUnderline(field.getName())));
         //主键
         this.idField = EntityRefelectUtils.getIdField(entityClass); //TODO 2
@@ -132,12 +129,6 @@ public abstract class BaseDAO<E, ID> {
         this.fields.add(0, this.idField);
         this.columnNames.addAll(this.columnNamesWithoutId);
         this.columnNames.add(0, camelToUnderline(this.idField.getName()));
-
-        //使用默认配置
-        this.dataSourceType = DataSourceType.POSTGRESQL;
-
-        //sql工厂
-        this.sqlFactory = new SQLFactory();
     }
 
 
@@ -153,16 +144,6 @@ public abstract class BaseDAO<E, ID> {
         //SQL语句部分字符串构建器
         final StringBuilder nameBuilder = new StringBuilder();
         final StringBuilder valueBuilder = new StringBuilder();
-        /*
-        for (Field field : fields) {
-            if (EntityRefelectUtils.getFieldValue(entity, field) != null) {
-                nameBuilder.append(",").append(StringExtUtils.camelToUnderline(field.getName()));
-                valueBuilder.append(",:").append(field.getName());
-            }
-        }
-        String insertSql = "INSERT INTO " + tableName + "(" + nameBuilder.toString().replaceFirst(",", "") + ") " +
-        "VALUES(" + valueBuilder.toString().replaceFirst(",", "") + ")";
-        */
         //遍历
         fields.stream()
                 .filter(field -> EntityRefelectUtils.getFieldValue(entity, field) != null)
@@ -175,13 +156,10 @@ public abstract class BaseDAO<E, ID> {
                 .INSERT_INTO(tableName, nameBuilder.deleteCharAt(0).toString())
                 .VALUES(valueBuilder.delete(0, 1).toString())
                 .beanParameter(entity);
-        //若useBeforeInsert设置为true，则执行拦截方法
         if (useBeforeInsert) {
             beforeInsert(entity);
         }
-        //执行sql语句并获取修改行数
         final int count = sql.update();
-        //若useAfterInsert设置为true，则执行拦截方法
         if (useAfterInsert) {
             afterInsert(entity, count);
         }
@@ -233,26 +211,13 @@ public abstract class BaseDAO<E, ID> {
                         sqlBuilder.append("," + StringExtUtils.camelToUnderline(field.getName()) +
                                 "=:" +
                                 field.getName()));
-        /*
-        for (Field field : fieldsWithoutId) {
-            sqlBuilder.append("," + StringExtUtils.camelToUnderline(field.getName()) + "=:" + field.getName());
-        }
-        String setValueSql = sqlBuilder.deleteCharAt(0).toString();
-        String sql = "UPDATE " + tableName + " SET " + setValueSql + " WHERE id=:id";//set sql
-        */
+
         final SQL sql = sqlFactory.createSQL()
                 .UPDATE(tableName)
                 .SET(sqlBuilder.deleteCharAt(0).toString())
                 .WHERE(idColumnName + "=:" + idColumnName)
                 .beanParameter(entity);
-        /*
-        if (useAfterUpdate) {
-            beforeUpdate(entity);
-        }
-        int count = namedParameterJdbcTemplate.update(
-                sql, new BeanPropertySqlParameterSource(entity)
-        );
-        */
+
         if (useBeforeUpdate) {
             beforeUpdate(entity);
         }
@@ -293,23 +258,13 @@ public abstract class BaseDAO<E, ID> {
                 sqlBuilder.append("," + StringExtUtils.camelToUnderline(field.getName()) +
                         "=:" +
                         field.getName()));
-        /*
-        for (Field field : fieldsWithoutId) {
-            if (EntityRefelectUtils.getFieldValue(entity, field) != null) {
-                sqlBuilder.append("," + StringExtUtils.camelToUnderline(field.getName()) + "=:" + field.getName());
-            }
-        }
-        String setValueSql = sqlBuilder.toString().replaceFirst(",", "");
-        String sql = "UPDATE " + tableName + " SET " + setValueSql + " WHERE id=:id";//set sql
-        */
+
         final SQL sql = sqlFactory.createSQL()
                 .UPDATE(tableName)
                 .SET(sqlBuilder.deleteCharAt(0).toString())
                 .WHERE(idColumnName + "=:" + idColumnName)
                 .beanParameter(entity);
-        /*
-        int count = namedParameterJdbcTemplate.update(sql, new BeanPropertySqlParameterSource(entity));
-        */
+
         if (useBeforeUpdate) {
             beforeUpdate(entity);
         }
@@ -329,11 +284,7 @@ public abstract class BaseDAO<E, ID> {
         for (String column : columns) {
             sqlBuilder.append("," + column + "=:" + EntityRefelectUtils.underlineToCamelFirstLower(column));
         }
-        /*
-        String setValueSql = sqlBuilder.toString().replaceFirst(",", "");
-        String sql = "UPDATE " + tableName + " SET " + setValueSql + " WHERE id=:id";//set sql
-        int count = namedParameterJdbcTemplate.update(sql, new BeanPropertySqlParameterSource(entity));
-        */
+
         final SQL sql = sqlFactory.createSQL()
                 .UPDATE(tableName)
                 .SET(sqlBuilder.deleteCharAt(0).toString())
@@ -364,9 +315,7 @@ public abstract class BaseDAO<E, ID> {
                 .DELETE_FROM(tableName)
                 .WHERE(idColumnName + "=:" + idColumnName)
                 .mapItemsParameter("id", id);
-        /*
-        int count = namedParameterJdbcTemplate.getJdbcOperations().update(sql, id);
-        */
+
         final int count = sql.update();
         if (useAfterDelete) {
             afterDelete(id, count);
@@ -378,9 +327,7 @@ public abstract class BaseDAO<E, ID> {
      * 删除所有数据
      */
     public int deleteAll() {
-        //TODO 此方法可考虑不使用SQL类重写
         return sqlFactory.createSQL().useSql("DELETE FROM " + tableName).update();
-//        return namedParameterJdbcTemplate.getJdbcOperations().update(" " + tableName);
     }
 
     /**
@@ -389,7 +336,6 @@ public abstract class BaseDAO<E, ID> {
     public int deleteWhere(String sqlCondition, Object... values) {
         String sql = "DELETE FROM " + tableName + " WHERE " + sqlCondition;
         return sqlFactory.createSQL().useSql(sql).varParameter(values).update();
-//        return namedParameterJdbcTemplate.getJdbcOperations().update(sql, values);
     }
 
     /**
@@ -397,11 +343,7 @@ public abstract class BaseDAO<E, ID> {
      */
     public BatchUpdateResult deleteInBatch(List<ID> ids) {
         final String sql = "DELETE FROM " + tableName + " WHERE " + idColumnName + "=:" + idColumnName;
-//        final MapSqlParameterSource[] parameterSources = new MapSqlParameterSource[ids.size()];
-//        for (int i = 0; i < ids.size(); i++) {
-//            parameterSources[i] = new MapSqlParameterSource("id", ids.get(i));
-//        }
-//        return namedParameterJdbcTemplate.batchUpdate(sql, parameterSources);
+
         List<Map<String, Object>> mapList = new ArrayList<>(ids.size());
         for (ID id : ids) {
             Map<String, Object> map = new HashMap<>();
@@ -421,13 +363,7 @@ public abstract class BaseDAO<E, ID> {
     public E selectOneById(ID id) {
         E returnObject;
         try {
-            /*
-            returnObject = namedParameterJdbcTemplate.getJdbcOperations().queryForObject(
-                    "SELECT * FROM " + tableName + " WHERE " + idColumnName + "=?",
-                    new BeanPropertyRowMapper<E>(entityClass),
-                    id
-            );
-            */
+
             returnObject = sqlFactory.createSQL()
                     .SELECT("*")
                     .FROM(tableName)
@@ -439,7 +375,6 @@ public abstract class BaseDAO<E, ID> {
         }
         return returnObject;
     }
-
 
     private E selectOneWhere(String sqlCondition, Object param1) {
         return selectOneWhere(sqlCondition, new Object[]{param1});
@@ -464,22 +399,12 @@ public abstract class BaseDAO<E, ID> {
         //sql
         String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition;
 
-//        List<E> dataList = namedParameterJdbcTemplate.getJdbcOperations().query(
-//                sql, values, new BeanPropertyRowMapper<>(entityClass)
-//        );
         List<E> dataList = getSqlFactory().createSQL().useSql(sql)
                 .varParameter(values)
                 .queryList(new BeanPropertyRowMapper<>(entityClass));
 
-        /*
-        TODO 不知如何用SQL重写
-        sqlFactory.createSQL()
-                .SELECT("*")
-                .FROM(tableName)
-                .WHERE(sqlCondition)
-        */
+
         if (dataList.isEmpty()) {
-//            log.warn(tableName + "#findOneWhere()返回的数据为null");
             return null;
         } else if (dataList.size() == 1) {
             return dataList.get(0);
@@ -489,7 +414,6 @@ public abstract class BaseDAO<E, ID> {
         }
     }
 
-
     public E selectOneWhere(String sqlCondition, SqlParameterSource parameterSource) {
         //sql
         String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition;
@@ -498,9 +422,7 @@ public abstract class BaseDAO<E, ID> {
                 .parameter(parameterSource)
                 .queryList(new BeanPropertyRowMapper<>(entityClass));
 
-//        List<E> dataList = namedParameterJdbcTemplate.query(
-//                sql, parameterSource, new BeanPropertyRowMapper<>(entityClass)
-//        );
+
         if (dataList.size() == 0) {
             return null;
         } else if (dataList.size() == 1) {
@@ -514,164 +436,61 @@ public abstract class BaseDAO<E, ID> {
     //////////////////////////////find list/////////////////////////////////////
 
     public List<E> selectAll() {
-        /*
-        String sql = "SELECT * FROM " + tableName;
-        return namedParameterJdbcTemplate.query(sql, new HashMap<String, Object>(), new BeanPropertyRowMapper<E>(entityClass));
-        */
-        return sqlFactory.createSQL()
-                .SELECT("*")
-                .FROM(tableName)
-                .queryList(entityClass);
+        return sqlFactory.createSQL().SELECT("*").FROM(tableName).queryList(entityClass);
     }
 
-    public List<E> selectWhere(String sqlCondition, Object param1) {
-        return selectWhere(sqlCondition, new Object[]{param1});
-    }
-
-    public List<E> selectWhere(String sqlCondition, Object param1, Object param2) {
-        return selectWhere(sqlCondition, new Object[]{param1, param2});
-    }
-
-    public List<E> selectWhere(String sqlCondition, Object param1, Object param2, Object param3) {
-        return selectWhere(sqlCondition, new Object[]{param1, param2, param3});
-    }
-
-    private List<E> selectWhere(String sqlCondition, Object[] values) {
+    private List<E> selectWhere(String sqlCondition, Object... values) {
         //sql
         String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition;
         return sqlFactory.createSQL().useSql(sql).varParameter(values).queryList(new BeanPropertyRowMapper<>(entityClass));
-//        return namedParameterJdbcTemplate.getJdbcOperations()
-//                .query(sql, values, new BeanPropertyRowMapper<>(entityClass));
     }
-
 
     public List<E> selectWhere(String sqlCondition, SqlParameterSource parameterSource) {
         //sql
         String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition;
         return sqlFactory.createSQL().useSql(sql).parameter(parameterSource).queryList(new BeanPropertyRowMapper<>(entityClass));
-
-//        return namedParameterJdbcTemplate.query(sql, parameterSource, new BeanPropertyRowMapper<>(entityClass));
     }
 
     ////////////////////////////////////count///////////////////////////////////////////
-
-//    public int countWhere(String sqlCondition, Object param1) {
-//        return countWhere(sqlCondition, new Object[]{param1});
-//    }
-//
-//    public int countWhere(String sqlCondition, Object param1, Object param2) {
-//        return countWhere(sqlCondition, new Object[]{param1, param2});
-//    }
-//
-//    public int countWhere(String sqlCondition, Object param1, Object param2, Object param3) {
-//        return countWhere(sqlCondition, new Object[]{param1, param2, param3});
-//    }
-
     private int countWhere(String sqlCondition, Object... values) {
         String sql = "SELECT count(*) FROM " + tableName + " WHERE " + sqlCondition;
         return sqlFactory.createSQL().useSql(sql).varParameter(values).queryInteger();
-
-//        return namedParameterJdbcTemplate.getJdbcOperations().queryForObject(sql, values, Integer.class);
     }
 
     public int countWhere(String sqlCondition, SqlParameterSource parameterSource) {
         //sql
         String sql = "SELECT count(*) FROM " + tableName + " WHERE " + sqlCondition;
-
         return sqlFactory.createSQL().useSql(sql).parameter(parameterSource).queryInteger();
-
-//        return namedParameterJdbcTemplate.queryForObject(sql, parameterSource, Integer.class);
     }
-
 
     public int count() {
-        /*
-        String sql = "SELECT count(*) FROM " + tableName;
-        return namedParameterJdbcTemplate.getJdbcOperations().queryForObject(sql, Integer.class);
-        */
-        return sqlFactory.createSQL()
-                .SELECT("COUNT(*)")
-                .FROM(tableName)
-                .queryInteger();
+        return sqlFactory.createSQL().SELECT("COUNT(*)").FROM(tableName).queryInteger();
     }
 
-
-    ////////////////page///////////////
-
-//    public ResultPage<E> selectPageWhere(String sqlCondition, int pageNumber, int perPage, Object param1) {
-//        return selectPageWhere(sqlCondition, pageNumber, perPage, new Object[]{param1});
-//    }
-//
-//    public ResultPage<E> selectPageWhere(String sqlCondition, int pageNumber, int perPage, Object param1, Object param2) {
-//        return selectPageWhere(sqlCondition, pageNumber, perPage, new Object[]{param1, param2});
-//    }
-//
-//    public ResultPage<E> selectPageWhere(String sqlCondition, int pageNumber, int perPage, Object param1, Object param2, Object param3) {
-//        return selectPageWhere(sqlCondition, pageNumber, perPage, new Object[]{param1, param2, param3});
-//    }
-
+    //////////////////////////////////query page///////////////////////////////////////////////////////////////
     public ResultPage<E> selectPageWhere(String sqlCondition, int pageNumber, int perPage, Object... values) {
         //sql
         String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition;
-//        List<E> list = namedParameterJdbcTemplate.getJdbcOperations().query(
-//                PageUtils.getRowsSQL(sql, pageNumber, perPage, this.dataSourceType),
-//                values,
-//                new BeanPropertyRowMapper<>(entityClass)
-//        );
-//        Integer count = namedParameterJdbcTemplate.getJdbcOperations().queryForObject(
-//                PageUtils.getNumberSQL(sql),
-//                Integer.class, values);
-//        return new ResultPage<>(list, count);
         return sqlFactory.createSQL().useSql(sql).varParameter(values)
                 .queryPage(pageNumber, perPage, new BeanPropertyRowMapper<>(entityClass));
     }
 
-
     public ResultPage<E> selectPageWhere(String sqlCondition, int pageNumber, int perPage,
                                          SqlParameterSource parameterSource) {
-        //sql
         String sql = "SELECT * FROM " + tableName + " WHERE 1=1 AND " + sqlCondition;
-
-//        List<E> coll = namedParameterJdbcTemplate.query(
-//                PageUtils.getRowsSQL(sql, pageNumber, perPage, this.dataSourceType),
-//                parameterSource,
-//                new BeanPropertyRowMapper<>(entityClass)
-//        );
-//        Integer count = namedParameterJdbcTemplate.queryForObject(
-//                PageUtils.getNumberSQL(sql),
-//                parameterSource,
-//                Integer.class);
-//
-//        return new ResultPage<>(coll, count);
-
         return sqlFactory.createSQL().useSql(sql).parameter(parameterSource)
                 .queryPage(pageNumber, perPage, new BeanPropertyRowMapper<>(entityClass));
     }
 
 
     public ResultPage<E> selectPage(int pageNumber, int perPage) {
-        //sql
         String sql = "SELECT * FROM " + tableName;
-
-//        List<E> coll = namedParameterJdbcTemplate.query(
-//                PageUtils.getRowsSQL(sql, pageNumber, perPage, this.dataSourceType),
-//                EmptySqlParameterSource.INSTANCE,
-//                new BeanPropertyRowMapper<>(entityClass)
-//        );
-//        Integer count = namedParameterJdbcTemplate.queryForObject(
-//                PageUtils.getNumberSQL(sql),
-//                EmptySqlParameterSource.INSTANCE,
-//                Integer.class);
-//        return new ResultPage<>(coll, count);
-
         return sqlFactory.createSQL().useSql(sql)
                 .queryPage(pageNumber, perPage, new BeanPropertyRowMapper<>(entityClass));
     }
 
 
     ////////////////////////////////////拦截器///////////////////////////
-
-
     protected void beforeInsert(E entity) {
     }
 

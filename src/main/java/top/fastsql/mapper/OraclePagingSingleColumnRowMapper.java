@@ -6,7 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * oracle分页之后多了一列，这个类可以选取单列数据
+ * oracle分页之后多了一列row number，匹配单列rowMapper会报错，这个类可以选取单列数据
  *
  * @author 陈佳志
  * 2017-10-25
