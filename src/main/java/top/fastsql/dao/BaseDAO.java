@@ -3,6 +3,7 @@ package top.fastsql.dao;
 import top.fastsql.SQL;
 import top.fastsql.SQLFactory;
 import top.fastsql.config.DataSourceType;
+import top.fastsql.dto.BatchUpdateResult;
 import top.fastsql.dto.ResultPage;
 import top.fastsql.util.EntityRefelectUtils;
 import top.fastsql.util.PageUtils;
@@ -22,7 +23,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static top.fastsql.util.StringExtUtils.camelToUnderline;
 
@@ -43,7 +46,7 @@ public abstract class BaseDAO<E, ID> {
     protected String className;
     protected String tableName;
     /**
-     * 元数据
+     * 实体类的元数据
      */
     protected Field idField;
     protected String idColumnName;
@@ -66,14 +69,26 @@ public abstract class BaseDAO<E, ID> {
 
     protected DataSourceType dataSourceType;
 
-    protected NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-
     protected SQLFactory sqlFactory;
 
-    //TODO 完全使用SQL代替NamedParameterJdbcTemplate
+
+    public SQLFactory getSqlFactory() {
+        if (sqlFactory == null) {
+            throw new IllegalArgumentException("sqlFactory is null in BaseDAO,please set it.");
+        }
+        return sqlFactory;
+    }
+
+    public SQL getSQL() {
+        if (sqlFactory == null) {
+            throw new IllegalArgumentException("sqlFactory is null in BaseDAO,please set it.");
+        }
+        return sqlFactory.createSQL();
+    }
+
     @Autowired
-    public void setNamedParameterJdbcTemplate(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
-        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+    public void setSqlFactory(SQLFactory sqlFactory) {
+        this.sqlFactory = sqlFactory;
     }
 
     public BaseDAO() {
@@ -185,21 +200,12 @@ public abstract class BaseDAO<E, ID> {
             nameBuilder.append(",").append(StringExtUtils.camelToUnderline(field.getName()));
             valueBuilder.append(",:").append(field.getName());
         });
-        /*
-        for (Field field : fields) {
-            nameBuilder.append(",").append(StringExtUtils.camelToUnderline(field.getName()));
-            valueBuilder.append(",:").append(field.getName());
-        }
-        */
+
         final SQL sql = sqlFactory.createSQL()
                 .INSERT_INTO(tableName, nameBuilder.deleteCharAt(0).toString())
                 .VALUES(valueBuilder.deleteCharAt(0).toString())
                 .beanParameter(entity);
-        /*
-        String sql = "INSERT INTO " + tableName + "(" + nameBuilder.toString().replaceFirst(",", "") + ") " +
-                "VALUES(" + valueBuilder.toString().replaceFirst(",", "") + ")";
-        int count = namedParameterJdbcTemplate.update(sql, new BeanPropertySqlParameterSource(entity));
-        */
+
         if (useBeforeInsert) {
             beforeInsert(entity);
         }
@@ -373,7 +379,8 @@ public abstract class BaseDAO<E, ID> {
      */
     public int deleteAll() {
         //TODO 此方法可考虑不使用SQL类重写
-        return namedParameterJdbcTemplate.getJdbcOperations().update("DELETE FROM " + tableName);
+        return sqlFactory.createSQL().useSql("DELETE FROM " + tableName).update();
+//        return namedParameterJdbcTemplate.getJdbcOperations().update(" " + tableName);
     }
 
     /**
@@ -381,19 +388,28 @@ public abstract class BaseDAO<E, ID> {
      */
     public int deleteWhere(String sqlCondition, Object... values) {
         String sql = "DELETE FROM " + tableName + " WHERE " + sqlCondition;
-        return namedParameterJdbcTemplate.getJdbcOperations().update(sql, values);
+        return sqlFactory.createSQL().useSql(sql).varParameter(values).update();
+//        return namedParameterJdbcTemplate.getJdbcOperations().update(sql, values);
     }
 
     /**
      * 根据id列表批量删除数据
      */
-    public int[] deleteInBatch(List<ID> ids) {
+    public BatchUpdateResult deleteInBatch(List<ID> ids) {
         final String sql = "DELETE FROM " + tableName + " WHERE " + idColumnName + "=:" + idColumnName;
-        final MapSqlParameterSource[] parameterSources = new MapSqlParameterSource[ids.size()];
-        for (int i = 0; i < ids.size(); i++) {
-            parameterSources[i] = new MapSqlParameterSource("id", ids.get(i));
+//        final MapSqlParameterSource[] parameterSources = new MapSqlParameterSource[ids.size()];
+//        for (int i = 0; i < ids.size(); i++) {
+//            parameterSources[i] = new MapSqlParameterSource("id", ids.get(i));
+//        }
+//        return namedParameterJdbcTemplate.batchUpdate(sql, parameterSources);
+        List<Map<String, Object>> mapList = new ArrayList<>(ids.size());
+        for (ID id : ids) {
+            Map<String, Object> map = new HashMap<>();
+            map.put(idColumnName, id);
+            mapList.add(map);
         }
-        return namedParameterJdbcTemplate.batchUpdate(sql, parameterSources);
+
+        return sqlFactory.createSQL().useSql(sql).batchUpdateByMapParams(mapList);
     }
 
 
@@ -448,9 +464,12 @@ public abstract class BaseDAO<E, ID> {
         //sql
         String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition;
 
-        List<E> dateList = namedParameterJdbcTemplate.getJdbcOperations().query(
-                sql, values, new BeanPropertyRowMapper<>(entityClass)
-        );
+//        List<E> dataList = namedParameterJdbcTemplate.getJdbcOperations().query(
+//                sql, values, new BeanPropertyRowMapper<>(entityClass)
+//        );
+        List<E> dataList = getSqlFactory().createSQL().useSql(sql)
+                .varParameter(values)
+                .queryList(new BeanPropertyRowMapper<>(entityClass));
 
         /*
         TODO 不知如何用SQL重写
@@ -459,11 +478,11 @@ public abstract class BaseDAO<E, ID> {
                 .FROM(tableName)
                 .WHERE(sqlCondition)
         */
-        if (dateList.isEmpty()) {
+        if (dataList.isEmpty()) {
 //            log.warn(tableName + "#findOneWhere()返回的数据为null");
             return null;
-        } else if (dateList.size() == 1) {
-            return dateList.get(0);
+        } else if (dataList.size() == 1) {
+            return dataList.get(0);
         } else {
             log.error(tableName + "#findOneWhere()返回多条数据");
             throw new RuntimeException(tableName + "#findOneWhere()返回多条数据");
@@ -475,13 +494,17 @@ public abstract class BaseDAO<E, ID> {
         //sql
         String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition;
 
-        List<E> dateList = namedParameterJdbcTemplate.query(
-                sql, parameterSource, new BeanPropertyRowMapper<>(entityClass)
-        );
-        if (dateList.size() == 0) {
+        List<E> dataList = getSqlFactory().createSQL().useSql(sql)
+                .parameter(parameterSource)
+                .queryList(new BeanPropertyRowMapper<>(entityClass));
+
+//        List<E> dataList = namedParameterJdbcTemplate.query(
+//                sql, parameterSource, new BeanPropertyRowMapper<>(entityClass)
+//        );
+        if (dataList.size() == 0) {
             return null;
-        } else if (dateList.size() == 1) {
-            return dateList.get(0);
+        } else if (dataList.size() == 1) {
+            return dataList.get(0);
         } else {
             log.error(tableName + "#findOneWhere()返回多条数据");
             throw new RuntimeException(tableName + "#findOneWhere()返回多条数据");
@@ -516,40 +539,48 @@ public abstract class BaseDAO<E, ID> {
     private List<E> selectWhere(String sqlCondition, Object[] values) {
         //sql
         String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition;
-        return namedParameterJdbcTemplate.getJdbcOperations()
-                .query(sql, values, new BeanPropertyRowMapper<>(entityClass));
+        return sqlFactory.createSQL().useSql(sql).varParameter(values).queryList(new BeanPropertyRowMapper<>(entityClass));
+//        return namedParameterJdbcTemplate.getJdbcOperations()
+//                .query(sql, values, new BeanPropertyRowMapper<>(entityClass));
     }
 
 
     public List<E> selectWhere(String sqlCondition, SqlParameterSource parameterSource) {
         //sql
         String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition;
-        return namedParameterJdbcTemplate.query(sql, parameterSource, new BeanPropertyRowMapper<>(entityClass));
+        return sqlFactory.createSQL().useSql(sql).parameter(parameterSource).queryList(new BeanPropertyRowMapper<>(entityClass));
+
+//        return namedParameterJdbcTemplate.query(sql, parameterSource, new BeanPropertyRowMapper<>(entityClass));
     }
 
     ////////////////////////////////////count///////////////////////////////////////////
 
-    public int countWhere(String sqlCondition, Object param1) {
-        return countWhere(sqlCondition, new Object[]{param1});
-    }
+//    public int countWhere(String sqlCondition, Object param1) {
+//        return countWhere(sqlCondition, new Object[]{param1});
+//    }
+//
+//    public int countWhere(String sqlCondition, Object param1, Object param2) {
+//        return countWhere(sqlCondition, new Object[]{param1, param2});
+//    }
+//
+//    public int countWhere(String sqlCondition, Object param1, Object param2, Object param3) {
+//        return countWhere(sqlCondition, new Object[]{param1, param2, param3});
+//    }
 
-    public int countWhere(String sqlCondition, Object param1, Object param2) {
-        return countWhere(sqlCondition, new Object[]{param1, param2});
-    }
-
-    public int countWhere(String sqlCondition, Object param1, Object param2, Object param3) {
-        return countWhere(sqlCondition, new Object[]{param1, param2, param3});
-    }
-
-    private int countWhere(String sqlCondition, Object[] values) {
+    private int countWhere(String sqlCondition, Object... values) {
         String sql = "SELECT count(*) FROM " + tableName + " WHERE " + sqlCondition;
-        return namedParameterJdbcTemplate.getJdbcOperations().queryForObject(sql, values, Integer.class);
+        return sqlFactory.createSQL().useSql(sql).varParameter(values).queryInteger();
+
+//        return namedParameterJdbcTemplate.getJdbcOperations().queryForObject(sql, values, Integer.class);
     }
 
     public int countWhere(String sqlCondition, SqlParameterSource parameterSource) {
         //sql
         String sql = "SELECT count(*) FROM " + tableName + " WHERE " + sqlCondition;
-        return namedParameterJdbcTemplate.queryForObject(sql, parameterSource, Integer.class);
+
+        return sqlFactory.createSQL().useSql(sql).parameter(parameterSource).queryInteger();
+
+//        return namedParameterJdbcTemplate.queryForObject(sql, parameterSource, Integer.class);
     }
 
 
@@ -567,30 +598,32 @@ public abstract class BaseDAO<E, ID> {
 
     ////////////////page///////////////
 
-    public ResultPage<E> selectPageWhere(String sqlCondition, int pageNumber, int perPage, Object param1) {
-        return selectPageWhere(sqlCondition, pageNumber, perPage, new Object[]{param1});
-    }
+//    public ResultPage<E> selectPageWhere(String sqlCondition, int pageNumber, int perPage, Object param1) {
+//        return selectPageWhere(sqlCondition, pageNumber, perPage, new Object[]{param1});
+//    }
+//
+//    public ResultPage<E> selectPageWhere(String sqlCondition, int pageNumber, int perPage, Object param1, Object param2) {
+//        return selectPageWhere(sqlCondition, pageNumber, perPage, new Object[]{param1, param2});
+//    }
+//
+//    public ResultPage<E> selectPageWhere(String sqlCondition, int pageNumber, int perPage, Object param1, Object param2, Object param3) {
+//        return selectPageWhere(sqlCondition, pageNumber, perPage, new Object[]{param1, param2, param3});
+//    }
 
-    public ResultPage<E> selectPageWhere(String sqlCondition, int pageNumber, int perPage, Object param1, Object param2) {
-        return selectPageWhere(sqlCondition, pageNumber, perPage, new Object[]{param1, param2});
-    }
-
-    public ResultPage<E> selectPageWhere(String sqlCondition, int pageNumber, int perPage, Object param1, Object param2, Object param3) {
-        return selectPageWhere(sqlCondition, pageNumber, perPage, new Object[]{param1, param2, param3});
-    }
-
-    public ResultPage<E> selectPageWhere(String sqlCondition, int pageNumber, int perPage, Object[] values) {
+    public ResultPage<E> selectPageWhere(String sqlCondition, int pageNumber, int perPage, Object... values) {
         //sql
         String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition;
-        List<E> list = namedParameterJdbcTemplate.getJdbcOperations().query(
-                PageUtils.getRowsSQL(sql, pageNumber, perPage, this.dataSourceType),
-                values,
-                new BeanPropertyRowMapper<>(entityClass)
-        );
-        Integer count = namedParameterJdbcTemplate.getJdbcOperations().queryForObject(
-                PageUtils.getNumberSQL(sql),
-                Integer.class, values);
-        return new ResultPage<>(list, count);
+//        List<E> list = namedParameterJdbcTemplate.getJdbcOperations().query(
+//                PageUtils.getRowsSQL(sql, pageNumber, perPage, this.dataSourceType),
+//                values,
+//                new BeanPropertyRowMapper<>(entityClass)
+//        );
+//        Integer count = namedParameterJdbcTemplate.getJdbcOperations().queryForObject(
+//                PageUtils.getNumberSQL(sql),
+//                Integer.class, values);
+//        return new ResultPage<>(list, count);
+        return sqlFactory.createSQL().useSql(sql).varParameter(values)
+                .queryPage(pageNumber, perPage, new BeanPropertyRowMapper<>(entityClass));
     }
 
 
@@ -599,17 +632,20 @@ public abstract class BaseDAO<E, ID> {
         //sql
         String sql = "SELECT * FROM " + tableName + " WHERE 1=1 AND " + sqlCondition;
 
-        List<E> coll = namedParameterJdbcTemplate.query(
-                PageUtils.getRowsSQL(sql, pageNumber, perPage, this.dataSourceType),
-                parameterSource,
-                new BeanPropertyRowMapper<>(entityClass)
-        );
-        Integer count = namedParameterJdbcTemplate.queryForObject(
-                PageUtils.getNumberSQL(sql),
-                parameterSource,
-                Integer.class);
+//        List<E> coll = namedParameterJdbcTemplate.query(
+//                PageUtils.getRowsSQL(sql, pageNumber, perPage, this.dataSourceType),
+//                parameterSource,
+//                new BeanPropertyRowMapper<>(entityClass)
+//        );
+//        Integer count = namedParameterJdbcTemplate.queryForObject(
+//                PageUtils.getNumberSQL(sql),
+//                parameterSource,
+//                Integer.class);
+//
+//        return new ResultPage<>(coll, count);
 
-        return new ResultPage<>(coll, count);
+        return sqlFactory.createSQL().useSql(sql).parameter(parameterSource)
+                .queryPage(pageNumber, perPage, new BeanPropertyRowMapper<>(entityClass));
     }
 
 
@@ -617,16 +653,19 @@ public abstract class BaseDAO<E, ID> {
         //sql
         String sql = "SELECT * FROM " + tableName;
 
-        List<E> coll = namedParameterJdbcTemplate.query(
-                PageUtils.getRowsSQL(sql, pageNumber, perPage, this.dataSourceType),
-                EmptySqlParameterSource.INSTANCE,
-                new BeanPropertyRowMapper<>(entityClass)
-        );
-        Integer count = namedParameterJdbcTemplate.queryForObject(
-                PageUtils.getNumberSQL(sql),
-                EmptySqlParameterSource.INSTANCE,
-                Integer.class);
-        return new ResultPage<>(coll, count);
+//        List<E> coll = namedParameterJdbcTemplate.query(
+//                PageUtils.getRowsSQL(sql, pageNumber, perPage, this.dataSourceType),
+//                EmptySqlParameterSource.INSTANCE,
+//                new BeanPropertyRowMapper<>(entityClass)
+//        );
+//        Integer count = namedParameterJdbcTemplate.queryForObject(
+//                PageUtils.getNumberSQL(sql),
+//                EmptySqlParameterSource.INSTANCE,
+//                Integer.class);
+//        return new ResultPage<>(coll, count);
+
+        return sqlFactory.createSQL().useSql(sql)
+                .queryPage(pageNumber, perPage, new BeanPropertyRowMapper<>(entityClass));
     }
 
 
