@@ -39,11 +39,12 @@
         - [其他查询](#%E5%85%B6%E4%BB%96%E6%9F%A5%E8%AF%A2)
     - [定制你的ApplicationBaseDAO](#%E5%AE%9A%E5%88%B6%E4%BD%A0%E7%9A%84applicationbasedao)
         - [定制通用方法](#%E5%AE%9A%E5%88%B6%E9%80%9A%E7%94%A8%E6%96%B9%E6%B3%95)
-        - [改变BaseDAO的默认属性](#%E6%94%B9%E5%8F%98basedao%E7%9A%84%E9%BB%98%E8%AE%A4%E5%B1%9E%E6%80%A7)
         - [设置多数据源支持](#%E8%AE%BE%E7%BD%AE%E5%A4%9A%E6%95%B0%E6%8D%AE%E6%BA%90%E6%94%AF%E6%8C%81)
+        - [设置BaseDAO中的拦截器](#%E8%AE%BE%E7%BD%AEbasedao%E4%B8%AD%E7%9A%84%E6%8B%A6%E6%88%AA%E5%99%A8)
     - [SQL构建器在BaseDAO中的使用](#sql%E6%9E%84%E5%BB%BA%E5%99%A8%E5%9C%A8basedao%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8)
 - [7.通用工具](#7%E9%80%9A%E7%94%A8%E5%B7%A5%E5%85%B7)
     - [获取sql的IN列表](#%E8%8E%B7%E5%8F%96sql%E7%9A%84in%E5%88%97%E8%A1%A8)
+    - [获取LIKE通配符](#%E8%8E%B7%E5%8F%96like%E9%80%9A%E9%85%8D%E7%AC%A6)
 - [8. 配置项](#8-%E9%85%8D%E7%BD%AE%E9%A1%B9)
 # 1. 简介
 FastSQL一个基于spring-jdbc的简单ORM框架，它支持sql构建、sql执行、命名参数绑定、查询结果自动映射和通用DAO。结合了Hibernate/JPA快速开发和Mybatis高效执行的优点。
@@ -475,6 +476,7 @@ sql.INSERT_INTO("student", "id", "name", "age")
     .update();
 ```
 
+
 ##  查询方法
 
 **查询方法解析**
@@ -623,7 +625,7 @@ public class StudentDAO extends BaseDAO<Student,String> {
      
 }
 ```
-在Service中：
+如果设置了SQLFactory作为一个Spring的@Bean ,将会自动注入。在Service中，你就可以使用这个DAO：
 ```java
 @Service
 public class StudentService {
@@ -648,10 +650,10 @@ public class StudentDAO extends BaseDAO<Student,String> {
 ```java
 public class Test  {
     public static void main(String[] args) {
-        //构建NamedParameterJdbcTemplate
-        NamedParameterJdbcTemplate namedParameterJdbcTemplate=...
-        //设置
-        studentDAO.setNamedParameterJdbcTemplate(namedParameterJdbcTemplate);
+        SQLFactory sqlFactory = ...
+    
+        StudentDAO studentDAO= new StudentDAO();
+        studentDAO.setSqlFactory(sqlFactory);//手动注入
         //执行操作
         studentDAO.XXX();
     }
@@ -804,9 +806,8 @@ public class BizPhotoDAO extends ApplicationBaseDAO<BizPhotoPO, String> {
 建议在你的程序中实现ApplicationBaseDAO，可以
 
 1. 定制一些通用方法
-2. 改变BaseDAO的默认属性
-3. 设置多数据库支持
-4. 设置BaseDAO中的触发器
+2. 设置多数据库支持
+3. 设置BaseDAO中的触发器
 
 ```java
 public abstract class ApplicationBaseDAO<E, ID> extends BaseDAO<E, ID> {
@@ -852,41 +853,31 @@ namedParameterJdbcTemplate //jdbc模板
 
 ```
 
-### 改变BaseDAO的默认属性
-```java
-public abstract class ApplicationBaseDAO<E, ID> extends BaseDAO<E, ID> {
-    public ApplicationBaseDAO() {
-        //BaseDAO中方法（比如selectWhere等）允许最大的可变参数最大个数
-        this.variableParameterLimit = 3;
-        
-        //修改默认的类型，1.集成这个类的子类分页方法使用 2.this.SELECT 分页使用
-        this.dataSourceType = DbType.MY_SQL; 
-    }
-}
-```
 
 ### 设置多数据源支持
 ```java
 public abstract class OracleApplicationBaseDAO<E, ID> extends BaseDAO<E, ID> {
-      //重写setNamedParameterJdbcTemplate方法
+      //重写setSqlFactory方法
       @Autowired
-      @Qualifier("oracleNamedParameterJdbcTemplate")//===>根据名称注入
+      @Qualifier("sqlFactory1")//===>根据名称注入
       @Override
-      protected void setNamedParameterJdbcTemplate(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
-          super.setNamedParameterJdbcTemplate(namedParameterJdbcTemplate);
-          dataSourceType
- dataSourceType
+      protected void setSqlFactory(SQLFactory sqlFactory) {
+          super.setSqlFactory(sqlFactory);
+      }
 }
 public abstract class MySqlApplicationBaseDAO<E, ID> extends BaseDAO<E, ID> {
-      //重写setNamedParameterJdbcTemplate方法
+      //重写setSqlFactory
       @Autowired
-      @Qualifier("mysqlNamedParameterJdbcTemplate")//===>根据名称注入
+      @Qualifier("sqlFactory2")//===>根据名称注入
       @Override
-      protected void setNamedParameterJdbcTemplate(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
-          super.setNamedParameterJdbcTemplate(namedParameterJdbcTemplate);
-          dataSourceType
-      }}
-}dataSourceType### 设置BaseDAO中的拦截器
+      protected void setSqlFactory(SQLFactory sqlFactory) {
+          super.setSqlFactory(sqlFactory);
+       }}
+}
+```
+
+
+### 设置BaseDAO中的拦截器
 
 ```java
 public abstract class ApplicationBaseDAO<E, ID> extends BaseDAO<E, ID> {
@@ -930,12 +921,12 @@ BaseDAO整合了SQL构建器，在继承BaseDAO的类中你可以你可以直接
 @Repository
 public class StudentDAO extends ApplicationBaseDAO<Student, String> {
     public void queryListByName() {
-        List<Student> list = this.SELECT("*").FROM(this.tableName)
+        List<Student> list = this.getSQL().SELECT("*").FROM(this.tableName)
                                         .WHERE("name").LIKE("'李%'")
                                         .queryList(Student.class);//查询列表
     }
     public void updateById() {
-        this.UPDATE(this.tableName).SET("name","Jakk").WHERE("id").eq("'22222222-2222-2222-2222-222222222222'").update();
+        this.getSQL().UPDATE(this.tableName).SET("name","Jakk").WHERE("id").eq("123").update();
     }
 }
 ```
@@ -954,6 +945,8 @@ FastSQLUtils.getInClause(Lists.newArrayList("dog", "people", "food", "apple")) /
 ```
 
 说明：IN功能已经整合到SQL构建器的IN方法
+
+## 获取LIKE通配符
 
 
 #  8. 配置项 
