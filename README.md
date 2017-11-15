@@ -17,9 +17,9 @@ SqlFactory sqlFactory = ...
 
 // 第二步.获取SQL实例，构建sql语句并执行
 Student student = sqlFactory.createSQL()
-                       .SELECT("*").FROM("student").WHERE("id=:id") //拼接sql语句
-                       .mapItemsParameter("id",101) //绑定参数
-                       .queryOne(Student.class); //执行并映射结果
+                       .SELECT("*").FROM("student").WHERE("id=:id")  //拼接sql语句
+                       .mapItemsParameter("id", 101)  //绑定参数
+                       .queryOne(Student.class);      //执行并映射结果
 
 ```
 
