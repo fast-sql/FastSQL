@@ -9,7 +9,6 @@
 - [4. SQL类作为sql语句构建器使用](#4-sql%E7%B1%BB%E4%BD%9C%E4%B8%BAsql%E8%AF%AD%E5%8F%A5%E6%9E%84%E5%BB%BA%E5%99%A8%E4%BD%BF%E7%94%A8)
     - [基本查询](#%E5%9F%BA%E6%9C%AC%E6%9F%A5%E8%AF%A2)
     - [使用操作符方法](#%E4%BD%BF%E7%94%A8%E6%93%8D%E4%BD%9C%E7%AC%A6%E6%96%B9%E6%B3%95)
-    - [byType(Object)方法](#bytypeobject%E6%96%B9%E6%B3%95)
     - [使用连接查询/排序](#%E4%BD%BF%E7%94%A8%E8%BF%9E%E6%8E%A5%E6%9F%A5%E8%AF%A2%E6%8E%92%E5%BA%8F)
     - [分组查询](#%E5%88%86%E7%BB%84%E6%9F%A5%E8%AF%A2)
     - [IN语句](#in%E8%AF%AD%E5%8F%A5)
@@ -163,54 +162,59 @@ sqlFactory.createSQL()
 
 如下：
 
-| 方法             | 说明                                                 |
-| :--------------- | :--------------------------------------------------- |
-| eq(String)       | 生成=，并追加参数（equals的缩写）                    |
-| gt(String)       | 生成>，并追加参数（是greater than的缩写）            |
-| gtEq(String)     | 生成>=，并追加参数（是greater than or equals的缩写） |
-| lt(String)       | 生成<，并追加参数（是less than的缩写 ）              |
-| ltEq(String)     | 生成<=，并追加参数（是less than or equals的缩写）    |
-| nEq(String)      | 生成!=，并追加参数（是not equals的缩写  ）           |
-| LIKE(String)     | 生成LIKE 并追加参数，                                |
-| NOT_LIKE(String) | 生成NOT LIKE ,并追加参数                             |
-| IS_NULL()        | 生成IS NULL                                          |
-| IS_NOT_NULL()    | 生成IS NOT NULL                                      |
-| eq()             | 生成 =                                               |
-| gt()             | 生成 >                                               |
-| gtEq()           | 生成 >=                                              |
-| lt()             | 生成 <                                               |
-| ltEq()           | 生成 <=                                              |
+| 方法             | 说明                                                  |
+| :--------------- | :---------------------------------------------------- |
+| eq(String)       | 生成 = ，并追加参数（equal的缩写）                    |
+| gt(String)       | 生成 > ，并追加参数（是greater than的缩写）           |
+| gtEq(String)     | 生成 >= ，并追加参数（是greater than or equal的缩写） |
+| lt(String)       | 生成 < ，并追加参数（是less than的缩写 ）             |
+| ltEq(String)     | 生成 <= ，并追加参数（是less than or equal的缩写）    |
+| nEq(String)      | 生成 != ，并追加参数（是not equal的缩写  ）           |
+| LIKE(String)     | 生成 LIKE ，并追加参数，                              |
+| NOT_LIKE(String) | 生成 NOT LIKE ，并追加参数                            |
+| IS_NULL()        | 生成 IS NULL                                          |
+| IS_NOT_NULL()    | 生成 IS NOT NULL                                      |
+| eq()             | 生成 =                                                |
+| gt()             | 生成 >                                                |
+| gtEq()           | 生成 >=                                               |
+| lt()             | 生成 <                                                |
+| ltEq()           | 生成 <=                                               |
+| nEq()            | 生成 !=                                               |
+| LIKE()           | 生成 LIKE                                             |
+| NOT_LIKE()       | 生成 NOT LIKE                                         |
 
-注意：
-- 这些方法仅仅是字符串连接：`eq("1")`生成` = 1` ，`eq("'1'")`会生成` = '1'`。
-- 同样提供无参数方法 eq()/gt()/... 不会追加参数。
+**byType(Object)**
 
-##  byType(Object)方法
+这些方法仅仅是字符串连接：`eq("1")`生成` = 1` ，`eq("'1'")`会生成` = '1'`。byType(Object)方法可以根据类型生成你想要的sql字符串
 
-操作符方法仅仅是字符串连接，`byType(Object)`方法会根据类型生成你想要的结果，上面的例子改写如下
 ```java
 sqlFactory.createSQL()
-                .SELECT("name", "age")
-                .FROM("student")
-                .WHERE("age").lt().byType(10)
-                .AND("name").eq().byType("小明")
-                .build();
+        .SELECT("name", "age")
+        .FROM("student")
+        .WHERE("age").lt().byType(10)
+        .AND("name").eq().byType("小明")
+        .build();
 //==>SELECT name,age FROM student WHERE age < 10 AND name = '小明'
 ```
-eq().byType("小明") 也可简写为 eqByType("小明")
+
+| 方法             | 说明                                                            |
+| :--------------- | :-------------------------------------------------------------- |
+| byType(Object)   | 根据类型生成相应字符串 ，如 byType(1)生成1 ，byType("1")生成'1' |
+| eqByType(Object) | 使用 = 连接根据类型生成相应的字符串                             |
 
 ## 使用连接查询/排序
 
 查询不及格的成绩
 
 ```java
-String sql = sqlFactory.createSQL().SELECT("s.name","c.subject_name","c.score_value")
-                .FROM("score c")
-                .LEFT_JOIN_ON("student s", "s.id=c.student_id")
-                .WHERE("c.score_value<60")
-                .ORDER_BY("c.score_value")
-                .build();
+sqlFactory.createSQL().SELECT("s.name","c.subject_name","c.score_value")
+        .FROM("score c")
+        .LEFT_JOIN_ON("student s", "s.id=c.student_id")
+        .WHERE("c.score_value<60")
+        .ORDER_BY("c.score_value")
+        .build();
 /*
+生成sql==>
 SELECT s.name, c.subject,c.score_value
 FROM score c
 LEFT OUTER JOIN student s ON (s.id = c.student_id)
@@ -221,12 +225,13 @@ ORDER BY c.score_value
 ## 分组查询
 查询每个学生总分数
 ```java
-String sql =sqlFactory.createSQL().SELECT("s.name", "sum(c.score_value) total_score")
-               .FROM("score c")
-               .LEFT_JOIN_ON("student s", "s.id=c.student_id")
-               .GROUP_BY("s.name")
-               .build()
+sqlFactory.createSQL().SELECT("s.name", "sum(c.score_value) total_score")
+        .FROM("score c")
+        .LEFT_JOIN_ON("student s", "s.id=c.student_id")
+        .GROUP_BY("s.name")
+        .build()
 /*
+生成sql==>
 SELECT s.name, sum(c.score_value) total_score
 FROM score c
 LEFT OUTER JOIN student s ON (s.id = c.student_id)
@@ -255,7 +260,7 @@ sqlFactory.createSQL().SELECT("*")
    .WHERE("name").IN(new Object[]{"小明","小红"})//
    .build();
 
-//输出===>SELECT *  FROM student  WHERE name  IN ('小明','小红')
+//生成sql==>SELECT *  FROM student  WHERE name  IN ('小明','小红')
 ```
 ## 使用$_$()方法进行子查询 
 查询大于平均分的成绩（可以使用 $_$()方法）
@@ -267,6 +272,7 @@ sqlFactory.createSQL().SELECT("*")
          sqlFactory.createSQL().SELECT("avg(score_value)").FROM("score")
     )
    .build();
+//生成sql==>
 //SELECT *  FROM score  
 //WHERE score_value >  ( SELECT avg(score_value)  FROM score  )
 ```
@@ -280,7 +286,7 @@ sqlFactory.createSQL().SELECT("*")
          sqlFactory.createSQL().SELECT("DISTINCT score_value").FROM("score")
     )
     .build();
-//SELECT * FROM score WHERE 1 = 1 AND score IN (SELECT DISTINCT score_value FROM score)
+//生成sql==> SELECT * FROM score WHERE 1 = 1 AND score IN (SELECT DISTINCT score_value FROM score)
 ```
 
 ## AND和OR结合使用
@@ -306,7 +312,8 @@ sqlFactory.createSQL().SELECT("*")
 - `ifPresent(Object object, Consumer<SQL> sqlConsumer)`:如果第1个参数存在（不等于null且不为""），则执行第二个参数（Lambda表达式）
 
 ```java
-sqlFactory.createSQL().SELECT("student")
+sqlFactory.createSQL()
+    .SELECT("student")
     .WHERE("id=:id")
     .ifTrue(true, thisBuilder -> thisBuilder.AND("name=:name"))  
     .ifNotEmpty(names, thisBuilder -> {
