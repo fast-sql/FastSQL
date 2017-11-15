@@ -1,4 +1,4 @@
-package top.fastsql;
+package top.fastsql.exception;
 
 public class FastSQLException extends RuntimeException {
 
