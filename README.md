@@ -25,12 +25,12 @@
     - [增删改操作：](#%E5%A2%9E%E5%88%A0%E6%94%B9%E6%93%8D%E4%BD%9C%EF%BC%9A)
     - [获取数据库元信息](#%E8%8E%B7%E5%8F%96%E6%95%B0%E6%8D%AE%E5%BA%93%E5%85%83%E4%BF%A1%E6%81%AF)
     - [事务管理](#%E4%BA%8B%E5%8A%A1%E7%AE%A1%E7%90%86)
-- [6.BaseDAO](#6basedao)
-    - [6.1.数据准备](#61%E6%95%B0%E6%8D%AE%E5%87%86%E5%A4%87)
+- [6. BaseDAO](#6-basedao)
+    - [数据准备](#%E6%95%B0%E6%8D%AE%E5%87%86%E5%A4%87)
         - [Entity实体类](#entity%E5%AE%9E%E4%BD%93%E7%B1%BB)
         - [DAO类在Spring环境中](#dao%E7%B1%BB%E5%9C%A8spring%E7%8E%AF%E5%A2%83%E4%B8%AD)
         - [DAO类在非Spring环境中](#dao%E7%B1%BB%E5%9C%A8%E9%9D%9Espring%E7%8E%AF%E5%A2%83%E4%B8%AD)
-    - [6.2.基本使用方法 CRUD](#62%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95-crud)
+    - [基本使用方法 CRUD](#%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95-crud)
         - [数据插入](#%E6%95%B0%E6%8D%AE%E6%8F%92%E5%85%A5)
         - [数据修改](#%E6%95%B0%E6%8D%AE%E4%BF%AE%E6%94%B9)
         - [数据删除](#%E6%95%B0%E6%8D%AE%E5%88%A0%E9%99%A4)
@@ -43,12 +43,11 @@
         - [改变BaseDAO的默认属性](#%E6%94%B9%E5%8F%98basedao%E7%9A%84%E9%BB%98%E8%AE%A4%E5%B1%9E%E6%80%A7)
         - [设置多数据源支持](#%E8%AE%BE%E7%BD%AE%E5%A4%9A%E6%95%B0%E6%8D%AE%E6%BA%90%E6%94%AF%E6%8C%81)
     - [SQL构建器在BaseDAO中的使用](#sql%E6%9E%84%E5%BB%BA%E5%99%A8%E5%9C%A8basedao%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8)
-- [通用工具](#%E9%80%9A%E7%94%A8%E5%B7%A5%E5%85%B7)
+- [7.通用工具](#7%E9%80%9A%E7%94%A8%E5%B7%A5%E5%85%B7)
     - [获取sql的IN列表](#%E8%8E%B7%E5%8F%96sql%E7%9A%84in%E5%88%97%E8%A1%A8)
-- [配置项](#%E9%85%8D%E7%BD%AE%E9%A1%B9)
-
+- [8. 配置项](#8-%E9%85%8D%E7%BD%AE%E9%A1%B9)
 # 1. 简介
-FastSQL一个基于spring-jdbc的简单ORM框架，它支持sql构建、sql执行、查询结果自动映射和通用DAO。结合了Hibernate/JPA快速开发和Mybatis高效执行的优点。
+FastSQL一个基于spring-jdbc的简单ORM框架，它支持sql构建、sql执行、命名参数绑定、查询结果自动映射和通用DAO。结合了Hibernate/JPA快速开发和Mybatis高效执行的优点。
 
 FastSQL可以完全满足你控制欲，可以用Java代码清晰又方便地写出sql语句并执行。 
 
@@ -575,9 +574,9 @@ connection.commit();//提交事务
 ```
 
 
-# 6.BaseDAO
+# 6. BaseDAO
 
-## 6.1.数据准备
+##  数据准备
 ### Entity实体类
 注解如下 
 
@@ -646,7 +645,7 @@ public class Test  {
 }
 ```
  
-## 6.2.基本使用方法 CRUD 
+##  基本使用方法 CRUD 
 CRUD 是四种数据操作的简称：C 表示创建，R 表示读取，U 表示更新，D 表示删除。BaseDAO 自动创建了处理数据表中数据的方法。
 
 ### 数据插入
@@ -928,7 +927,7 @@ public class StudentDAO extends ApplicationBaseDAO<Student, String> {
 }
 ```
 
-#  通用工具
+#  7.通用工具
 
 ## 获取sql的IN列表
 
@@ -944,8 +943,13 @@ FastSQLUtils.getInClause(Lists.newArrayList("dog", "people", "food", "apple")) /
 说明：IN功能已经整合到SQL构建器的IN方法
 
 
-#  配置项 
-显示sql日志
+#  8. 配置项 
+
+显示sql日志,需要调节相应的类日志级别：
+org.springframework.jdbc.core.JdbcTemplate 日志级别调整为 debug 会显示SQL语句
+org.springframework.jdbc.core.StatementCreatorUtils 日志级别调整为 trace 会显示绑定参数过程
+
+下面是Springboot中的配置：
 ```properties
 #显示sql
 logging.level.org.springframework.jdbc.core.JdbcTemplate=debug
