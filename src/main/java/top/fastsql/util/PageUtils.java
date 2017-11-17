@@ -9,12 +9,6 @@ import java.util.Objects;
  */
 public class PageUtils {
 
-//    public static String getRowsSQL(String sql, int pageNumber, int perPageSize) {
-//        //没指定dbType，使用FastSqlConfig配置项中默认的
-//        return getRowsSQL(sql, pageNumber, perPageSize, FastSqlConfig.dataSourceType);
-//    }
-
-
     public static String getRowsSQL(String sql, int pageNumber, int perPageSize, DataSourceType dataSourceType) {
         if (Objects.equals(dataSourceType, DataSourceType.MY_SQL)) {
             return mysql(sql, pageNumber, perPageSize);
@@ -27,11 +21,8 @@ public class PageUtils {
         }
     }
 
-
-
     public static String getNumberSQL(String sql) {
-        // (T_T)
-        //subQuery can not with  "AS"  in Oracle
+        // Can not use  "AS"  in sub-query in Oracle.
         return "SELECT count(*) FROM ( " + sql + " ) total";
     }
 

@@ -73,14 +73,14 @@ public abstract class BaseDAO<E, ID> {
     protected SQLFactory sqlFactory;
 
 
-    public SQLFactory getSqlFactory() {
+    protected SQLFactory getSqlFactory() {
         if (sqlFactory == null) {
             throw new IllegalArgumentException("sqlFactory is null in BaseDAO,please set it.");
         }
         return sqlFactory;
     }
 
-    public SQL getSQL() {
+    protected SQL getSQL() {
         if (sqlFactory == null) {
             throw new IllegalArgumentException("sqlFactory is null in BaseDAO,please set it.");
         }
@@ -141,6 +141,9 @@ public abstract class BaseDAO<E, ID> {
      * @return 插入成功的数量
      */
     public int insertSelective(E entity) {
+        if (useBeforeInsert) {
+            beforeInsert(entity);
+        }
         //SQL语句部分字符串构建器
         final StringBuilder nameBuilder = new StringBuilder();
         final StringBuilder valueBuilder = new StringBuilder();
@@ -156,9 +159,7 @@ public abstract class BaseDAO<E, ID> {
                 .INSERT_INTO(tableName, nameBuilder.deleteCharAt(0).toString())
                 .VALUES(valueBuilder.delete(0, 1).toString())
                 .beanParameter(entity);
-        if (useBeforeInsert) {
-            beforeInsert(entity);
-        }
+
         final int count = sql.update();
         if (useAfterInsert) {
             afterInsert(entity, count);
@@ -172,6 +173,10 @@ public abstract class BaseDAO<E, ID> {
      * 插入对象中的值到数据库，null值在数据库中会设置为NULL
      */
     public int insert(E entity) {
+        if (useBeforeInsert) {
+            beforeInsert(entity);
+        }
+
         final StringBuilder nameBuilder = new StringBuilder();
         final StringBuilder valueBuilder = new StringBuilder();
         fields.forEach(field -> {
@@ -184,9 +189,7 @@ public abstract class BaseDAO<E, ID> {
                 .VALUES(valueBuilder.deleteCharAt(0).toString())
                 .beanParameter(entity);
 
-        if (useBeforeInsert) {
-            beforeInsert(entity);
-        }
+
         final int count = sql.update();
         if (useAfterInsert) {
             afterInsert(entity, count);
@@ -200,6 +203,9 @@ public abstract class BaseDAO<E, ID> {
      * 全更新 null值在 数据库中设置为null
      */
     public int update(E entity) {
+        if (useBeforeUpdate) {
+            beforeUpdate(entity);
+        }
         //TODO
         final ID id = (ID) EntityRefelectUtils.getFieldValue(entity, idField);
         if (StringUtils.isEmpty(id)) {
@@ -218,9 +224,7 @@ public abstract class BaseDAO<E, ID> {
                 .WHERE(idColumnName + "=:" + idColumnName)
                 .beanParameter(entity);
 
-        if (useBeforeUpdate) {
-            beforeUpdate(entity);
-        }
+
         final int count = sql.update();
         if (useAfterUpdate) {
             afterUpdate(entity, count);
@@ -249,6 +253,9 @@ public abstract class BaseDAO<E, ID> {
      * 仅更新非null， null值 不更新
      */
     public int updateSelective(E entity) {
+        if (useBeforeUpdate) {
+            beforeUpdate(entity);
+        }
         final ID id = (ID) EntityRefelectUtils.getFieldValue(entity, idField);
         if (StringUtils.isEmpty(id)) {
             throw new RuntimeException("修改时对象id不能为空");
@@ -265,9 +272,7 @@ public abstract class BaseDAO<E, ID> {
                 .WHERE(idColumnName + "=:" + idColumnName)
                 .beanParameter(entity);
 
-        if (useBeforeUpdate) {
-            beforeUpdate(entity);
-        }
+
         final int count = sql.update();
         if (useAfterUpdate) {
             afterUpdate(entity, count);
@@ -376,17 +381,7 @@ public abstract class BaseDAO<E, ID> {
         return returnObject;
     }
 
-    private E selectOneWhere(String sqlCondition, Object param1) {
-        return selectOneWhere(sqlCondition, new Object[]{param1});
-    }
 
-    private E selectOneWhere(String sqlCondition, Object param1, Object param2) {
-        return selectOneWhere(sqlCondition, new Object[]{param1, param2});
-    }
-
-    private E selectOneWhere(String sqlCondition, Object param1, Object param2, Object param3) {
-        return selectOneWhere(sqlCondition, new Object[]{param1, param2, param3});
-    }
 
     /**
      * 通过where条件查找一条记录
@@ -395,7 +390,7 @@ public abstract class BaseDAO<E, ID> {
      * @param sqlCondition name=:1 and age=:2
      * @param values       "wang",23
      */
-    private E selectOneWhere(String sqlCondition, Object[] values) {
+    public E selectOneWhere(String sqlCondition, Object... values) {
         //sql
         String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition;
 
@@ -439,7 +434,7 @@ public abstract class BaseDAO<E, ID> {
         return sqlFactory.createSQL().SELECT("*").FROM(tableName).queryList(entityClass);
     }
 
-    private List<E> selectWhere(String sqlCondition, Object... values) {
+    public List<E> selectWhere(String sqlCondition, Object... values) {
         //sql
         String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition;
         return sqlFactory.createSQL().useSql(sql).varParameter(values).queryList(new BeanPropertyRowMapper<>(entityClass));

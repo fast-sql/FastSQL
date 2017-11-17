@@ -66,7 +66,7 @@ public class EntityRefelectUtils {
 
     public static Object invokeMethod(Object object, String methodStr) {
         try {
-            Method method = object.getClass().getMethod(methodStr, new Class[]{});
+            Method method = object.getClass().getDeclaredMethod(methodStr, new Class[]{});
             return method.invoke(object);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -90,7 +90,7 @@ public class EntityRefelectUtils {
      */
     public static Object getFieldValue(Object object, String fieldStr) {
         try {
-            Field field = object.getClass().getField(fieldStr);
+            Field field = object.getClass().getDeclaredField(fieldStr);
             field.setAccessible(true);
             return field.get(object);
         } catch (Exception e) {
@@ -245,21 +245,21 @@ public class EntityRefelectUtils {
     }
 
 
-    public static String getStringInClause(List strings) {
-        StringBuilder builder = new StringBuilder("( ");
-        for (Object string : strings) {
-            builder.append(",'" + string.toString() + "'");
-        }
-        builder.append(" )");
-        return builder.toString().replaceFirst(",", "");
-    }
-
-    public static String getIntegerInClause(List integers) {
-        StringBuilder builder = new StringBuilder("( ");
-        for (Object i : integers) {
-            builder.append("," + i + " ");
-        }
-        builder.append(" )");
-        return builder.toString().replaceFirst(",", "");
-    }
+//    public static String getStringInClause(List strings) {
+//        StringBuilder builder = new StringBuilder("( ");
+//        for (Object string : strings) {
+//            builder.append(",'" + string.toString() + "'");
+//        }
+//        builder.append(" )");
+//        return builder.toString().replaceFirst(",", "");
+//    }
+//
+//    public static String getIntegerInClause(List integers) {
+//        StringBuilder builder = new StringBuilder("( ");
+//        for (Object i : integers) {
+//            builder.append("," + i + " ");
+//        }
+//        builder.append(" )");
+//        return builder.toString().replaceFirst(",", "");
+//    }
 }

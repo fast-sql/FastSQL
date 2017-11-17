@@ -33,6 +33,7 @@ public class SQLFactory {
 //        if (dataSource == null) {
 //            throw new FastSQLException("SQLFactory的dataSource不能为null");
 //        }
+
         JdbcTemplate jdbcTemplate = new JdbcTemplate();
         jdbcTemplate.setIgnoreWarnings(ignoreWarnings);
         jdbcTemplate.setFetchSize(fetchSize);
@@ -41,6 +42,8 @@ public class SQLFactory {
         jdbcTemplate.setSkipResultsProcessing(skipResultsProcessing);
         jdbcTemplate.setSkipUndeclaredResults(skipUndeclaredResults);
         jdbcTemplate.setResultsMapCaseInsensitive(resultsMapCaseInsensitive);
+
+        jdbcTemplate.setDataSource(this.dataSource);
         return new SQL(jdbcTemplate, dataSourceType, logSQLWhenBuild);
     }
 
