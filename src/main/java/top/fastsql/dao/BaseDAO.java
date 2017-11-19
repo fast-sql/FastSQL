@@ -447,7 +447,7 @@ public abstract class BaseDAO<E, ID> {
     }
 
     ////////////////////////////////////count///////////////////////////////////////////
-    private int countWhere(String sqlCondition, Object... values) {
+    public int countWhere(String sqlCondition, Object... values) {
         String sql = "SELECT count(*) FROM " + tableName + " WHERE " + sqlCondition;
         return sqlFactory.createSQL().useSql(sql).varParameter(values).queryInteger();
     }

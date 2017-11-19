@@ -133,9 +133,20 @@ public class SQL {
     }
 
 
+    public SQL SELECT() {
+        strBuilder.append("SELECT ");
+        return this;
+    }
+
     public SQL SELECT(String... columns) {
         String columnsStr = String.join(",", columns);
         strBuilder.append("SELECT ").append(columnsStr);
+        return this;
+    }
+
+    public SQL SELECT_DISTINCT(String... columns) {
+        String columnsStr = String.join(",", columns);
+        strBuilder.append("SELECT DISTINCT ").append(columnsStr);
         return this;
     }
 
@@ -220,27 +231,27 @@ public class SQL {
         return this;
     }
 
-    public SQL SET(String... columnOrValue) {
+    public SQL SET(String... columnEqualsValue) {
         strBuilder.append(" SET ");
-        for (int i = 0; i < columnOrValue.length; i = i + 2) {
+        for (int i = 0; i < columnEqualsValue.length; i++) {
             if (i != 0) {
                 strBuilder.append(",");
             }
-            strBuilder.append(columnOrValue[i]).append(" = ").append(columnOrValue[i + 1]);
+            strBuilder.append(columnEqualsValue[i]);
         }
         return this;
     }
 
-    public SQL SET_byType(String... columnOrValue) {
-        strBuilder.append(" SET ");
-        for (int i = 0; i < columnOrValue.length; i = i + 2) {
-            if (i != 0) {
-                strBuilder.append(",");
-            }
-            strBuilder.append(columnOrValue[i]).append(" = ").append(getStringByType(columnOrValue[i + 1]));
-        }
-        return this;
-    }
+//    public SQL SET_byType(String... columnOrValue) {
+//        strBuilder.append(" SET ");
+//        for (int i = 0; i < columnOrValue.length; i = i + 2) {
+//            if (i != 0) {
+//                strBuilder.append(",");
+//            }
+//            strBuilder.append(columnOrValue[i]).append(" = ").append(getStringByType(columnOrValue[i + 1]));
+//        }
+//        return this;
+//    }
 
 
     /////////////////////////////////////
@@ -260,14 +271,14 @@ public class SQL {
         return this;
     }
 
-    public SQL JOIN_ON(String table, String on) {
-        strBuilder.append(" JOIN ")
-                .append(table)
-                .append(" ON (")
-                .append(on)
-                .append(" )");
-        return this;
-    }
+//    public SQL JOIN_ON(String table, String on) {
+//        strBuilder.append(" JOIN ")
+//                .append(table)
+//                .append(" ON (")
+//                .append(on)
+//                .append(" )");
+//        return this;
+//    }
 
     public SQL INNER_JOIN_ON(String table, String on) {
         strBuilder.append(" INNER JOIN ")
@@ -296,35 +307,49 @@ public class SQL {
         return this;
     }
 
+    public SQL LEFT_JOIN_ON(String table, String on) {
+        strBuilder.append(" LEFT JOIN ")
+                .append(table)
+                .append(" ON (")
+                .append(on)
+                .append(" )");
+        return this;
+    }
+
     public SQL LEFT_OUTER_JOIN(String table) {
         strBuilder.append(" LEFT OUTER JOIN ").append(table);
         return this;
     }
 
-    public SQL INNER_JOIN(String table) {
-        strBuilder.append(" INNER JOIN ").append(table);
-        return this;
-    }
+//    public SQL INNER_JOIN(String table) {
+//        strBuilder.append(" INNER JOIN ").append(table);
+//        return this;
+//    }
 
-    public SQL JOIN(String table) {
-        strBuilder.append(" JOIN ").append(table);
-        return this;
-    }
+//    public SQL JOIN(String table) {
+//        strBuilder.append(" JOIN ").append(table);
+//        return this;
+//    }
 
-    public SQL ON(String on) {
-        strBuilder.append(" ON (").append(on).append(")");
-        return this;
-    }
+//    public SQL ON(String on) {
+//        strBuilder.append(" ON (").append(on).append(")");
+//        return this;
+//    }
 
     public SQL RIGHT_OUTER_JOIN_ON(String table, String on) {
         strBuilder.append(" RIGHT OUTER JOIN ").append(table).append(" ON (").append(on).append(")");
         return this;
     }
 
-    public SQL RIGHT_OUTER_JOIN(String table) {
-        strBuilder.append(" RIGHT OUTER JOIN ").append(table);
+    public SQL RIGHT_JOIN_ON(String table, String on) {
+        strBuilder.append(" RIGHT OUTER JOIN ").append(table).append(" ON (").append(on).append(")");
         return this;
     }
+
+//    public SQL RIGHT_OUTER_JOIN(String table) {
+//        strBuilder.append(" RIGHT OUTER JOIN ").append(table);
+//        return this;
+//    }
 
     public SQL WHERE() {
         strBuilder.append(" WHERE 1 = 1");
