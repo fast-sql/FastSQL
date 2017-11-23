@@ -1,23 +1,18 @@
 package top.fastsql.dao;
 
-import top.fastsql.SQL;
-import top.fastsql.SQLFactory;
-import top.fastsql.config.DataSourceType;
-import top.fastsql.dto.BatchUpdateResult;
-import top.fastsql.dto.ResultPage;
-import top.fastsql.util.EntityRefelectUtils;
-import top.fastsql.util.PageUtils;
-import top.fastsql.util.StringExtUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.namedparam.EmptySqlParameterSource;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.util.StringUtils;
+import top.fastsql.SQL;
+import top.fastsql.SQLFactory;
+import top.fastsql.dto.BatchUpdateResult;
+import top.fastsql.dto.ResultPage;
+import top.fastsql.util.EntityRefelectUtils;
+import top.fastsql.util.StringExtUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;

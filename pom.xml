@@ -6,11 +6,11 @@
 
     <groupId>top.fastsql</groupId>
     <artifactId>fastsql</artifactId>
-    <version>0.9.1</version>
+    <version>0.9.5</version>
 
     <name>fastsql</name>
     <description>FastSQL is a lightweight database operate library.</description>
-    <url>http://www.fastsql.top/</url>
+    <url>http://fastsql.top/</url>
 
     <dependencies>
         <dependency>

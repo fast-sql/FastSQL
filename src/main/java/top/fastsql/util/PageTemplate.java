@@ -1,10 +1,10 @@
 package top.fastsql.util;
 
-import top.fastsql.config.DataSourceType;
-import top.fastsql.dto.ResultPage;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import top.fastsql.config.DataSourceType;
+import top.fastsql.dto.ResultPage;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ public class PageTemplate {
         this.namedParameterJdbcTemplate = template;
     }
 
-//    public <T> ResultPage<T> queryPage(String sql, int page, int perPage, SqlParameterSource paramSource, RowMapper<T> rowMapper) {
+    //    public <T> ResultPage<T> queryPage(String sql, int page, int perPage, SqlParameterSource paramSource, RowMapper<T> rowMapper) {
 //        String rowsSQL = PageUtils.getRowsSQL(sql, page, perPage);
 //        List<T> list = namedParameterJdbcTemplate.query(
 //                rowsSQL,
