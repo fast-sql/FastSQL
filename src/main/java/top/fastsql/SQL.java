@@ -27,7 +27,7 @@ import java.util.*;
 import java.util.function.Consumer;
 
 /**
- * SQL构建器和执行器
+ * sql语句构建器和执行器
  *
  * @author 陈佳志
  */
@@ -49,14 +49,17 @@ public class SQL {
 
     private DataSourceType dataSourceType;
 
-    //    SQL(JdbcTemplate jdbcTemplate, DataSourceType dataSourceType) {
-//        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
-//        this.dataSourceType = dataSourceType;
-//    }
+
     SQL(JdbcTemplate jdbcTemplate, DataSourceType dataSourceType, boolean logSqlWhenBuild) {
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
         this.dataSourceType = dataSourceType;
         this.logSqlWhenBuild = logSqlWhenBuild;
+    }
+
+    @Deprecated
+    public SQL template(NamedParameterJdbcTemplate template) {
+        this.namedParameterJdbcTemplate = template;
+        return this;
     }
 
 
@@ -92,22 +95,6 @@ public class SQL {
         strBuilder.append(sql);
         return this;
     }
-
-//    /**
-//     * 生成左括号和右括号
-//     */
-//    public SQL subQuery(SQL SQL) {
-//        strBuilder.append(" (").append(SQL.build()).append(")");
-//        return this;
-//    }
-//
-//    /**
-//     * 生成左括号和右括号
-//     */
-//    public SQL subQuery(String sql) {
-//        strBuilder.append(" (").append(sql).append(")");
-//        return this;
-//    }
 
 
     /**
@@ -206,10 +193,12 @@ public class SQL {
     }
 
 
+    @Deprecated
     public SQL VALUES_byType(Object... columnValues) {
         return this.VALUES_byType(Arrays.asList(columnValues));
     }
 
+    @Deprecated
     public SQL VALUES_byType(List<Object> columnValues) {
         strBuilder.append(" VALUES ").append("(");
         int i = 0;
@@ -231,32 +220,25 @@ public class SQL {
         return this;
     }
 
-    public SQL SET(String... columnEqualsValue) {
+    public SQL SET(String... columnEqValue) {
         strBuilder.append(" SET ");
-        for (int i = 0; i < columnEqualsValue.length; i++) {
+        for (int i = 0; i < columnEqValue.length; i++) {
             if (i != 0) {
                 strBuilder.append(",");
             }
-            strBuilder.append(columnEqualsValue[i]);
+            strBuilder.append(columnEqValue[i]);
         }
         return this;
     }
 
-//    public SQL SET_byType(String... columnOrValue) {
-//        strBuilder.append(" SET ");
-//        for (int i = 0; i < columnOrValue.length; i = i + 2) {
-//            if (i != 0) {
-//                strBuilder.append(",");
-//            }
-//            strBuilder.append(columnOrValue[i]).append(" = ").append(getStringByType(columnOrValue[i + 1]));
-//        }
-//        return this;
-//    }
-
-
     /////////////////////////////////////
     public SQL FROM(String table) {
         strBuilder.append(" FROM ").append(table);
+        return this;
+    }
+
+    public SQL FROM_as(String table, String as) {
+        strBuilder.append(" FROM ").append(table).append(" ").append(as);
         return this;
     }
 
@@ -265,76 +247,31 @@ public class SQL {
         return this;
     }
 
-
     public SQL FROM() {
         strBuilder.append(" FROM ");
         return this;
     }
 
-//    public SQL JOIN_ON(String table, String on) {
-//        strBuilder.append(" JOIN ")
-//                .append(table)
-//                .append(" ON (")
-//                .append(on)
-//                .append(" )");
-//        return this;
-//    }
-
     public SQL INNER_JOIN_ON(String table, String on) {
-        strBuilder.append(" INNER JOIN ")
-                .append(table)
-                .append(" ON (")
-                .append(on)
-                .append(" )");
+        strBuilder.append(" INNER JOIN ").append(table).append(" ON (").append(on).append(" )");
         return this;
     }
 
     public SQL FULL_OUTER_JOIN_ON(String table, String on) {
-        strBuilder.append(" FULL OUTER JOIN ")
-                .append(table)
-                .append(" ON (")
-                .append(on)
-                .append(" )");
+        strBuilder.append(" FULL OUTER JOIN ").append(table).append(" ON (").append(on).append(" )");
         return this;
     }
 
     public SQL LEFT_OUTER_JOIN_ON(String table, String on) {
-        strBuilder.append(" LEFT OUTER JOIN ")
-                .append(table)
-                .append(" ON (")
-                .append(on)
-                .append(" )");
+        strBuilder.append(" LEFT OUTER JOIN ").append(table).append(" ON (").append(on).append(" )");
         return this;
     }
 
     public SQL LEFT_JOIN_ON(String table, String on) {
-        strBuilder.append(" LEFT JOIN ")
-                .append(table)
-                .append(" ON (")
-                .append(on)
-                .append(" )");
+        strBuilder.append(" LEFT JOIN ").append(table).append(" ON (").append(on).append(" )");
         return this;
     }
 
-    public SQL LEFT_OUTER_JOIN(String table) {
-        strBuilder.append(" LEFT OUTER JOIN ").append(table);
-        return this;
-    }
-
-//    public SQL INNER_JOIN(String table) {
-//        strBuilder.append(" INNER JOIN ").append(table);
-//        return this;
-//    }
-
-//    public SQL JOIN(String table) {
-//        strBuilder.append(" JOIN ").append(table);
-//        return this;
-//    }
-
-//    public SQL ON(String on) {
-//        strBuilder.append(" ON (").append(on).append(")");
-//        return this;
-//    }
 
     public SQL RIGHT_OUTER_JOIN_ON(String table, String on) {
         strBuilder.append(" RIGHT OUTER JOIN ").append(table).append(" ON (").append(on).append(")");
@@ -342,14 +279,9 @@ public class SQL {
     }
 
     public SQL RIGHT_JOIN_ON(String table, String on) {
-        strBuilder.append(" RIGHT OUTER JOIN ").append(table).append(" ON (").append(on).append(")");
+        strBuilder.append(" RIGHT JOIN ").append(table).append(" ON (").append(on).append(")");
         return this;
     }
-
-//    public SQL RIGHT_OUTER_JOIN(String table) {
-//        strBuilder.append(" RIGHT OUTER JOIN ").append(table);
-//        return this;
-//    }
 
     public SQL WHERE() {
         strBuilder.append(" WHERE 1 = 1");
@@ -832,14 +764,6 @@ public class SQL {
         return this;
     }
 
-    /**
-     * @see SQL#beanParameter(Object)
-     */
-    @Deprecated
-    public SQL parameterDTO(Object beanParam) {
-        this.sqlParameterSource = new BeanPropertySqlParameterSource(beanParam);
-        return this;
-    }
 
     public SQL beanParameter(Object beanParam) {
         this.sqlParameterSource = new BeanPropertySqlParameterSource(beanParam);
@@ -911,7 +835,7 @@ public class SQL {
                 return this.namedParameterJdbcTemplate.queryForObject(sql, this.sqlParameterSource, rowMapper);
             }
         } catch (EmptyResultDataAccessException e) {
-            logger.warn("Get a empty result from database,it will be mapped a null object or value");
+            logger.warn(e.getClass().getSimpleName() + " : Get a empty result from database,it will be mapped a null object or value");
             return null;
         }
     }
@@ -930,7 +854,7 @@ public class SQL {
                 return this.namedParameterJdbcTemplate.queryForMap(strBuilder.toString(), this.sqlParameterSource);
             }
         } catch (EmptyResultDataAccessException e) {
-            logger.warn("Get a empty result from database,it will be mapped a null object or value");
+            logger.warn(e.getClass().getSimpleName() + " : Get a empty result from database,it will be mapped a null object or value.");
             return null;
         }
     }
@@ -1145,12 +1069,6 @@ public class SQL {
         return new BatchUpdateResult(this.namedParameterJdbcTemplate.getJdbcOperations().batchUpdate(sql, objects));
     }
 
-
-//    public int execute() {
-//        return update();
-//    }
-
-
     public List<String> getTableNames() {
         checkNull();
         Connection connection;
@@ -1260,17 +1178,18 @@ public class SQL {
         return this;
     }
 
-    //////////////////////////////////////private////////////////////////
-    private void checkNull() {
-        if (this.namedParameterJdbcTemplate == null) {
-            throw new RuntimeException("数据库没有指定");
-        }
-    }
-
-    private DataSource getDataSource() {
+    public DataSource getDataSource() {
         checkNull();
         return ((JdbcTemplate) namedParameterJdbcTemplate.getJdbcOperations()).getDataSource();
     }
+
+    //////////////////////////////////////private////////////////////////
+    private void checkNull() {
+        if (this.namedParameterJdbcTemplate == null) {
+            throw new RuntimeException("namedParameterJdbcTemplate or database is not set.");
+        }
+    }
+
 
     private <T> RowMapper<T> getRowMapper(Class<T> returnClassType) {
         RowMapper<T> rowMapper;
