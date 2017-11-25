@@ -86,16 +86,16 @@ SQL 实例是有状态的 ，不是线程安全的，是不能被共享的。即
 SQLFactory sqlFactory = new SQLFactory();
 ```
 指定DataSource
-````java
+```java
 DataSource dataSource =  ... ;//新建任意类型一个DataSource，如SimpleDriverDataSource（Spring内部简单的DataSource）或者支持连接池的DataSource
 sqlFactory.setDataSource(dataSource);
-````
+```
 设置数据源类型
-````java
+```java
 sqlFactory.setDataSourceType(DataSourceType.POSTGRESQL);//默认
 //sqlFactory.setDataSourceType(DataSourceType.MY_SQL);
 //sqlFactory.setDataSourceType(DataSourceType.ORACLE);
-````
+```
 
 
 # 4 SQL类作为sql语句构建器使用
@@ -121,7 +121,7 @@ if (false){
   sql.AND("age < 8");
 }
 
-//===>SELECT name,age  FROM student  WHERE 1 = 1  AND age > 10
+//生成sql=>SELECT name,age  FROM student  WHERE 1 = 1  AND age > 10
 ```
 
 ## 使用操作符方法
@@ -135,7 +135,7 @@ sqlFactory.createSQL()
     .WHERE("age").lt("10")
     .AND("name").eq("'小明'")
     .build();
-//==> SELECT name,age FROM student WHERE age > 10 AND name = '小明'
+//生成sql=> SELECT name,age FROM student WHERE age > 10 AND name = '小明'
 ```
 
 如下：
@@ -192,8 +192,7 @@ sqlFactory.createSQL().SELECT("s.name","c.subject_name","c.score_value")
         .ORDER_BY("c.score_value")
         .build();
 /*
-生成sql==>
-
+生成sql =>
 SELECT s.name, c.subject,c.score_value
 FROM score c
 LEFT OUTER JOIN student s ON (s.id = c.student_id)
@@ -307,12 +306,12 @@ sqlFactory.createSQL().SELECT("*")
 sqlFactory.createSQL()
     .SELECT("student")
     .WHERE("id=:id")
-    .ifTrue(true, thisBuilder -> thisBuilder.AND("name=:name"))
-    .ifNotEmpty(names, thisBuilder -> {
+    .ifTrue(true, sql -> thisBuilder.AND("name=:name"))
+    .ifNotEmpty(names, sql -> {
         System.out.println("ifNotEmpty?");
         thisBuilder.AND("name").IN(Lists.newArrayList("小明", "小红"));
     })
-    .ifPresent("",thisBuilder -> {
+    .ifPresent("",sql -> {
         System.out.println("ifPresent?");
         //...处理其他流程语句...
     })
@@ -323,9 +322,6 @@ sqlFactory.createSQL()
 ifNotEmpty?
 SELECT student WHERE id=:id AND name=:name AND name  IN ('小明','小红')
 ```
-
-
-
 
 ## 分页功能
 **使用原生关键字进行分页**
@@ -360,31 +356,28 @@ sqlFactory.createSQL().SELECT("*").FROM("student").countThis().buildAndPrintSQL(
 ```java
 //使用列
 sqlFactory.createSQL().INSERT_INTO("student", "id", "name", "age")
-                .VALUES(":id", ":name", ":age").build();
-//=>INSERT INTO student (id,name,age)  VALUES (:id,:name,:age)
+                .VALUES("21", "'Lily'", "12").build();
+//=>INSERT INTO student (id,name,age)  VALUES (21,'Lily',12)
 
 //不使用列
-sqlFactory.createSQL().INSERT_INTO("student").VALUES(":id", ":name", ":age").build();
-//=>INSERT INTO student VALUES (:id,:name,:age)
+sqlFactory.createSQL().INSERT_INTO("student").VALUES("21", "'Lily'", "12").build();
+//=>INSERT INTO student VALUES (21,'Lily',12)
 ```
 
 **修改**
 
-SET(String column, String value) :SET关键字
-
-setOne(String column, String value) :追加一个值
-
+SET(String...items) :SET关键字
 
 ```java
-sqlFactory.createSQL().UPDATE("student").SET("name","'Jack'").setOne("age","9").WHERE("name").eq("'Mike'").build();
-//=>  UPDATE student SET name='Jack',age=9 WHERE name = 'Mike'
+sqlFactory.createSQL().UPDATE("student").SET("name = 'Jack'","age = 9").WHERE("name = 'Mike'").build();
+//=>  UPDATE student SET name = 'Jack',age = 9 WHERE name = 'Mike'
 ```
 
 **构建删除语句**
 
 ```java
-sqlFactory.createSQL().DELETE_FROM("student").WHERE("id=:id").build();
-//=>DELETE FROM student WHERE id=:id
+sqlFactory.createSQL().DELETE_FROM("student").WHERE("id=12").build();
+//=>DELETE FROM student WHERE id=12
 ```
 
 
@@ -916,18 +909,18 @@ count 参数表示执行成功的条数
 
 ##   SQL构建器在BaseDAO中的使用
 
-BaseDAO整合了SQL构建器，在继承BaseDAO的类中你可以你可以直接调用 `this.SELECT(..)/this.UPDATE(..) /this.DELETE(..) /this.INSERT(..)` , 注意：不用设置 **namedParameterJdbcTemplate**或者**dataSource**
+BaseDAO整合了SQL构建器，在继承BaseDAO的类中你可以你可以直接调用 `getSQL()` 来获取一个SQL实例：
 
 ```java
 @Repository
 public class StudentDAO extends ApplicationBaseDAO<Student, String> {
-    public void queryListByName() {
-        List<Student> list = this.getSQL().SELECT("*").FROM(this.tableName)
-                                        .WHERE("name").LIKE("'李%'")
-                                        .queryList(Student.class);//查询列表
+    public List<Student> queryListByName() {
+        return getSQL().SELECT("*").FROM(this.tableName)
+                       .WHERE("name").LIKE("'李%'")
+                       .queryList(Student.class);//查询列表
     }
-    public void updateById() {
-        this.getSQL().UPDATE(this.tableName).SET("name","Jakk").WHERE("id").eq("123").update();
+    public int updateName(String oldName,String newName) {
+        return getSQL().UPDATE(this.tableName).SET("name = '"+newName+"'").WHERE("name").eqByType(oldName).update();
     }
 }
 ```
@@ -948,9 +941,9 @@ FastSQLUtils.getInClause(Lists.newArrayList("dog", "people", "food", "apple")) /
 ## 获取LIKE通配符
 
 ```
-FastSqlUtils.bothWildcard("李");
-FastSqlUtils.leftWildcard("李");
-FastSqlUtils.rightWildcard("李");
+FastSqlUtils.bothWildcard("李"); // => %李%
+FastSqlUtils.leftWildcard("李");  // => %李
+FastSqlUtils.rightWildcard("李"); // => 李%
 ```
 
 # 8 配置项
@@ -969,5 +962,5 @@ logging.level.org.springframework.jdbc.core.StatementCreatorUtils=trace
 
 # 9 其他
 
-* [使用文档](http://fastsql.top)
+* [项目主页](http://fastsql.top)
 * [版本下载](https://oss.sonatype.org/content/repositories/releases/top/fastsql/fastsql/)
