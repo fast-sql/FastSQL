@@ -1,15 +1,50 @@
 # 轻量级数据库访问框架FastSQL
 
-
 [![Maven central](https://maven-badges.herokuapp.com/maven-central/top.fastsql/fastsql/badge.svg)](https://maven-badges.herokuapp.com/maven-central/top.fastsql/fastsql)
 [![License](http://img.shields.io/:license-apache-brightgreen.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
 ![logo](logo_s.jpg)
 
 # 目录
-[1 简介](http:www.baiodu.com)
+
+- [1 简介](#1-%E7%AE%80%E4%BB%8B)
+- [2 入门](#2-%E5%85%A5%E9%97%A8)
+    - [安装](#%E5%AE%89%E8%A3%85)
+    - [构建 SQLFactory](#%E6%9E%84%E5%BB%BA-sqlfactory)
+    - [从 SQLFactory 中获取 SQL](#%E4%BB%8E-sqlfactory-%E4%B8%AD%E8%8E%B7%E5%8F%96-sql)
+    - [作用域（Scope）和生命周期](#%E4%BD%9C%E7%94%A8%E5%9F%9F%EF%BC%88scope%EF%BC%89%E5%92%8C%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F)
+- [3 SQLFactory 配置](#3-sqlfactory-%E9%85%8D%E7%BD%AE)
+- [4 SQL类作为sql语句构建器使用](#4-sql%E7%B1%BB%E4%BD%9C%E4%B8%BAsql%E8%AF%AD%E5%8F%A5%E6%9E%84%E5%BB%BA%E5%99%A8%E4%BD%BF%E7%94%A8)
+    - [基本查询](#%E5%9F%BA%E6%9C%AC%E6%9F%A5%E8%AF%A2)
+    - [使用操作符方法](#%E4%BD%BF%E7%94%A8%E6%93%8D%E4%BD%9C%E7%AC%A6%E6%96%B9%E6%B3%95)
+    - [使用连接查询/排序](#%E4%BD%BF%E7%94%A8%E8%BF%9E%E6%8E%A5%E6%9F%A5%E8%AF%A2%E6%8E%92%E5%BA%8F)
+    - [分组查询](#%E5%88%86%E7%BB%84%E6%9F%A5%E8%AF%A2)
+    - [IN语句](#in%E8%AF%AD%E5%8F%A5)
+    - [使用$_$()方法进行子查询](#%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95%E8%BF%9B%E8%A1%8C%E5%AD%90%E6%9F%A5%E8%AF%A2)
+    - [AND和OR结合使用](#and%E5%92%8Cor%E7%BB%93%E5%90%88%E4%BD%BF%E7%94%A8)
+    - [使用Lambda表达式简化构建动态sql](#%E4%BD%BF%E7%94%A8lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E7%AE%80%E5%8C%96%E6%9E%84%E5%BB%BA%E5%8A%A8%E6%80%81sql)
+    - [分页功能](#%E5%88%86%E9%A1%B5%E5%8A%9F%E8%83%BD)
+    - [构建插入insert/修改update/删除delete语句](#%E6%9E%84%E5%BB%BA%E6%8F%92%E5%85%A5insert%E4%BF%AE%E6%94%B9update%E5%88%A0%E9%99%A4delete%E8%AF%AD%E5%8F%A5)
+- [5 SQL构建器的执行功能](#5-sql%E6%9E%84%E5%BB%BA%E5%99%A8%E7%9A%84%E6%89%A7%E8%A1%8C%E5%8A%9F%E8%83%BD)
+    - [创建SqlFactory](#%E5%88%9B%E5%BB%BAsqlfactory)
+    - [设置参数方法](#%E8%AE%BE%E7%BD%AE%E5%8F%82%E6%95%B0%E6%96%B9%E6%B3%95)
+    - [查询方法](#%E6%9F%A5%E8%AF%A2%E6%96%B9%E6%B3%95)
+    - [增删改操作：](#%E5%A2%9E%E5%88%A0%E6%94%B9%E6%93%8D%E4%BD%9C%EF%BC%9A)
+    - [获取数据库元信息](#%E8%8E%B7%E5%8F%96%E6%95%B0%E6%8D%AE%E5%BA%93%E5%85%83%E4%BF%A1%E6%81%AF)
+    - [事务管理](#%E4%BA%8B%E5%8A%A1%E7%AE%A1%E7%90%86)
+- [6 BaseDAO](#6-basedao)
+    - [数据准备](#%E6%95%B0%E6%8D%AE%E5%87%86%E5%A4%87)
+    - [基本使用方法 CRUD](#%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95-crud)
+    - [定制你的ApplicationBaseDAO](#%E5%AE%9A%E5%88%B6%E4%BD%A0%E7%9A%84applicationbasedao)
+    - [SQL构建器在BaseDAO中的使用](#sql%E6%9E%84%E5%BB%BA%E5%99%A8%E5%9C%A8basedao%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8)
+- [7 通用工具](#7-%E9%80%9A%E7%94%A8%E5%B7%A5%E5%85%B7)
+    - [获取sql的IN列表](#%E8%8E%B7%E5%8F%96sql%E7%9A%84in%E5%88%97%E8%A1%A8)
+    - [获取LIKE通配符](#%E8%8E%B7%E5%8F%96like%E9%80%9A%E9%85%8D%E7%AC%A6)
+- [8 配置项](#8-%E9%85%8D%E7%BD%AE%E9%A1%B9)
+- [9 其他](#9-%E5%85%B6%E4%BB%96)
 
 # 1 简介
+
 FastSQL一个基于spring-jdbc的简单ORM框架，它支持sql构建、sql执行、命名参数绑定、查询结果自动映射和通用DAO。结合了Hibernate/JPA快速开发和Mybatis高效执行的优点。
 
 FastSQL可以完全满足你控制欲，可以用Java代码清晰又方便地写出sql语句并执行。
@@ -958,7 +993,7 @@ logging.level.org.springframework.jdbc.core.JdbcTemplate=debug
 logging.level.org.springframework.jdbc.core.StatementCreatorUtils=trace
 ```
 
-## 9 其他
+# 9 其他
 
 * [使用文档](http://fastsql.top)
 * [版本下载](https://oss.sonatype.org/content/repositories/releases/top/fastsql/fastsql/)
