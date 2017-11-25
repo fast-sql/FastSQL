@@ -82,23 +82,36 @@ SQL 实例是有状态的 ，不是线程安全的，是不能被共享的。即
 # 3 SQLFactory 配置
 
 新建SQLFactory
+
 ```java
 SQLFactory sqlFactory = new SQLFactory();
 ```
+
 指定DataSource
+
 ```java
-DataSource dataSource =  ... ;//新建任意类型一个DataSource，如SimpleDriverDataSource（Spring内部简单的DataSource）或者支持连接池的DataSource
+//新建任意类型一个DataSource，如SimpleDriverDataSource（Spring内部提供的）
+//  或者其他支持连接池的DataSource
+DataSource dataSource =  ... ;
+
+//设置数据源
 sqlFactory.setDataSource(dataSource);
 ```
+
 设置数据源类型
+
 ```java
 sqlFactory.setDataSourceType(DataSourceType.POSTGRESQL);//默认
 //sqlFactory.setDataSourceType(DataSourceType.MY_SQL);
 //sqlFactory.setDataSourceType(DataSourceType.ORACLE);
 ```
 
+设置其他内容
 
-# 4 SQL类作为sql语句构建器使用
+>撰写中
+
+
+# 4 使用SQL类构建sql语句
 
 Java程序员面对的最痛苦的事情之一就是在Java代码中嵌入SQL语句。`SQL`类可以简化你构建sql语句的过程。
 
@@ -386,7 +399,7 @@ sqlFactory.createSQL().DELETE_FROM("student").WHERE("id=12").build();
 //=>DELETE FROM student WHERE id=12
 ```
 
-# 5 SQL类的执行sql功能
+# 5 使用SQL类执行sql语句
 
 ##  5.1 创建SqlFactory
 
@@ -402,19 +415,21 @@ sqlFactory.setDataSource(dataSource);
 sqlFactory.setDataSourceType(DataSourceType.MY_SQL);
 ```
 
-##  5.2 设置参数方法
+##  5.2 设置参数的方法
 
 FastSQL支持多种传入命名参数的方法：
 
-- `parameter(SqlParameterSource)` 支持传入SqlParameterSource类型的参数（兼容spring-jdbc）
-- `beanParameter(Object)`方法可以传入对象参数
-- `mapParameter(Map<String, Object>)`支持传入Map类型参数
-- `mapItemsParameter(Object...)`支持多个key-value形式的参数，比如`mapItemsParameter("id", 12345,"name","小明")`
-- `beanAndMapParameter(Object, Map<String, Object>)` 支持两种不同的参数组合，后一个会覆盖前面的相同名字的参数
-- `appendMapParameterItem(String, Object)`可以为以上几种传参方法追加参数，同`addMapParameterItem(String, Object)`
+- `parameter(SqlParameterSource)` 支持传入SqlParameterSource类型的参数（为了兼容spring-jdbc）。
+- `beanParameter(Object)`方法可以传入对象参数。
+- `mapParameter(Map<String, Object>)`支持传入Map类型参数。
+- `mapItemsParameter(Object...)`支持多个key-value形式的参数，比如`mapItemsParameter("id", 12345,"name","小明")`。
+- `beanAndMapParameter(Object, Map<String, Object>)` 支持两种不同的参数组合，后一个map会覆盖前面bean中的相同名字的参数。
+- `addMapParameterItem(String, Object)`可以为以上几种传参方法追加参数。
+
+>注意：以上方法除了`addMapParameterItem`都**只能调用一次，调用多次会导致前面的传参被覆盖**。如需追加参数，请使用`addMapParameterItem`。
 
 FastSQL也支持?占位符和可变参数：
-- `varParameter(Object... vars)` 可以调用多次
+- `varParameter(Object... vars)` 传入可变参数，**可以调用多次**，用来追加参数。
 
 ### 示例
 
