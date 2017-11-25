@@ -415,10 +415,10 @@ FastSQL也支持?占位符和可变参数：
 
 使用beanParameter方法支持传入一个参数bean
 ```java
-@Data
 public class StudentDTO{
     private String name;
     private int age;
+    //省略set和get方法
 }
 ```
 ```java
