@@ -6,12 +6,15 @@
 
 ![logo](logo_s.jpg)
 
-# 1. 简介
+# 目录
+[1 简介](http:www.baiodu.com)
+
+# 1 简介
 FastSQL一个基于spring-jdbc的简单ORM框架，它支持sql构建、sql执行、命名参数绑定、查询结果自动映射和通用DAO。结合了Hibernate/JPA快速开发和Mybatis高效执行的优点。
 
 FastSQL可以完全满足你控制欲，可以用Java代码清晰又方便地写出sql语句并执行。
 
-# 2. 入门
+# 2 入门
 
 ## 安装
 
@@ -67,7 +70,7 @@ SQL 实例是有状态的 ，不是线程安全的，是不能被共享的。即
 绝对不能将 SQL 实例的引用放在一个类的静态域，甚至一个类的实例变量也不行。
 
 
-# 3. SQLFactory 配置
+# 3 SQLFactory 配置
 
 新建SQLFactory
 ```java
@@ -86,7 +89,7 @@ sqlFactory.setDataSourceType(DataSourceType.POSTGRESQL);//默认
 ````
 
 
-# 4. SQL类作为sql语句构建器使用
+# 4 SQL类作为sql语句构建器使用
 
 Java程序员面对的最痛苦的事情之一就是在Java代码中嵌入SQL语句。`SQL`类可以简化你构建sql语句的过程。
 
@@ -378,7 +381,7 @@ sqlFactory.createSQL().DELETE_FROM("student").WHERE("id=:id").build();
 
 
 
-# 5. SQL构建器的执行功能
+# 5 SQL构建器的执行功能
 
 ##  创建SqlFactory
 ```java
@@ -568,7 +571,7 @@ connection.commit();//提交事务
 ```
 
 
-# 6. BaseDAO
+# 6 BaseDAO
 
 ##  数据准备
 ### Entity实体类
@@ -920,7 +923,7 @@ public class StudentDAO extends ApplicationBaseDAO<Student, String> {
 }
 ```
 
-# 7. 通用工具
+# 7 通用工具
 
 ## 获取sql的IN列表
 
@@ -941,7 +944,7 @@ FastSqlUtils.leftWildcard("李");
 FastSqlUtils.rightWildcard("李");
 ```
 
-# 8. 配置项
+# 8 配置项
 
 显示sql日志,需要调节相应的类日志级别：
 org.springframework.jdbc.core.JdbcTemplate 日志级别调整为 debug 会显示SQL语句
@@ -955,7 +958,7 @@ logging.level.org.springframework.jdbc.core.JdbcTemplate=debug
 logging.level.org.springframework.jdbc.core.StatementCreatorUtils=trace
 ```
 
-## 要点
+## 9 其他
 
 * [使用文档](http://fastsql.top)
 * [版本下载](https://oss.sonatype.org/content/repositories/releases/top/fastsql/fastsql/)
