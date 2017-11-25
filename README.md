@@ -25,7 +25,7 @@ FastSQL可以完全满足你控制欲，可以用Java代码清晰又方便地写
 
 # 2 入门
 
-## 安装
+## 2.1 安装
 
 要使用 FastSQL， 只需将 fastsql-0.9.3.jar 文件置于 classpath 中即可（0.9.3为对应的版本号，下同）。
 
@@ -45,7 +45,7 @@ FastSQL可以完全满足你控制欲，可以用Java代码清晰又方便地写
 compile 'top.fastsql:fastsql:0.9.3'
 ```
 
-## 构建 SQLFactory
+## 2.2 构建 SQLFactory
 你可以直接从 Java 程序构建一个 SQLFactory ，如果使用SQL的执行功能，至少需要设置 DataSource 。
 ```java
 //新建一个DataSource（这里使用了Spring-Jdbc的SimpleDriverDataSource）
@@ -55,7 +55,7 @@ SQLFactory sqlFactory = new SQLFactory();
 sqlFactory.setDataSource(dataSource);
 ```
 
-## 从 SQLFactory 中获取 SQL
+## 2.3 从 SQLFactory 中获取 SQL
 
 既然有了 SQLFactory ，我们就可以从中获得 SQL 的实例了。SQL类完全包含了面向数据库执行 sql 命令所需的所有方法。
 你可以通过 SQL 实例来构建并直接执行 SQL 语句。例如：
@@ -64,16 +64,16 @@ SQL sql = sqlFactory.createSQL();
 Student student = sql.SELECT("*").FROM("student").WHERE("id=101").queryOne(Student.class);
 ```
 
-## 作用域（Scope）和生命周期
+## 2.4 作用域（Scope）和生命周期
 
-**SQLFactory**
+### SQLFactory
 
 SQLFactory 一旦被创建就应该在应用的运行期间一直存在，没有任何理由对它进行清除或重建。
 使用 SQLFactory 的最佳实践是在应用运行期间不要重复创建多次，多次重建 SQLFactory 被视为一种代码“坏味道（bad smell）”。
 因此 SQLFactory 的最佳作用域是应用的作用域。有很多方法可以做到，最简单的就是使用单例模式或者静态单例模式
 （如果在Spring环境中，利用Spring容器的功能，你完全可以把它设置为一个单例bean）。
 
-**SQL**
+### SQL
 
 SQL 实例是有状态的 ，不是线程安全的，是不能被共享的。即使在同一个线程中每执行sql语句一次，都需要重新构建一个 SQL 实例。
 绝对不能将 SQL 实例的引用放在一个类的静态域，甚至一个类的实例变量也不行。
@@ -102,7 +102,7 @@ sqlFactory.setDataSourceType(DataSourceType.POSTGRESQL);//默认
 
 Java程序员面对的最痛苦的事情之一就是在Java代码中嵌入SQL语句。`SQL`类可以简化你构建sql语句的过程。
 
-## 基本查询
+## 4.1 基本查询
 
 SELECT方法可以传入一个可变参数，以便选择多列。(FastSQL中建议SQL关键字全部采用大写)
 ```java
@@ -124,7 +124,7 @@ if (false){
 //生成sql=>SELECT name,age  FROM student  WHERE 1 = 1  AND age > 10
 ```
 
-## 使用操作符方法
+## 4.2 使用操作符方法
 
 FastSQL提供了一些操作符方便SQL的构建，比如：
 
@@ -161,7 +161,7 @@ sqlFactory.createSQL()
 | LIKE()           | 生成 LIKE                                             |
 | NOT_LIKE()       | 生成 NOT LIKE                                         |
 
-**byType(Object)**
+### byType(Object)
 
 这些方法仅仅是字符串连接：`eq("1")`生成` = 1` ，`eq("'1'")`会生成` = '1'`。byType(Object)方法可以根据类型生成你想要的sql字符串
 
@@ -180,7 +180,7 @@ sqlFactory.createSQL()
 | byType(Object)   | 根据类型生成相应字符串 ，如 byType(1)生成1 ，byType("1")生成'1' |
 | eqByType(Object) | 使用 = 连接根据类型生成相应的字符串                             |
 
-## 使用连接查询/排序
+## 4.3 使用连接查询/排序
 
 查询不及格的成绩
 
@@ -201,7 +201,7 @@ ORDER BY c.score_value
 */
 ```
 
-## 分组查询
+## 4.4 分组查询
 
 查询每个学生总分数
 
@@ -221,7 +221,7 @@ GROUP BY s.name
 */
 ```
 
-## IN语句
+## 4.5 IN语句
 
 由于Jdbc规范不支持IN参数绑定，FastSQL提供了几种IN语句直接拼接的方式：
 
@@ -247,7 +247,7 @@ sqlFactory.createSQL().SELECT("*")
 //生成sql==> SELECT *  FROM student  WHERE name  IN ('小明','小红')
 ```
 
-## 使用$_$()方法进行子查询
+## 4.6 使用$_$()方法进行子查询
 
 查询大于平均分的成绩（可以使用 $_$()方法）
 
@@ -278,7 +278,7 @@ sqlFactory.createSQL().SELECT("*")
 //生成sql==> SELECT * FROM score WHERE 1 = 1 AND score IN (SELECT DISTINCT score_value FROM score)
 ```
 
-## AND和OR结合使用
+## 4.7 AND和OR结合使用
 
 如果查询年龄大于10岁，并且名字是小明或小红
 
@@ -296,7 +296,7 @@ sqlFactory.createSQL().SELECT("*")
    .build();
 ```
 
-## 使用Lambda表达式简化构建动态sql
+## 4.8 使用Lambda表达式简化构建动态sql
 
 - `ifTrue(boolean bool, Consumer<SQL> sqlConsumer)`:如果第1个参数为true，则执行第二个参数（Lambda表达式）
 - `ifNotEmpty(Collection<?> collection, Consumer<SQL> sqlConsumer)`:如果第1个参数长度大于0，则执行第二个参数（Lambda表达式）
@@ -323,8 +323,10 @@ ifNotEmpty?
 SELECT student WHERE id=:id AND name=:name AND name  IN ('小明','小红')
 ```
 
-## 分页功能
-**使用原生关键字进行分页**
+## 4.9 分页功能
+
+### 使用原生关键字进行分页
+
 ```java
 sqlFactory.createSQL().SELECT("*").FROM("student").LIMIT(10).build();
 sqlFactory.createSQL().SELECT("*").FROM("student").LIMIT(5, 10).build();  //postgresql中的写法
@@ -337,7 +339,8 @@ SELECT * FROM student LIMIT 5,10
 SELECT * FROM student LIMIT 10 OFFSET 5
 ```
 
-**使用** `pageThis(int,int)` **分页方法进行分页**
+### 使用 `pageThis(int,int)` 分页方法进行分页
+
 ```
 //
 sqlFactory.setDataSourceType(DataSourceType.POSTGRESQL); //使用枚举指定数据源类型
@@ -345,13 +348,16 @@ sqlFactory.createSQL().SELECT("*").FROM("student").pageThis(1,10).build();
 ```
 注意：如果不指定 dataSourceType，将会使用 FastSQLConfig#dataSourceType 的默认类型进行分页;
 
-**使用** `countThis()` **生成获取数量语句**
+### 使用 `countThis()` 生成获取数量语句
+
 ```java
 //countThis
 sqlFactory.createSQL().SELECT("*").FROM("student").countThis().buildAndPrintSQL();
 ```
-## 构建插入insert/修改update/删除delete语句
-**插入**
+
+## 4.10 构建插入insert/修改update/删除delete语句
+
+### 插入
 
 ```java
 //使用列
@@ -364,7 +370,7 @@ sqlFactory.createSQL().INSERT_INTO("student").VALUES("21", "'Lily'", "12").build
 //=>INSERT INTO student VALUES (21,'Lily',12)
 ```
 
-**修改**
+### 修改
 
 SET(String...items) :SET关键字
 
@@ -373,19 +379,17 @@ sqlFactory.createSQL().UPDATE("student").SET("name = 'Jack'","age = 9").WHERE("n
 //=>  UPDATE student SET name = 'Jack',age = 9 WHERE name = 'Mike'
 ```
 
-**构建删除语句**
+### 构建删除语句
 
 ```java
 sqlFactory.createSQL().DELETE_FROM("student").WHERE("id=12").build();
 //=>DELETE FROM student WHERE id=12
 ```
 
-
-
-
 # 5 SQL类的执行sql功能
 
-##  创建SqlFactory
+##  5.1 创建SqlFactory
+
 ```java
 //创建任意DataSource对象（这里使用了spring自带的数据源SimpleDriverDataSource）
 DataSource dataSource = new SimpleDriverDataSource(
@@ -398,7 +402,8 @@ sqlFactory.setDataSource(dataSource);
 sqlFactory.setDataSourceType(DataSourceType.MY_SQL);
 ```
 
-##   设置参数方法
+##  5.2 设置参数方法
+
 FastSQL支持多种传入命名参数的方法：
 
 - `parameter(SqlParameterSource)` 支持传入SqlParameterSource类型的参数（兼容spring-jdbc）
@@ -411,7 +416,7 @@ FastSQL支持多种传入命名参数的方法：
 FastSQL也支持?占位符和可变参数：
 - `varParameter(Object... vars)` 可以调用多次
 
-**示例**
+### 示例
 
 使用beanParameter方法支持传入一个参数bean
 ```java
@@ -434,7 +439,7 @@ sqlFactory.createSQL().SELECT("*")
     .queryList(StudVO.class);
 
 ```
-使用mapParameter方法并追加参数
+使用beanParameter方法并追加参数
 ```java
 Map<String,Object> param = new HashMap<>();
 map.put("name","李%");
@@ -461,9 +466,10 @@ sql.INSERT_INTO("student", "id", "name", "age")
 ```
 
 
-##  查询方法
+##  5.3 查询方法
 
-**查询方法解析**
+### 查询方法解析
+
 - `T queryOne(Class<T> returnClassType)`查询单行结果封装为一个对象,参数可以是可以为String/Integer/Long/Short/BigDecimal/BigInteger/Float/Double/Boolean或者任意POJO的class。
 - `Map<String, Object> queryMap()`查询单行结果封装为Map
 - `List<T> queryList(Class<T> returnClassType)`查询多行结果封装为一个对象列表
@@ -472,7 +478,7 @@ sql.INSERT_INTO("student", "id", "name", "age")
 - `ResultPage<T> queryPage(int page, int perPage, Class<T> returnClassType)` 查询结果页
 
 
-**示例**
+### 示例
 
 StudentVO是查询视图类，包含name和age字段；StudentDTO是查询参数类，包含name字段。
 
@@ -517,7 +523,8 @@ ResultPage<StudVO> studVOResultPage =sqlFactory.createSQL().SELECT("name", "age"
 注意2：queryPage返回的是ResultPage对象
 
 
-##  增删改操作：
+##  5.4 增删改操作
+
 使用update方法
 ```java
 //插入
@@ -550,7 +557,7 @@ List<ColumnMetaData> columnMetaDataList = sqlFactory.createSQL().getColumnMetaDa
 
 ```
 
-##  事务管理
+##  5.5 事务管理
 
 手动事务：FastSQL事务管理使用Spring的工具类`org.springframework.jdbc.datasource.DataSourceUtils`
 ```java
@@ -575,8 +582,10 @@ connection.commit();//提交事务
 
 # 6 BaseDAO
 
-##  数据准备
+##  6.1 数据准备
+
 ### Entity实体类
+
 注解如下
 
 1. @Table 非必需，如果不写表名称将会被解析为student（根据类名的下划线形式）
@@ -601,6 +610,7 @@ public class Student {
 新建DAO层数据访问类, 并继承BaseDAO类，会自动继承BaseDAO中的方法(详见第2部分）
 
 ### DAO类在Spring环境中
+
 DAO层：
 
 ```java
@@ -644,7 +654,7 @@ public class Test  {
 }
 ```
 
-##  基本使用方法 CRUD
+##  6.2 基本使用方法 CRUD
 CRUD 是四种数据操作的简称：C 表示创建，R 表示读取，U 表示更新，D 表示删除。BaseDAO 自动创建了处理数据表中数据的方法。
 
 ### 数据插入
@@ -791,7 +801,7 @@ public class BizPhotoDAO extends ApplicationBaseDAO<BizPhotoPO, String> {
 
 方法   `int count()` 查询表总数量
 
-##  定制你的ApplicationBaseDAO
+##  6.3 定制你的ApplicationBaseDAO
 
 建议在你的程序中实现ApplicationBaseDAO，可以
 
@@ -907,7 +917,7 @@ count 参数表示执行成功的条数
 | useBeforeDelete | beforeDelete(ID id)               | deleteOneById(..)执行删除之前                                 |
 | useAfterDelete  | void afterDelete(ID id,int count) | deleteOneById(..)执行删除之后                                 |
 
-##   SQL构建器在BaseDAO中的使用
+##  6.4 SQL构建器在BaseDAO中的使用
 
 BaseDAO整合了SQL构建器，在继承BaseDAO的类中你可以你可以直接调用 `getSQL()` 来获取一个SQL实例：
 
@@ -927,7 +937,7 @@ public class StudentDAO extends ApplicationBaseDAO<Student, String> {
 
 # 7 通用工具
 
-## 获取sql的IN列表
+## 7.1 获取sql的IN列表
 
 `FastSQLUtils.getInClause(Collection<?> collection)`,会根据Collection的类型自动判断使用什么样的分隔符:
 
@@ -938,7 +948,7 @@ FastSQLUtils.getInClause(Lists.newArrayList("dog", "people", "food", "apple")) /
 
 说明：IN功能已经整合到SQL构建器的IN方法
 
-## 获取LIKE通配符
+## 7.2 获取LIKE通配符
 
 ```
 FastSqlUtils.bothWildcard("李"); // => %李%
