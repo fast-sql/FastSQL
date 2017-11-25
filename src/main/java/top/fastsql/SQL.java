@@ -743,6 +743,11 @@ public class SQL {
 
     }
 
+    public SQL appendMapParameterItem(String key, Object value) {
+        return addMapParameterItem(key, value);
+    }
+
+
     /**
      * 出现相同名称的参数时，map或覆盖bean中的参数
      *

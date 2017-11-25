@@ -401,12 +401,12 @@ sqlFactory.setDataSourceType(DataSourceType.MY_SQL);
 ##   设置参数方法
 FastSQL支持多种传入命名参数的方法：
 
-- `parameter(SqlParameterSource sqlParameterSource)` 支持传入SqlParameterSource类型的参数（兼容spring-jdbc）
-- `beanParameter(Object dto)`方法可以传入对象参数
-- `mapParameter(Map<String, Object> map)`支持传入Map类型参数
-- `mapItemsParameter(Object... param)`支持多个key-value形式的参数，比如`mapItemsParameter("id", 12345,"name","小明")`
-- `beanAndMapParameter(Object dto, Map<String, Object> map)` 支持两种不同的参数组合，后一个会覆盖前面的相同名字的参数
-- `addParameterMapItem(String key, Object value)`可以为以上几种传参方法追加参数
+- `parameter(SqlParameterSource)` 支持传入SqlParameterSource类型的参数（兼容spring-jdbc）
+- `beanParameter(Object)`方法可以传入对象参数
+- `mapParameter(Map<String, Object>)`支持传入Map类型参数
+- `mapItemsParameter(Object...)`支持多个key-value形式的参数，比如`mapItemsParameter("id", 12345,"name","小明")`
+- `beanAndMapParameter(Object, Map<String, Object>)` 支持两种不同的参数组合，后一个会覆盖前面的相同名字的参数
+- `appendMapParameterItem(String, Object)`可以为以上几种传参方法追加参数，同`addMapParameterItem(String, Object)`
 
 FastSQL也支持?占位符和可变参数：
 - `varParameter(Object... vars)` 可以调用多次
