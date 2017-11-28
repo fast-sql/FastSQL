@@ -545,7 +545,7 @@ ResultPage<StudVO> studVOResultPage =sqlFactory.createSQL().SELECT("name", "age"
 //插入
 sqlFactory.createSQL().INSERT_INTO("student", "id", "name", "age")
         .VALUES(":id", ":name", ":age")
-        .mapItemsParameter("id", 678, "name", "kjs345a354dfk", "age", 123)
+        .mapItemsParameter("id", 678, "name", "Kiven", "age", 123)
         .update();
 
 //修改
@@ -613,7 +613,7 @@ connection.commit();//提交事务
 @Data  //use lombok
 public class Student {
     @Id
-    private String id;
+    private Integer id;
     private String name;
     private Integer age;
     private LocalDate birthday;
@@ -630,7 +630,7 @@ DAO层：
 
 ```java
 @Repository
-public class StudentDAO extends BaseDAO<Student,String> {
+public class StudentDAO extends BaseDAO<Student,Integer> {
 
 }
 ```
@@ -677,7 +677,7 @@ CRUD 是四种数据操作的简称：C 表示创建，R 表示读取，U 表示
 方法 ` int insert(E entity) `，插入对象中的值到数据库，null值在生成的sql语句中会设置为NULL
 ```java
 Student student = new Student();
-student.setId(UUID.randomUUID().toString());
+student.setId(2);
 student.setName("小丽");
 student.setBirthday(LocalDate.now());//这里使用jdk8时间类型
 student.setHomeAddress("");
@@ -685,7 +685,7 @@ student.setHomeAddress("");
 studentDao.insert(student);//获取保存成功的id
 
 //等价如下SQL语句（注意：age被设置为null）
-//INSERT INTO student(id,name,age,birthday,home_address) VALUES ('622bca40-4c64-43aa-8819-447718bdafa5','小丽',NULL,'2017-07-11','')
+//INSERT INTO student(id,name,age,birthday,home_address) VALUES (2,'小丽',NULL,'2017-07-11','')
 
 ```
 
@@ -693,14 +693,14 @@ studentDao.insert(student);//获取保存成功的id
 
 ```java
 Student student = new Student();
-student.setId(UUID.randomUUID().toString());
+student.setId(3);
 student.setName("小丽");
 student.setBirthday(new Date());
 student.setHomeAddress("");
 studentDao.insertSelective(student);
 
 //等价如下SQL语句（注意：没有对age进行保存，在数据库层面age将会保存为该表设置的默认值，如果没有设置默认值，将会被保存为null ）
-//===>INSERT INTO student(id,name,birthday,home_address)  VALUES  ('622bca40-4c64-43aa-8819-447718bdafa5','小丽','2017-07-11','')
+//===>INSERT INTO student(id,name,birthday,home_address)  VALUES  (3,'小丽','2017-07-11','')
 ```
 
 
@@ -718,8 +718,8 @@ studentDao.insertSelective(student);
 
 方法   `int updateByColumn(E entity, String... columns) `,根据id更新可变参数columns列，对象中@id字段不能为空
 
-```
-Student student = studentDAO.selectOneById("11111111-1111-1111-1111-111111111111");
+```java
+Student student = studentDAO.selectOneById(44);
 student.setAge(19);
 studentDAO.updateByColumn(student,"age");
 
@@ -730,8 +730,8 @@ studentDAO.updateByColumn(student,"age");
 
 方法 `int deleteOneById(String id) ` 根据id删除数据
 ```java
-int num = studentDao.deleteOneById("22b66bcf-1c2e-4713-b90d-eab17182b565");//获取删除的行数量
-//===>DELETE FROM student WHERE id='22b66bcf-1c2e-4713-b90d-eab17182b565'
+int num = studentDao.deleteOneById(2);//获取删除的行数量
+//===>DELETE FROM student WHERE id=2
 ```
 
 方法 `int deleteAll()`,删除某个表所有行
@@ -745,8 +745,8 @@ int number = studentDao.deleteAll();//获取删除的行数量
 
 ```java
 List<String> ids = new ArrayList<>();
-ids.add("467641d2-e344-45e9-9e0e-fd6152f80867");
-ids.add("881c80a1-8c93-4bb7-926e-9a8bc9799a72");
+ids.add(1);
+ids.add(2);
 studentDao.deleteInBatch(ids);//返回成功删除的数量
 ```
 方法` int deleteWhere(String sqlCondition, Object... values)`，根据条件删除
@@ -758,7 +758,7 @@ studentDao.deleteInBatch(ids);//返回成功删除的数量
 通过id查询一个对象
 
 ```java
-Student student = studentDao.selectOneById("12345678");//查询id为12345678的数据，并封装到Student类中
+Student student = studentDao.selectOneById(4);//查询id为12345678的数据，并封装到Student类中
 ```
 方法     `E selectOneWhere(String sqlCondition, Object... values)`,通过语句查询（返回多条数据将会抛出运行时异常,为了防止sql语句在service层滥用，可变参数最多支持三个）
 
@@ -766,7 +766,7 @@ Student student = studentDao.selectOneById("12345678");//查询id为12345678的�
 Student student = studentDao.selectOneWhere("name=? AND home_address=?", "小明", "成都");
 ```
 
-方法     `protected E selectOneWhere(String sqlCondition, SqlParameterSource parameterSource)` 查询一条数据，protected，只能在子类中使用
+方法     `E selectOneWhere(String sqlCondition, SqlParameterSource parameterSource)` 查询一条数据
 
 ### 多条数据查询
 
@@ -785,13 +785,13 @@ List<Student> studentList  =  studentDao.selectWhere("home_address IS NULL ORDER
 List<Student> allStudents  =  studentDao.selectAll();
 ```
 
-方法     `protected List<E> selectWhere(String sqlCondition, SqlParameterSource parameterSource)`可以返回一条或多条数据， protected，只能在子类中使用
+方法     ` List<E> selectWhere(String sqlCondition, SqlParameterSource parameterSource)`可以返回一条或多条数据
 
 ### 分页查询
 
 方法     `ResultPage<E> selectPageWhere(String sqlCondition, int pageNumber, int perPage, Object... values)`
 
-方法     `protected ResultPage<E> selectPageWhere(String sqlCondition, int pageNumber, int perPage, SqlParameterSource parameterSource)` ， protected，只能在子类中使用
+方法     ` ResultPage<E> selectPageWhere(String sqlCondition, int pageNumber, int perPage, SqlParameterSource parameterSource)` 
 
 方法     `ResultPage<E> selectPage(int pageNumber, int perPage)`
 
@@ -804,7 +804,7 @@ int countWhere = studentDao.countWhere("age >= 20"); //查找年龄大于等于2
 int countWhere = studentDao.countWhere("age > ?" , 10); //查找年龄大于10的学生
 ```
 
-方法     `protected int countWhere(String sqlCondition, SqlParameterSource parameterSource)`,通过条件查询数量， protected，只能在子类中使用
+方法     ` int countWhere(String sqlCondition, SqlParameterSource parameterSource)`,通过条件查询数量
 ```java
 @Repository
 public class BizPhotoDAO extends ApplicationBaseDAO<BizPhotoPO, String> {
@@ -831,7 +831,7 @@ public abstract class ApplicationBaseDAO<E, ID> extends BaseDAO<E, ID> {
 
 ////我们的StudentDAO此时应该继承ApplicationBaseDAO
 @Repository
-public class StudentDAO extends ApplicationBaseDAO<Student,String> {
+public class StudentDAO extends ApplicationBaseDAO<Student,Integer> {
 
 }
 ```
@@ -907,9 +907,8 @@ public abstract class ApplicationBaseDAO<E, ID> extends BaseDAO<E, ID> {
     //2.重写触发器相关方法
     @Override
     protected void beforeInsert(E object) {
-        EntityRefelectUtils.setFieldValue(object, idField, UUID.randomUUID().toString());
         EntityRefelectUtils.setFieldValue(object, "createdAt", LocalDateTime.now());
-        EntityRefelectUtils.setFieldValue(object, "updatedAt", LocalDateTime.now());//在插入数据时自动更新id,createdAt,updatedAt
+        EntityRefelectUtils.setFieldValue(object, "updatedAt", LocalDateTime.now());//在插入数据时自动写入createdAt,updatedAt
     }
 
     @Override
@@ -934,16 +933,23 @@ count 参数表示执行成功的条数
 
 ##  6.4 SQL构建器在BaseDAO中的使用
 
-BaseDAO整合了SQL构建器，在继承BaseDAO的类中你可以你可以直接调用 `getSQL()` 来获取一个SQL实例：
+BaseDAO整合了SQL构建器，在继承BaseDAO的类中你可以你可以直接调用 `getSQL()` 来获取一个SQL的实例：
 
 ```java
 @Repository
 public class StudentDAO extends ApplicationBaseDAO<Student, String> {
+    /**
+     * 查询姓李的同学列表
+     */
     public List<Student> queryListByName() {
         return getSQL().SELECT("*").FROM(this.tableName)
                        .WHERE("name").LIKE("'李%'")
                        .queryList(Student.class);//查询列表
     }
+    
+    /**
+    * 根据旧名字修改学生姓名
+    */
     public int updateName(String oldName,String newName) {
         return getSQL().UPDATE(this.tableName).SET("name = '"+newName+"'").WHERE("name").eqByType(oldName).update();
     }
@@ -957,8 +963,11 @@ public class StudentDAO extends ApplicationBaseDAO<Student, String> {
 `FastSQLUtils.getInClause(Collection<?> collection)`,会根据Collection的类型自动判断使用什么样的分隔符:
 
 ```java
-FastSQLUtils.getInClause(Lists.newArrayList(1, 23, 4, 15))  //生成=>(1,23,4,15)
-FastSQLUtils.getInClause(Lists.newArrayList("dog", "people", "food", "apple")) //生成=> ('dog','people','food','apple')
+FastSQLUtils.getInClause(Lists.newArrayList(1, 23, 4, 15));
+//生成=>(1,23,4,15)
+
+FastSQLUtils.getInClause(Lists.newArrayList("dog", "people", "food", "apple")); 
+//生成=> ('dog','people','food','apple')
 ```
 
 说明：IN功能已经整合到SQL构建器的IN方法
