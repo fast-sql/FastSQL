@@ -50,6 +50,10 @@ public class SQL {
     private DataSourceType dataSourceType;
 
 
+    public SQL() {
+
+    }
+
     SQL(JdbcTemplate jdbcTemplate, DataSourceType dataSourceType, boolean logSqlWhenBuild) {
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
         this.dataSourceType = dataSourceType;
