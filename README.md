@@ -329,7 +329,9 @@ sqlFactory.createSQL()
     })
     .build();
 ```
+
 输出：
+
 ```
 ifNotEmpty?
 SELECT student WHERE id=:id AND name=:name AND name  IN ('小明','小红')
@@ -345,6 +347,7 @@ sqlFactory.createSQL().SELECT("*").FROM("student").LIMIT(5, 10).build();  //post
 sqlFactory.createSQL().SELECT("*").FROM("student").LIMIT(10).OFFSET(5).build(); //mysql中的写法
 ```
 生成如下SQL
+
 ```sql
 SELECT * FROM student LIMIT 10
 SELECT * FROM student LIMIT 5,10
@@ -623,7 +626,7 @@ public class Student {
 
 新建DAO层数据访问类, 并继承BaseDAO类，会自动继承BaseDAO中的方法(详见第2部分）
 
-### DAO类在Spring环境中
+### DAO类在Spring环境中的使用
 
 DAO层：
 
