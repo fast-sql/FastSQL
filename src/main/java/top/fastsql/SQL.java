@@ -151,6 +151,12 @@ public class SQL {
         return this;
     }
 
+    public SQL appendSELECT(String... columns) {
+        String columnsStr = String.join(",", columns);
+        strBuilder.append(",").append(columnsStr);
+        return this;
+    }
+
     public SQL AS(String value) {
         strBuilder.append(" AS ").append(value);
         return this;
