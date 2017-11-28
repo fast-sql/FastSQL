@@ -27,7 +27,7 @@ FastSQL可以完全满足你控制欲，可以用Java代码清晰又方便地写
 
 ## 2.1 安装
 
-要使用 FastSQL， 只需将 fastsql-1.0.0.jar 文件置于 classpath 中即可（0.9.3为对应的版本号，下同）。
+要使用 FastSQL， 只需将 fastsql-1.0.0.jar 文件置于 classpath 中即可。
 
 如果使用 Maven 来构建项目，则需将下面的 dependency 代码置于 pom.xml 文件中：
 
