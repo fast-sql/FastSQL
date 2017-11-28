@@ -102,8 +102,7 @@ sqlFactory.setDataSource(dataSource);
 
 ```java
 sqlFactory.setDataSourceType(DataSourceType.POSTGRESQL);//默认
-//sqlFactory.setDataSourceType(DataSourceType.MY_SQL);
-//sqlFactory.setDataSourceType(DataSourceType.ORACLE);
+//支持 DataSourceType.POSTGRESQL、 DataSourceType.MY_SQL、DataSourceType.ORACLE
 ```
 
 设置其他内容
