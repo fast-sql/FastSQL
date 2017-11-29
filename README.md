@@ -147,7 +147,7 @@ sqlFactory.createSQL()
     .WHERE("age").lt("10")
     .AND("name").eq("'小明'")
     .build();
-//生成sql=> SELECT name,age FROM student WHERE age > 10 AND name = '小明'
+//生成sql=> SELECT name,age FROM student WHERE age < 10 AND name = '小明'
 ```
 
 如下：
