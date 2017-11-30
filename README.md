@@ -361,7 +361,7 @@ SELECT * FROM student LIMIT 10 OFFSET 5
 sqlFactory.setDataSourceType(DataSourceType.POSTGRESQL); //使用枚举指定数据源类型
 sqlFactory.createSQL().SELECT("*").FROM("student").pageThis(1,10).build();
 ```
-注意：如果不指定 dataSourceType，将会使用 FastSQLConfig#dataSourceType 的默认类型进行分页;
+注意：如果不指定 dataSourceType，将会使用 postgresql 数据库类型进行分页;
 
 ### 使用 `countThis()` 生成获取数量语句
 
