@@ -343,8 +343,8 @@ SELECT student WHERE id=:id AND name=:name AND name  IN ('小明','小红')
 
 ```java
 sqlFactory.createSQL().SELECT("*").FROM("student").LIMIT(10).build();
-sqlFactory.createSQL().SELECT("*").FROM("student").LIMIT(5, 10).build();  //postgresql中的写法
-sqlFactory.createSQL().SELECT("*").FROM("student").LIMIT(10).OFFSET(5).build(); //mysql中的写法
+sqlFactory.createSQL().SELECT("*").FROM("student").LIMIT(5, 10).build(); //mysql中的写法
+sqlFactory.createSQL().SELECT("*").FROM("student").LIMIT(10).OFFSET(5).build(); //postgresql中的写法
 ```
 生成如下SQL
 
