@@ -29,18 +29,22 @@ public class SQLFactory {
 
     private boolean logSQLWhenBuild = false;
 
-    public SQL createSQL() {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate();
-        jdbcTemplate.setIgnoreWarnings(ignoreWarnings);
-        jdbcTemplate.setFetchSize(fetchSize);
-        jdbcTemplate.setMaxRows(maxRows);
-        jdbcTemplate.setQueryTimeout(queryTimeout);
-        jdbcTemplate.setSkipResultsProcessing(skipResultsProcessing);
-        jdbcTemplate.setSkipUndeclaredResults(skipUndeclaredResults);
-        jdbcTemplate.setResultsMapCaseInsensitive(resultsMapCaseInsensitive);
+    private JdbcTemplate jdbcTemplate;
 
-        jdbcTemplate.setDataSource(this.dataSource);
-        return new SQL(jdbcTemplate, dataSourceType, logSQLWhenBuild);
+    public SQL createSQL() {
+        if (this.jdbcTemplate == null) {
+
+            this.jdbcTemplate = new JdbcTemplate();
+            this.jdbcTemplate.setIgnoreWarnings(ignoreWarnings);
+            this.jdbcTemplate.setFetchSize(fetchSize);
+            this.jdbcTemplate.setMaxRows(maxRows);
+            this.jdbcTemplate.setQueryTimeout(queryTimeout);
+            this.jdbcTemplate.setSkipResultsProcessing(skipResultsProcessing);
+            this.jdbcTemplate.setSkipUndeclaredResults(skipUndeclaredResults);
+            this.jdbcTemplate.setResultsMapCaseInsensitive(resultsMapCaseInsensitive);
+            this.jdbcTemplate.setDataSource(this.dataSource);
+        }
+        return new SQL(this.jdbcTemplate, this.dataSourceType, this.logSQLWhenBuild);
     }
 
 

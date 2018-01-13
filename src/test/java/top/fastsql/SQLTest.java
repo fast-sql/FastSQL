@@ -1,14 +1,19 @@
 package top.fastsql;
 
-import com.mysql.jdbc.Driver;
+import com.mysql.jdbc.log.LogFactory;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.impl.SimpleLoggerFactory;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import top.fastsql.config.DataSourceType;
 
 import javax.sql.DataSource;
-import java.sql.SQLException;
+
 
 public class SQLTest {
+
+    private  Logger log= LoggerFactory.getLogger(SQLTest.class);
 
     private static SQLFactory sqlFactory = new SQLFactory();
 
@@ -16,18 +21,27 @@ public class SQLTest {
         DataSource dataSource = null;
         try {
             dataSource = new SimpleDriverDataSource(
-                    new Driver(), "jdbc:postgresql://192.168.0.226:5432/picasso_dev2?stringtype=unspecified",
+                    new org.postgresql.Driver(), "jdbc:postgresql://192.168.0.226:5432/picasso_dev2?stringtype=unspecified",
                     "developer", "password");
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         sqlFactory.setDataSource(dataSource);
-        sqlFactory.setDataSourceType(DataSourceType.MY_SQL);
+        sqlFactory.setDataSourceType(DataSourceType.POSTGRESQL);
     }
 
     @Test
     public void testOperatorMethod() {
+//        SimpleLoggerFactory factory = new SimpleLoggerFactory();
+        log.info("222");
+        log.debug("-----------");
+        sqlFactory.createSQL()
+                .SELECT("*")
+                .FROM("sys_users")
+                .queryMapList();
+        Logger logger = LoggerFactory.getILoggerFactory().getLogger("top.fastsql.SQLTest");
 
+        System.out.println("---");
     }
 
     /**

@@ -67,14 +67,14 @@ public abstract class BaseDAO<E, ID> {
     protected SQLFactory sqlFactory;
 
 
-    protected SQLFactory getSqlFactory() {
+    public SQLFactory getSqlFactory() {
         if (sqlFactory == null) {
             throw new IllegalArgumentException("sqlFactory is null in BaseDAO,please set it.");
         }
         return sqlFactory;
     }
 
-    protected SQL getSQL() {
+    public SQL getSQL() {
         if (sqlFactory == null) {
             throw new IllegalArgumentException("sqlFactory is null in BaseDAO,please set it.");
         }

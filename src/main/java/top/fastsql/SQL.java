@@ -60,6 +60,14 @@ public class SQL {
         this.logSqlWhenBuild = logSqlWhenBuild;
     }
 
+    public NamedParameterJdbcTemplate getNamedParameterJdbcTemplate() {
+        return namedParameterJdbcTemplate;
+    }
+
+    public void setNamedParameterJdbcTemplate(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+    }
+
     @Deprecated
     public SQL template(NamedParameterJdbcTemplate template) {
         this.namedParameterJdbcTemplate = template;
@@ -800,6 +808,7 @@ public class SQL {
             Collections.addAll(objectList, vars);
             this.varParams = objectList.toArray();
         }
+
         return this;
     }
 
@@ -839,7 +848,7 @@ public class SQL {
     }
 
     /**
-     * 使用 namedParameterJdbcTemplate 查询一个
+     * 使用  JdbcTemplate 查询一个
      */
     private <T> T useTemplateQueryOne(RowMapper<T> rowMapper) {
         try {

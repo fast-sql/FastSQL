@@ -1,5 +1,6 @@
 package top.fastsql.dto;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -16,6 +17,11 @@ public class ResultPage<T> implements Iterable<T> {
      * 总长度
      */
     private int totalElements; //TODO 考虑改为long?
+
+    public ResultPage() {
+        this.content = new ArrayList<>();
+        this.totalElements = 0;
+    }
 
     public ResultPage(List<T> content, int totalElements) {
         this.content = content;
