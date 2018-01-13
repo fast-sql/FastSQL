@@ -990,6 +990,7 @@ org.springframework.jdbc.core.JdbcTemplate 日志级别调整为 debug 会显示
 org.springframework.jdbc.core.StatementCreatorUtils 日志级别调整为 trace 会显示绑定参数过程
 
 下面是Springboot中的配置：
+
 ```properties
 #显示sql
 logging.level.org.springframework.jdbc.core.JdbcTemplate=debug
@@ -1001,3 +1002,5 @@ logging.level.org.springframework.jdbc.core.StatementCreatorUtils=trace
 
 * [项目主页](http://fastsql.top)
 * [版本下载](https://oss.sonatype.org/content/repositories/releases/top/fastsql/fastsql/)
+
+# 10 更新日志
