@@ -1022,6 +1022,38 @@ public class SQL {
                 .queryPage(strBuilder.toString(), page, perPage, sqlParameterSource, rowMapper, this.dataSourceType);
     }
 
+//    private void doWithInParam() {
+//        List<Integer> indexList = new ArrayList<>();
+//        List<Object> newVars = new ArrayList<>();
+//        int i = 0;
+//        for (Object param : varParams) {
+//            if (param instanceof Collection) {
+//                indexList.add(i);
+//            } else {
+//                newVars.add(param);
+//            }
+//            i++;
+//        }
+//
+//        //处理sql
+//        String[] split = this.strBuilder.toString().split("\\?");
+//        List<String> sqls = new ArrayList<>();
+//        int i2 = 0;
+//        for (String sql : sqls) {
+//            if (i2 != 0) {
+//                sqls.add("?");
+//            }
+//            sqls.add(split[i]);
+//            i2++;
+//        }
+//
+//
+//        for (Integer index : indexList) {
+//            sqls.set(index*2,FastSqlUtils.getInClause((Collection<?>) varParams[index]));
+//        }
+//
+//        this.varParams = newVars.toArray();
+//    }
 
     /**
      * 查询结果内存分页
