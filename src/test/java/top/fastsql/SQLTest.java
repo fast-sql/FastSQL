@@ -1,19 +1,22 @@
 package top.fastsql;
 
-import com.mysql.jdbc.log.LogFactory;
+import com.google.common.collect.Lists;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.impl.SimpleLoggerConfiguration;
 import org.slf4j.impl.SimpleLoggerFactory;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import top.fastsql.config.DataSourceType;
 
 import javax.sql.DataSource;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class SQLTest {
 
-    private  Logger log= LoggerFactory.getLogger(SQLTest.class);
+    private Logger log = LoggerFactory.getLogger(SQLTest.class);
 
     private static SQLFactory sqlFactory = new SQLFactory();
 
@@ -28,7 +31,11 @@ public class SQLTest {
         }
         sqlFactory.setDataSource(dataSource);
         sqlFactory.setDataSourceType(DataSourceType.POSTGRESQL);
-    }
+
+
+        //log
+
+     }
 
     @Test
     public void testOperatorMethod() {
@@ -68,6 +75,54 @@ public class SQLTest {
                 .FROM("student")
                 .WHERE("name").IN(new Object[]{"小红", "小明"})
                 .build();
+    }
+
+    @Test
+    public void testINCollection() {
+        List<String> list = new ArrayList<>();
+        list.add("小红");
+        list.add("小红");
+
+        String sql = sqlFactory.createSQL()
+                .SELECT("name", "age")
+                .FROM("student")
+                .WHERE("name IN ?")
+                .varParameter(list)
+                .build();
+
+        System.out.println(sql);
+
+        List<Integer> list2 = new ArrayList<>();
+        list2.add(1);
+        list2.add(3);
+
+        String sql2 = sqlFactory.createSQL()
+                .SELECT("name", "age")
+                .FROM("student")
+                .WHERE("age IN ?")
+                .varParameter(list2)
+                .build();
+        System.out.println(sql2);
+
+
+    }
+
+    @Test
+    public void testINCollectionQuery() {
+        sqlFactory.createSQL()
+                .SELECT("name")
+                .FROM("sys_dict")
+                .WHERE("code IN ?")
+                .varParameter(Lists.newArrayList("1"))
+                .queryMapListAndPrint();
+    }
+
+    @Test
+    public void testINCollectionDAOQuery() {
+        SysDictDAO sysDictDAO = new SysDictDAO(sqlFactory);
+        List<SysDict> list = sysDictDAO.selectWhere("code IN ? AND state=?", Lists.newArrayList("1", "abc"), 0);
+        System.out.println(list);
+
     }
 
     @Test

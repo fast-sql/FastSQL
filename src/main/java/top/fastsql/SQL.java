@@ -626,6 +626,7 @@ public class SQL {
         if (logSqlWhenBuild) {
             logger.info(strBuilder.toString());
         }
+        doWithCollectionParam();
         return strBuilder.toString();
     }
 
@@ -854,6 +855,7 @@ public class SQL {
         try {
             String sql = this.build();
             if (useClassicJdbcTemplate) {
+                doWithCollectionParam();
                 return this.namedParameterJdbcTemplate.getJdbcOperations().queryForObject(sql, rowMapper, this.varParams);
             } else {
                 return this.namedParameterJdbcTemplate.queryForObject(sql, this.sqlParameterSource, rowMapper);
@@ -873,6 +875,7 @@ public class SQL {
         checkNull();
         try {
             if (this.useClassicJdbcTemplate) {
+                doWithCollectionParam();
                 return this.namedParameterJdbcTemplate.getJdbcOperations().queryForMap(strBuilder.toString(), varParams);
             } else {
                 return this.namedParameterJdbcTemplate.queryForMap(strBuilder.toString(), this.sqlParameterSource);
@@ -892,6 +895,7 @@ public class SQL {
         checkNull();
         RowMapper<T> rowMapper = getRowMapper(returnClassType);
         if (this.useClassicJdbcTemplate) {
+            doWithCollectionParam();
             return this.namedParameterJdbcTemplate.getJdbcOperations().query(strBuilder.toString(), rowMapper, varParams);
         }
 
@@ -903,6 +907,7 @@ public class SQL {
         checkNull();
         RowMapper<String> rowMapper = new SingleColumnRowMapper<>(String.class);
         if (this.useClassicJdbcTemplate) {
+            doWithCollectionParam();
             return this.namedParameterJdbcTemplate.getJdbcOperations().query(strBuilder.toString(), rowMapper, varParams);
         }
 
@@ -913,6 +918,7 @@ public class SQL {
         checkNull();
         RowMapper<Integer> rowMapper = new SingleColumnRowMapper<>(Integer.class);
         if (this.useClassicJdbcTemplate) {
+            doWithCollectionParam();
             return this.namedParameterJdbcTemplate.getJdbcOperations().query(strBuilder.toString(), rowMapper, varParams);
         }
 
@@ -922,6 +928,7 @@ public class SQL {
     public <T> List<T> queryList(RowMapper<T> rowMapper) {
         checkNull();
         if (this.useClassicJdbcTemplate) {
+            doWithCollectionParam();
             return this.namedParameterJdbcTemplate.getJdbcOperations().query(strBuilder.toString(), rowMapper, varParams);
         }
 
@@ -936,6 +943,7 @@ public class SQL {
     public List<Map<String, Object>> queryMapList() {
         checkNull();
         if (this.useClassicJdbcTemplate) {
+            doWithCollectionParam();
             return this.namedParameterJdbcTemplate.getJdbcOperations().queryForList(strBuilder.toString(), varParams);
         }
         return this.namedParameterJdbcTemplate.queryForList(strBuilder.toString(), this.sqlParameterSource);
@@ -949,6 +957,7 @@ public class SQL {
     public List<Object[]> queryArrayList() {
         checkNull();
         if (this.useClassicJdbcTemplate) {
+            doWithCollectionParam();
             return this.namedParameterJdbcTemplate.getJdbcOperations().query(strBuilder.toString(), varParams, (rs, rowNum) -> {
                 int columnCount = rs.getMetaData().getColumnCount();
                 Object[] objects = new Object[columnCount];
@@ -1004,56 +1013,74 @@ public class SQL {
         RowMapper<T> rowMapper = getRowMapper(returnClassType);
 
         if (useClassicJdbcTemplate) {
+            doWithCollectionParam();
             return new PageTemplate(namedParameterJdbcTemplate)
                     .queryPage(strBuilder.toString(), page, perPage, varParams, rowMapper, this.dataSourceType);
+        } else {
+            return new PageTemplate(namedParameterJdbcTemplate)
+                    .queryPage(strBuilder.toString(), page, perPage, sqlParameterSource, rowMapper, this.dataSourceType);
         }
-        return new PageTemplate(namedParameterJdbcTemplate)
-                .queryPage(strBuilder.toString(), page, perPage, sqlParameterSource, rowMapper, this.dataSourceType);
     }
 
     public <T> ResultPage<T> queryPage(int page, int perPage, RowMapper<T> rowMapper) {
         checkNull();
 
         if (useClassicJdbcTemplate) {
+            doWithCollectionParam();
             return new PageTemplate(namedParameterJdbcTemplate)
                     .queryPage(strBuilder.toString(), page, perPage, varParams, rowMapper, this.dataSourceType);
+        } else {
+            return new PageTemplate(namedParameterJdbcTemplate)
+                    .queryPage(strBuilder.toString(), page, perPage, sqlParameterSource, rowMapper, this.dataSourceType);
         }
-        return new PageTemplate(namedParameterJdbcTemplate)
-                .queryPage(strBuilder.toString(), page, perPage, sqlParameterSource, rowMapper, this.dataSourceType);
     }
 
-//    private void doWithInParam() {
-//        List<Integer> indexList = new ArrayList<>();
-//        List<Object> newVars = new ArrayList<>();
-//        int i = 0;
-//        for (Object param : varParams) {
-//            if (param instanceof Collection) {
-//                indexList.add(i);
-//            } else {
-//                newVars.add(param);
-//            }
-//            i++;
-//        }
-//
-//        //处理sql
-//        String[] split = this.strBuilder.toString().split("\\?");
-//        List<String> sqls = new ArrayList<>();
-//        int i2 = 0;
-//        for (String sql : sqls) {
-//            if (i2 != 0) {
-//                sqls.add("?");
-//            }
-//            sqls.add(split[i]);
-//            i2++;
-//        }
-//
-//
-//        for (Integer index : indexList) {
-//            sqls.set(index*2,FastSqlUtils.getInClause((Collection<?>) varParams[index]));
-//        }
-//
-//        this.varParams = newVars.toArray();
-//    }
+    /**
+     * 提前替换Collection类型的参数
+     */
+    private void doWithCollectionParam() {
+        List<Object> newVarParams = new ArrayList<>();
+
+        List<Integer> indexList = new ArrayList<>();
+        int i = 0;
+        for (Object param : this.varParams) {
+            if (param instanceof Collection) {
+                indexList.add(i);
+            } else {
+                newVarParams.add(param);
+            }
+            i++;
+        }
+
+
+        //使用 ？ 分割 sql
+        String[] split = this.strBuilder.toString().split("\\?");
+
+        // 使用 ？ 连接各部分 生成 list
+        List<String> sqls = new ArrayList<>();
+
+        int i2 = 0;
+        for (String s : split) {
+            if (i2 != 0) {
+                sqls.add("?");
+            }
+            sqls.add(s);
+            i2++;
+        }
+        if (this.strBuilder.toString().trim().endsWith("?")) { //特殊特殊情况处理
+            sqls.add("?");
+        }
+
+
+        // 替换list部分相应的？
+        for (Integer index : indexList) {
+            sqls.set(index * 2 + 1, FastSqlUtils.getInClause((Collection<?>) this.varParams[index]));
+        }
+
+        this.varParams = newVarParams.toArray();
+
+        this.strBuilder = new StringBuilder(String.join("", sqls));
+    }
 
     /**
      * 查询结果内存分页
@@ -1081,6 +1108,7 @@ public class SQL {
         String sql = strBuilder.toString();
 
         if (useClassicJdbcTemplate) {
+            doWithCollectionParam();
             count = this.namedParameterJdbcTemplate.getJdbcOperations().update(sql, varParams);
         } else {
             count = this.namedParameterJdbcTemplate.update(sql, this.sqlParameterSource);
