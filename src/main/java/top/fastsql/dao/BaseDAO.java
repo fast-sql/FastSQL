@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.util.StringUtils;
 import top.fastsql.SQL;
@@ -193,6 +194,31 @@ public abstract class BaseDAO<E, ID> {
             afterInsert(entity, count);
         }
         return count;
+    }
+
+    /**
+     * 批量插入
+     */
+    public int[] batchInsert(List<E> entities) {
+
+        StringBuilder nameBuilder = new StringBuilder();
+        StringBuilder valueBuilder = new StringBuilder();
+        fields.forEach(field -> {
+            nameBuilder.append(",").append(StringExtUtils.camelToUnderline(field.getName()));
+            valueBuilder.append(",:").append(field.getName());
+        });
+
+
+        String sql = getSQL()
+                .INSERT_INTO(tableName, nameBuilder.deleteCharAt(0).toString())
+                .VALUES(valueBuilder.deleteCharAt(0).toString()).build();
+
+        SqlParameterSource[] sqlParameterSources = new BeanPropertySqlParameterSource[entities.size()];
+        for (int i = 0; i < sqlParameterSources.length; i++) {
+            sqlParameterSources[i] = new BeanPropertySqlParameterSource(entities.get(i));
+        }
+
+        return getSQL().getNamedParameterJdbcTemplate().batchUpdate(sql, sqlParameterSources);
     }
 
     /////////////////////////////修改 /////////////////////////////////////////////

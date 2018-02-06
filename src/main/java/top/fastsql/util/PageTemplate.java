@@ -20,22 +20,7 @@ public class PageTemplate {
         this.namedParameterJdbcTemplate = template;
     }
 
-    //    public <T> ResultPage<T> queryPage(String sql, int page, int perPage, SqlParameterSource paramSource, RowMapper<T> rowMapper) {
-//        String rowsSQL = PageUtils.getRowsSQL(sql, page, perPage);
-//        List<T> list = namedParameterJdbcTemplate.query(
-//                rowsSQL,
-//                paramSource,
-//                rowMapper);
-//
-//        //查询数量
-//        String numberSQL = PageUtils.getNumberSQL(sql);
-//        Integer number = namedParameterJdbcTemplate.queryForObject(
-//                numberSQL,
-//                paramSource,
-//                Integer.class);
-//        return new ResultPage<T>(list, number);
-//    }
-//
+
     public <T> ResultPage<T> queryPage(String sql, int page, int perPage, SqlParameterSource paramSource, RowMapper<T> rowMapper, DataSourceType dataSourceType) {
         String rowsSQL = PageUtils.getRowsSQL(sql, page, perPage, dataSourceType);
         List<T> list = namedParameterJdbcTemplate.query(
@@ -52,21 +37,6 @@ public class PageTemplate {
         return new ResultPage<T>(list, number);
     }
 
-//    public <T> ResultPage<T> queryPage(String sql, int page, int perPage, Object[] objects, RowMapper<T> rowMapper) {
-//        String rowsSQL = PageUtils.getRowsSQL(sql, page, perPage);
-//        List<T> list = namedParameterJdbcTemplate.getJdbcOperations().query(
-//                rowsSQL,
-//                objects,
-//                rowMapper);
-//
-//        //查询数量
-//        String numberSQL = PageUtils.getNumberSQL(sql);
-//        Integer number = namedParameterJdbcTemplate.getJdbcOperations().queryForObject(
-//                numberSQL,
-//                objects,
-//                Integer.class);
-//        return new ResultPage<T>(list, number);
-//    }
 
     public <T> ResultPage<T> queryPage(String sql, int page, int perPage, Object[] objects, RowMapper<T> rowMapper, DataSourceType dataSourceType) {
         String rowsSQL = PageUtils.getRowsSQL(sql, page, perPage, dataSourceType);
