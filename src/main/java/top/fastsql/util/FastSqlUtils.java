@@ -1,6 +1,7 @@
 package top.fastsql.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -125,5 +126,11 @@ public class FastSqlUtils {
         return String.format("%%%s%%", source);
     }
 
+
+    public static <A> List<A> listOf(A... elements) {
+        List<A> list = new ArrayList<>();
+        list.addAll(Arrays.asList(elements));
+        return list;
+    }
 
 }

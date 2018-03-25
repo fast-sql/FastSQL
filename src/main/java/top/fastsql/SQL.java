@@ -41,7 +41,7 @@ public class SQL {
 
     private boolean useClassicJdbcTemplate = false;
 
-    private boolean logSqlWhenBuild = false;
+//    private boolean logSqlWhenBuild = false;
 
     private SqlParameterSource sqlParameterSource = new EmptySqlParameterSource();
 
@@ -54,10 +54,10 @@ public class SQL {
 
     }
 
-    SQL(JdbcTemplate jdbcTemplate, DataSourceType dataSourceType, boolean logSqlWhenBuild) {
+    public SQL(JdbcTemplate jdbcTemplate, DataSourceType dataSourceType) {
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
         this.dataSourceType = dataSourceType;
-        this.logSqlWhenBuild = logSqlWhenBuild;
+//        this.logSqlWhenBuild = logSqlWhenBuild;
     }
 
     public NamedParameterJdbcTemplate getNamedParameterJdbcTemplate() {
@@ -68,11 +68,11 @@ public class SQL {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
-    @Deprecated
-    public SQL template(NamedParameterJdbcTemplate template) {
-        this.namedParameterJdbcTemplate = template;
-        return this;
-    }
+//    @Deprecated
+//    public SQL template(NamedParameterJdbcTemplate template) {
+//        this.namedParameterJdbcTemplate = template;
+//        return this;
+//    }
 
 
     /**
@@ -211,25 +211,25 @@ public class SQL {
     }
 
 
-    @Deprecated
-    public SQL VALUES_byType(Object... columnValues) {
-        return this.VALUES_byType(Arrays.asList(columnValues));
-    }
-
-    @Deprecated
-    public SQL VALUES_byType(List<Object> columnValues) {
-        strBuilder.append(" VALUES ").append("(");
-        int i = 0;
-        for (Object value : columnValues) {
-            if (i != 0) {
-                strBuilder.append(",");
-            }
-            strBuilder.append(getStringByType(value));
-            i++;
-        }
-        strBuilder.append(")");
-        return this;
-    }
+//    @Deprecated
+//    public SQL VALUES_byType(Object... columnValues) {
+//        return this.VALUES_byType(Arrays.asList(columnValues));
+//    }
+//
+//    @Deprecated
+//    public SQL VALUES_byType(List<Object> columnValues) {
+//        strBuilder.append(" VALUES ").append("(");
+//        int i = 0;
+//        for (Object value : columnValues) {
+//            if (i != 0) {
+//                strBuilder.append(",");
+//            }
+//            strBuilder.append(getStringByType(value));
+//            i++;
+//        }
+//        strBuilder.append(")");
+//        return this;
+//    }
 
 
     /////////////////////update////////////////
@@ -623,9 +623,9 @@ public class SQL {
     }
 
     public String build() {
-        if (logSqlWhenBuild) {
-            logger.info(strBuilder.toString());
-        }
+//        if (logSqlWhenBuild) {
+//            logger.info(strBuilder.toString());
+//        }
         doWithCollectionParam();
         return strBuilder.toString();
     }

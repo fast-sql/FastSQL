@@ -1,6 +1,5 @@
 package top.fastsql;
 
-import com.google.common.collect.Lists;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +9,8 @@ import top.fastsql.config.DataSourceType;
 import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
+
+import static top.fastsql.util.FastSqlUtils.listOf;
 
 
 public class SQLTest {
@@ -107,18 +108,20 @@ public class SQLTest {
 
     @Test
     public void testINCollectionQuery() {
+
+
         sqlFactory.createSQL()
                 .SELECT("name")
                 .FROM("sys_dict")
                 .WHERE("code IN ?")
-                .varParameter(Lists.newArrayList("1"))
+                .varParameter(listOf("1"))
                 .queryMapListAndPrint();
     }
 
     @Test
     public void testINCollectionDAOQuery() {
         SysDictDAO sysDictDAO = new SysDictDAO(sqlFactory);
-        List<SysDict> list = sysDictDAO.selectWhere("code IN ? AND state=?", Lists.newArrayList("1", "abc"), 0);
+        List<SysDict> list = sysDictDAO.selectWhere("code IN ? AND state=?", listOf("1", "abc"), 0);
         System.out.println(list);
     }
 
