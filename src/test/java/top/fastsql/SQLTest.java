@@ -8,6 +8,7 @@ import org.slf4j.impl.SimpleLoggerConfiguration;
 import org.slf4j.impl.SimpleLoggerFactory;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import top.fastsql.config.DataSourceType;
+import top.fastsql.util.FastSqlUtils;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;
@@ -122,7 +123,6 @@ public class SQLTest {
         SysDictDAO sysDictDAO = new SysDictDAO(sqlFactory);
         List<SysDict> list = sysDictDAO.selectWhere("code IN ? AND state=?", Lists.newArrayList("1", "abc"), 0);
         System.out.println(list);
-
     }
 
     @Test
