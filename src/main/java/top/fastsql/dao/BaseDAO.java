@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.util.StringUtils;
 import top.fastsql.SQL;
@@ -50,6 +51,11 @@ public abstract class BaseDAO<E, ID> {
 
     protected List<Field> fields = new ArrayList<>();
     protected List<String> columnNames = new ArrayList<>();
+
+    /**
+     * 所有字段
+     */
+    protected String columns = null;
 
     /**
      * save/update/delete 拦截器  配置
@@ -128,6 +134,11 @@ public abstract class BaseDAO<E, ID> {
         this.fields.add(0, this.idField);
         this.columnNames.addAll(this.columnNamesWithoutId);
         this.columnNames.add(0, camelToUnderline(this.idField.getName()));
+
+        //所有字段
+        final StringBuilder sb = new StringBuilder(idColumnName);
+        columnNamesWithoutId.forEach(c -> sb.append(',').append(c));
+        columns = sb.toString();
     }
 
 
@@ -193,6 +204,31 @@ public abstract class BaseDAO<E, ID> {
             afterInsert(entity, count);
         }
         return count;
+    }
+
+    /**
+     * 批量插入
+     */
+    public int[] batchInsert(List<E> entities) {
+
+        StringBuilder nameBuilder = new StringBuilder();
+        StringBuilder valueBuilder = new StringBuilder();
+        fields.forEach(field -> {
+            nameBuilder.append(",").append(StringExtUtils.camelToUnderline(field.getName()));
+            valueBuilder.append(",:").append(field.getName());
+        });
+
+
+        String sql = getSQL()
+                .INSERT_INTO(tableName, nameBuilder.deleteCharAt(0).toString())
+                .VALUES(valueBuilder.deleteCharAt(0).toString()).build();
+
+        SqlParameterSource[] sqlParameterSources = new BeanPropertySqlParameterSource[entities.size()];
+        for (int i = 0; i < sqlParameterSources.length; i++) {
+            sqlParameterSources[i] = new BeanPropertySqlParameterSource(entities.get(i));
+        }
+
+        return getSQL().getNamedParameterJdbcTemplate().batchUpdate(sql, sqlParameterSources);
     }
 
     /////////////////////////////修改 /////////////////////////////////////////////
@@ -372,7 +408,7 @@ public abstract class BaseDAO<E, ID> {
         E returnObject;
         try {
             returnObject = getSQL()
-                    .SELECT("*")
+                    .SELECT(columns)
                     .FROM(tableName)
                     .WHERE(idColumnName + "=:" + idColumnName)
                     .mapItemsParameter(idColumnName, id)
@@ -393,7 +429,7 @@ public abstract class BaseDAO<E, ID> {
      */
     public E selectOneWhere(String sqlCondition, Object... values) {
         //sql
-        String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition;
+        String sql = "SELECT " + columns + " FROM " + tableName + " WHERE " + sqlCondition;
 
         List<E> dataList = getSqlFactory().createSQL().useSql(sql)
                 .varParameter(values)
@@ -411,7 +447,7 @@ public abstract class BaseDAO<E, ID> {
 
     public E selectOneWhere(String sqlCondition, SqlParameterSource parameterSource) {
         //sql
-        String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition;
+        String sql = "SELECT " + columns + " FROM " + tableName + " WHERE " + sqlCondition;
 
         List<E> dataList = getSqlFactory().createSQL().useSql(sql)
                 .parameter(parameterSource)
@@ -431,18 +467,18 @@ public abstract class BaseDAO<E, ID> {
     //////////////////////////////find list/////////////////////////////////////
 
     public List<E> selectAll() {
-        return getSQL().SELECT("*").FROM(tableName).queryList(entityClass);
+        return getSQL().SELECT(columns).FROM(tableName).queryList(entityClass);
     }
 
     public List<E> selectWhere(String sqlCondition, Object... values) {
         //sql
-        String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition;
+        String sql = "SELECT " + columns + " FROM " + tableName + " WHERE " + sqlCondition;
         return getSQL().useSql(sql).varParameter(values).queryList(new BeanPropertyRowMapper<>(entityClass));
     }
 
     public List<E> selectWhere(String sqlCondition, SqlParameterSource parameterSource) {
         //sql
-        String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition;
+        String sql = "SELECT " + columns + " FROM " + tableName + " WHERE " + sqlCondition;
         return getSQL().useSql(sql).parameter(parameterSource).queryList(new BeanPropertyRowMapper<>(entityClass));
     }
 
@@ -465,21 +501,21 @@ public abstract class BaseDAO<E, ID> {
     //////////////////////////////////query page///////////////////////////////////////////////////////////////
     public ResultPage<E> selectPageWhere(String sqlCondition, int pageNumber, int perPage, Object... values) {
         //sql
-        String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition;
+        String sql = "SELECT " + columns + " FROM " + tableName + " WHERE " + sqlCondition;
         return getSQL().useSql(sql).varParameter(values)
                 .queryPage(pageNumber, perPage, new BeanPropertyRowMapper<>(entityClass));
     }
 
     public ResultPage<E> selectPageWhere(String sqlCondition, int pageNumber, int perPage,
                                          SqlParameterSource parameterSource) {
-        String sql = "SELECT * FROM " + tableName + " WHERE 1=1 AND " + sqlCondition;
+        String sql = "SELECT " + columns + " FROM " + tableName + " WHERE 1=1 AND " + sqlCondition;
         return getSQL().useSql(sql).parameter(parameterSource)
                 .queryPage(pageNumber, perPage, new BeanPropertyRowMapper<>(entityClass));
     }
 
 
     public ResultPage<E> selectPage(int pageNumber, int perPage) {
-        String sql = "SELECT * FROM " + tableName;
+        String sql = "SELECT " + columns + " FROM " + tableName;
         return getSQL().useSql(sql)
                 .queryPage(pageNumber, perPage, new BeanPropertyRowMapper<>(entityClass));
     }

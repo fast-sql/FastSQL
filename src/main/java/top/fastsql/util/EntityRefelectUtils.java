@@ -33,9 +33,7 @@ public class EntityRefelectUtils {
         final Table table = entityClass.getAnnotation(Table.class);
         //判断实例是否非空
         if (table != null) {
-            //若非空，判断元数据name是否不为空字符串
             if (!StringUtils.isEmpty(table.name())) {
-                //若是，则使用name的值覆盖表名
                 tableName = table.name();
             }
         }
@@ -243,23 +241,4 @@ public class EntityRefelectUtils {
         }
         return fieldList;
     }
-
-
-//    public static String getStringInClause(List strings) {
-//        StringBuilder builder = new StringBuilder("( ");
-//        for (Object string : strings) {
-//            builder.append(",'" + string.toString() + "'");
-//        }
-//        builder.append(" )");
-//        return builder.toString().replaceFirst(",", "");
-//    }
-//
-//    public static String getIntegerInClause(List integers) {
-//        StringBuilder builder = new StringBuilder("( ");
-//        for (Object i : integers) {
-//            builder.append("," + i + " ");
-//        }
-//        builder.append(" )");
-//        return builder.toString().replaceFirst(",", "");
-//    }
 }
