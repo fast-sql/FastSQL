@@ -1,7 +1,9 @@
 package top.fastsql;
 
-import javax.persistence.*;
-import java.time.*;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.time.LocalDateTime;
 
 
 @Entity

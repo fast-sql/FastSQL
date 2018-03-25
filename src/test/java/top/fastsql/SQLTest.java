@@ -4,11 +4,8 @@ import com.google.common.collect.Lists;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.impl.SimpleLoggerConfiguration;
-import org.slf4j.impl.SimpleLoggerFactory;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import top.fastsql.config.DataSourceType;
-import top.fastsql.util.FastSqlUtils;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;
