@@ -127,7 +127,7 @@ public class SQLTest {
 
     @Test
     public void pageSQLTest() {
-        sqlFactory.setLogSQLWhenBuild(true);
+//        sqlFactory.setLogSQLWhenBuild(true);
 
         sqlFactory.setDataSourceType(DataSourceType.ORACLE);
         sqlFactory.createSQL().SELECT("*").FROM("student").pageThis(1, 10).build();
