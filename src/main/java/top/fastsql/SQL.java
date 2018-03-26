@@ -1039,6 +1039,10 @@ public class SQL {
      * 提前替换Collection类型的参数
      */
     private void doWithCollectionParam() {
+        if (this.varParams == null) {
+            return;
+        }
+
         List<Object> newVarParams = new ArrayList<>();
 
         List<Integer> indexList = new ArrayList<>();

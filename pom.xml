@@ -3,10 +3,11 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    <!-- http://search.maven.org/solrsearch/select?q=g%3A%22top.fastsql%22%20AND%20a%3A%22fastsql%22&rows=20&wt=json -->
 
     <groupId>top.fastsql</groupId>
     <artifactId>fastsql</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.2</version>
 
     <name>fastsql</name>
     <description>FastSQL is a lightweight database operate library.</description>
@@ -66,7 +67,6 @@
         <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
 
 
-
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -121,6 +121,8 @@
     </scm>
 
 
+    <!--https://oss.sonatype.org/#nexus-search;quick~fastsql-->
+    <!-- 上传到staging 可能发生文件不全的情况，需要多上传几次就好了 -->
     <distributionManagement>
         <snapshotRepository>
             <id>oss</id>
@@ -196,3 +198,4 @@
         </plugins>
     </build>
 </project>
+
