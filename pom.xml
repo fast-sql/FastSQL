@@ -7,7 +7,7 @@
 
     <groupId>top.fastsql</groupId>
     <artifactId>fastsql</artifactId>
-    <version>1.1.2</version>
+    <version>1.1.6</version>
 
     <name>fastsql</name>
     <description>FastSQL is a lightweight database operate library.</description>
@@ -123,24 +123,24 @@
 
     <!--https://oss.sonatype.org/#nexus-search;quick~fastsql-->
     <!-- 上传到staging 可能发生文件不全的情况，需要多上传几次就好了 -->
+    <!--<distributionManagement>-->
+        <!--<snapshotRepository>-->
+            <!--<id>oss</id>-->
+            <!--<url>https://oss.sonatype.org/content/repositories/snapshots/</url>-->
+        <!--</snapshotRepository>-->
+        <!--<repository>-->
+            <!--<id>oss</id>-->
+            <!--<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>-->
+        <!--</repository>-->
+    <!--</distributionManagement>-->
+
     <distributionManagement>
-        <snapshotRepository>
-            <id>oss</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-        </snapshotRepository>
         <repository>
-            <id>oss</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <id>nexus</id>
+            <name>Nexus Release Repository</name>
+            <url>http://192.168.0.223:8081/repository/maven-releases/</url>
         </repository>
     </distributionManagement>
-
-    <!--<distributionManagement>-->
-    <!--<repository>-->
-    <!--<id>nexus</id>-->
-    <!--<name>Nexus Release Repository</name>-->
-    <!--<url>http://192.168.0.223:8081/repository/maven-releases/</url>-->
-    <!--</repository>-->
-    <!--</distributionManagement>-->
 
 
     <build>
@@ -168,33 +168,33 @@
                 </executions>
             </plugin>
             <!-- Javadoc -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.9.1</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+            <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-javadoc-plugin</artifactId>-->
+                <!--<version>2.9.1</version>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<phase>package</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>jar</goal>-->
+                        <!--</goals>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+            <!--</plugin>-->
             <!-- GPG -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <version>1.5</version>
-                <executions>
-                    <execution>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+            <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-gpg-plugin</artifactId>-->
+                <!--<version>1.5</version>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<phase>verify</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>sign</goal>-->
+                        <!--</goals>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+            <!--</plugin>-->
         </plugins>
     </build>
 </project>

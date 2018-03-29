@@ -10,6 +10,7 @@ import top.fastsql.config.DataSourceType;
 import top.fastsql.dto.BatchUpdateResult;
 import top.fastsql.dto.ColumnMetaData;
 import top.fastsql.dto.ResultPage;
+import top.fastsql.dto.ValueMap;
 import top.fastsql.mapper.OraclePagingSingleColumnRowMapper;
 import top.fastsql.util.FastSqlUtils;
 import top.fastsql.util.PageTemplate;
@@ -861,7 +862,7 @@ public class SQL {
                 return this.namedParameterJdbcTemplate.queryForObject(sql, this.sqlParameterSource, rowMapper);
             }
         } catch (EmptyResultDataAccessException e) {
-            logger.warn(e.getClass().getSimpleName() + " : Get a empty result from database,it will be mapped a null object or value");
+//            logger.warn(e.getClass().getSimpleName() + " : Get a empty result from database,it will be mapped a null object or value");
             return null;
         }
     }
@@ -881,9 +882,23 @@ public class SQL {
                 return this.namedParameterJdbcTemplate.queryForMap(strBuilder.toString(), this.sqlParameterSource);
             }
         } catch (EmptyResultDataAccessException e) {
-            logger.warn(e.getClass().getSimpleName() + " : Get a empty result from database,it will be mapped a null object or value.");
+//            logger.warn(e.getClass().getSimpleName() + " : Get a empty result from database,it will be mapped a null object or value.");
             return null;
         }
+    }
+
+    /**
+     * 查询单行结果封装为Map
+     *
+     * @return Map
+     */
+    public ValueMap queryValueMap() {
+
+        Map<String, Object> map = queryMap();
+        if (map == null) {
+            return null;
+        }
+        return new ValueMap(map);
     }
 
     /**
@@ -947,6 +962,17 @@ public class SQL {
             return this.namedParameterJdbcTemplate.getJdbcOperations().queryForList(strBuilder.toString(), varParams);
         }
         return this.namedParameterJdbcTemplate.queryForList(strBuilder.toString(), this.sqlParameterSource);
+    }
+
+    public List<ValueMap> queryValueMapList() {
+        List<Map<String, Object>> mapList = queryMapList();
+
+        List<ValueMap> valueMapList=new ArrayList<>();
+        for (Map<String, Object> map : mapList) {
+
+            valueMapList.add(new ValueMap(map));
+        }
+        return valueMapList;
     }
 
     /**
@@ -1035,6 +1061,7 @@ public class SQL {
         }
     }
 
+
 //    /**
 //     * 提前替换Collection类型的参数
 //     */
@@ -1085,6 +1112,58 @@ public class SQL {
 //
 //        this.strBuilder = new StringBuilder(String.join("", sqls));
 //    }
+
+//    /**
+//     * 提前替换Collection类型的参数
+//     */
+//    private void doWithCollectionParam() {
+//        if (this.varParams == null) {
+//            return;
+//        }
+//
+//        List<Object> newVarParams = new ArrayList<>();
+//
+//        List<Integer> indexList = new ArrayList<>();
+//        int i = 0;
+//        for (Object param : this.varParams) {
+//            if (param instanceof Collection) {
+//                indexList.add(i);
+//            } else {
+//                newVarParams.add(param);
+//            }
+//            i++;
+//        }
+//
+//
+//        //使用 ？ 分割 sql
+//        String[] split = this.strBuilder.toString().split("\\?");
+//
+//        // 使用 ？ 连接各部分 生成 list
+//        List<String> sqls = new ArrayList<>();
+//
+//        int i2 = 0;
+//        for (String s : split) {
+//            if (i2 != 0) {
+//                sqls.add("?");
+//            }
+//            sqls.add(s);
+//            i2++;
+//        }
+//        if (this.strBuilder.toString().trim().endsWith("?")) { //特殊特殊情况处理
+//            sqls.add("?");
+//        }
+//
+//
+//        // 替换list部分相应的？
+//        for (Integer index : indexList) {
+//            sqls.set(index * 2 + 1, FastSqlUtils.getInClause((Collection<?>) this.varParams[index]));
+//        }
+//
+//        this.varParams = newVarParams.toArray();
+//
+//        this.strBuilder = new StringBuilder(String.join("", sqls));
+//    }
+
 
     /**
      * 查询结果内存分页
