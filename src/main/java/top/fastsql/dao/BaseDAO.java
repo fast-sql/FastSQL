@@ -36,7 +36,7 @@ public abstract class BaseDAO<E, ID> {
     protected Class<E> entityClass;
     protected Class<ID> idClass;
 
-    protected Logger log;//TODO 重写
+    protected Logger log;
 
     protected String className;
     protected String tableName;
@@ -61,11 +61,11 @@ public abstract class BaseDAO<E, ID> {
      * save/update/delete 拦截器  配置
      */
     protected boolean useBeforeInsert = false;
-    protected boolean useAfterInsert = true;//
+    protected boolean useAfterInsert = true;
     protected boolean useBeforeUpdate = false;
-    protected boolean useAfterUpdate = true;//
+    protected boolean useAfterUpdate = true;
     protected boolean useBeforeDelete = false;
-    protected boolean useAfterDelete = true;//
+    protected boolean useAfterDelete = true;
 
     /**
      * 执行引擎
@@ -136,7 +136,7 @@ public abstract class BaseDAO<E, ID> {
         this.columnNames.add(0, camelToUnderline(this.idField.getName()));
 
         //所有字段
-        final StringBuilder sb = new StringBuilder(idColumnName);
+        StringBuilder sb = new StringBuilder(idColumnName);
         columnNamesWithoutId.forEach(c -> sb.append(',').append(c));
         columns = sb.toString();
     }
@@ -155,8 +155,8 @@ public abstract class BaseDAO<E, ID> {
             beforeInsert(entity);
         }
         //SQL语句部分字符串构建器
-        final StringBuilder nameBuilder = new StringBuilder();
-        final StringBuilder valueBuilder = new StringBuilder();
+        StringBuilder nameBuilder = new StringBuilder();
+        StringBuilder valueBuilder = new StringBuilder();
         //遍历
         fields.stream()
                 .filter(field -> EntityRefelectUtils.getFieldValue(entity, field) != null)
@@ -165,12 +165,12 @@ public abstract class BaseDAO<E, ID> {
                     valueBuilder.append(",:").append(field.getName());
                 });
         //构建SQL实例
-        final SQL sql = getSQL()
+        SQL sql = getSQL()
                 .INSERT_INTO(tableName, nameBuilder.deleteCharAt(0).toString())
                 .VALUES(valueBuilder.delete(0, 1).toString())
                 .beanParameter(entity);
 
-        final int count = sql.update();
+        int count = sql.update();
         if (useAfterInsert) {
             afterInsert(entity, count);
         }
@@ -187,19 +187,19 @@ public abstract class BaseDAO<E, ID> {
             beforeInsert(entity);
         }
 
-        final StringBuilder nameBuilder = new StringBuilder();
-        final StringBuilder valueBuilder = new StringBuilder();
+        StringBuilder nameBuilder = new StringBuilder();
+        StringBuilder valueBuilder = new StringBuilder();
         fields.forEach(field -> {
             nameBuilder.append(",").append(StringExtUtils.camelToUnderline(field.getName()));
             valueBuilder.append(",:").append(field.getName());
         });
 
-        final SQL sql = getSQL()
+        SQL sql = getSQL()
                 .INSERT_INTO(tableName, nameBuilder.deleteCharAt(0).toString())
                 .VALUES(valueBuilder.deleteCharAt(0).toString())
                 .beanParameter(entity);
 
-        final int count = sql.update();
+        int count = sql.update();
         if (useAfterInsert) {
             afterInsert(entity, count);
         }
@@ -241,23 +241,23 @@ public abstract class BaseDAO<E, ID> {
             beforeUpdate(entity);
         }
         //TODO
-        final ID id = (ID) EntityRefelectUtils.getFieldValue(entity, idField);
+        ID id = (ID) EntityRefelectUtils.getFieldValue(entity, idField);
         if (StringUtils.isEmpty(id)) {
             throw new RuntimeException("修改时对象id不能为空");
         }
-        final StringBuilder sqlBuilder = new StringBuilder();
+        StringBuilder sqlBuilder = new StringBuilder();
         fieldsWithoutId.forEach(field ->
                 sqlBuilder.append("," + StringExtUtils.camelToUnderline(field.getName()) + "=:" + field.getName())
         );
 
-        final SQL sql = getSQL()
+        SQL sql = getSQL()
                 .UPDATE(tableName)
                 .SET(sqlBuilder.deleteCharAt(0).toString())
                 .WHERE(idColumnName + "=:" + idColumnName)
                 .beanParameter(entity);
 
 
-        final int count = sql.update();
+        int count = sql.update();
         if (useAfterUpdate) {
             afterUpdate(entity, count);
         }
@@ -265,13 +265,13 @@ public abstract class BaseDAO<E, ID> {
     }
 
     public int insertOrUpdate(E entity) {
-        final ID id = (ID) EntityRefelectUtils.getFieldValue(entity, idField);
+        ID id = (ID) EntityRefelectUtils.getFieldValue(entity, idField);
         if (StringUtils.isEmpty(id)) {
             //插入
             return insert(entity);
         } else {
             //更新
-            final E row = selectOneById(id);
+            E row = selectOneById(id);
             if (row == null) {
                 return insert(entity);
             } else {
@@ -288,23 +288,23 @@ public abstract class BaseDAO<E, ID> {
         if (useBeforeUpdate) {
             beforeUpdate(entity);
         }
-        final ID id = (ID) EntityRefelectUtils.getFieldValue(entity, idField);
+        ID id = (ID) EntityRefelectUtils.getFieldValue(entity, idField);
         if (StringUtils.isEmpty(id)) {
             throw new RuntimeException("修改时对象id不能为空");
         }
-        final StringBuilder sqlBuilder = new StringBuilder();
+        StringBuilder sqlBuilder = new StringBuilder();
         fieldsWithoutId.forEach(field ->
                 sqlBuilder.append("," + StringExtUtils.camelToUnderline(field.getName()) + "=:" + field.getName())
         );
 
-        final SQL sql = getSQL()
+        SQL sql = getSQL()
                 .UPDATE(tableName)
                 .SET(sqlBuilder.deleteCharAt(0).toString())
                 .WHERE(idColumnName + "=:" + idColumnName)
                 .beanParameter(entity);
 
 
-        final int count = sql.update();
+        int count = sql.update();
         if (useAfterUpdate) {
             afterUpdate(entity, count);
         }
@@ -312,16 +312,16 @@ public abstract class BaseDAO<E, ID> {
     }
 
     public int updateColumns(E entity, String... columns) {
-        final ID id = (ID) EntityRefelectUtils.getFieldValue(entity, idField);
+        ID id = (ID) EntityRefelectUtils.getFieldValue(entity, idField);
         if (StringUtils.isEmpty(id)) {
             throw new RuntimeException("修改时对象id不能为空");
         }
-        final StringBuilder sqlBuilder = new StringBuilder();
+        StringBuilder sqlBuilder = new StringBuilder();
         for (String column : columns) {
             sqlBuilder.append("," + column + "=:" + EntityRefelectUtils.underlineToCamelFirstLower(column));
         }
 
-        final SQL sql = getSQL()
+        SQL sql = getSQL()
                 .UPDATE(tableName)
                 .SET(sqlBuilder.deleteCharAt(0).toString())
                 .WHERE(idColumnName + "=:" + idColumnName)
@@ -329,7 +329,7 @@ public abstract class BaseDAO<E, ID> {
         if (useBeforeUpdate) {
             beforeUpdate(entity);
         }
-        final int count = sql.update();
+        int count = sql.update();
         if (useAfterUpdate) {
             afterUpdate(entity, count);
         }
@@ -355,12 +355,12 @@ public abstract class BaseDAO<E, ID> {
             beforeDelete(id);
         }
         //String sql = "DELETE FROM " + tableName + " WHERE " + idColumnName + " = ?";
-        final SQL sql = getSQL()
+        SQL sql = getSQL()
                 .DELETE_FROM(tableName)
                 .WHERE(idColumnName + "=:" + idColumnName)
                 .mapItemsParameter("id", id);
 
-        final int count = sql.update();
+        int count = sql.update();
         if (useAfterDelete) {
             afterDelete(id, count);
         }
@@ -386,7 +386,7 @@ public abstract class BaseDAO<E, ID> {
      * 根据id列表批量删除数据
      */
     public BatchUpdateResult deleteInBatch(List<ID> ids) {
-        final String sql = "DELETE FROM " + tableName + " WHERE " + idColumnName + "=:" + idColumnName;
+        String sql = "DELETE FROM " + tableName + " WHERE " + idColumnName + "=:" + idColumnName;
 
         List<Map<String, Object>> mapList = new ArrayList<>(ids.size());
         for (ID id : ids) {

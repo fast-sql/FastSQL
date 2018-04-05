@@ -22,8 +22,13 @@ public class PageUtils {
     }
 
     public static String getNumberSQL(String sql) {
-        // Can not use  "AS"  in sub-query in Oracle.
+        // Can not use  "AS"  in Oracle's subQuery.
         return "SELECT count(*) FROM ( " + sql + " ) total";
+    }
+
+    public static String getSmartNumberSQL(String sql) {
+        // Can not use  "AS"  in Oracle's subQuery.
+        return new CountSqlParser().getSimpleCountSql(sql);
     }
 
     /**
