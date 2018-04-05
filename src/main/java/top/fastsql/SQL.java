@@ -1039,7 +1039,7 @@ public class SQL {
         RowMapper<T> rowMapper = getRowMapper(returnClassType);
 
         if (useClassicJdbcTemplate) {
-//            doWithCollectionParam();
+
             return new PageTemplate(namedParameterJdbcTemplate)
                     .queryPage(strBuilder.toString(), page, perPage, varParams, rowMapper, this.dataSourceType);
         } else {
@@ -1052,7 +1052,6 @@ public class SQL {
         checkNull();
 
         if (useClassicJdbcTemplate) {
-//            doWithCollectionParam();
             return new PageTemplate(namedParameterJdbcTemplate)
                     .queryPage(strBuilder.toString(), page, perPage, varParams, rowMapper, this.dataSourceType);
         } else {
@@ -1060,109 +1059,6 @@ public class SQL {
                     .queryPage(strBuilder.toString(), page, perPage, sqlParameterSource, rowMapper, this.dataSourceType);
         }
     }
-
-
-//    /**
-//     * 提前替换Collection类型的参数
-//     */
-//    private void doWithCollectionParam() {
-//        if (this.varParams == null) {
-//            return;
-//        }
-//
-//        List<Object> newVarParams = new ArrayList<>();
-//
-//        List<Integer> indexList = new ArrayList<>();
-//        int i = 0;
-//        for (Object param : this.varParams) {
-//            if (param instanceof Collection) {
-//                indexList.add(i);
-//            } else {
-//                newVarParams.add(param);
-//            }
-//            i++;
-//        }
-//
-//
-//        //使用 ？ 分割 sql
-//        String[] split = this.strBuilder.toString().split("\\?");
-//
-//        // 使用 ？ 连接各部分 生成 list
-//        List<String> sqls = new ArrayList<>();
-//
-//        int i2 = 0;
-//        for (String s : split) {
-//            if (i2 != 0) {
-//                sqls.add("?");
-//            }
-//            sqls.add(s);
-//            i2++;
-//        }
-//        if (this.strBuilder.toString().trim().endsWith("?")) { //特殊特殊情况处理
-//            sqls.add("?");
-//        }
-//
-//
-//        // 替换list部分相应的？
-//        for (Integer index : indexList) {
-//            sqls.set(index * 2 + 1, FastSqlUtils.getInClause((Collection<?>) this.varParams[index]));
-//        }
-//
-//        this.varParams = newVarParams.toArray();
-//
-//        this.strBuilder = new StringBuilder(String.join("", sqls));
-//    }
-
-//    /**
-//     * 提前替换Collection类型的参数
-//     */
-//    private void doWithCollectionParam() {
-//        if (this.varParams == null) {
-//            return;
-//        }
-//
-//        List<Object> newVarParams = new ArrayList<>();
-//
-//        List<Integer> indexList = new ArrayList<>();
-//        int i = 0;
-//        for (Object param : this.varParams) {
-//            if (param instanceof Collection) {
-//                indexList.add(i);
-//            } else {
-//                newVarParams.add(param);
-//            }
-//            i++;
-//        }
-//
-//
-//        //使用 ？ 分割 sql
-//        String[] split = this.strBuilder.toString().split("\\?");
-//
-//        // 使用 ？ 连接各部分 生成 list
-//        List<String> sqls = new ArrayList<>();
-//
-//        int i2 = 0;
-//        for (String s : split) {
-//            if (i2 != 0) {
-//                sqls.add("?");
-//            }
-//            sqls.add(s);
-//            i2++;
-//        }
-//        if (this.strBuilder.toString().trim().endsWith("?")) { //特殊特殊情况处理
-//            sqls.add("?");
-//        }
-//
-//
-//        // 替换list部分相应的？
-//        for (Integer index : indexList) {
-//            sqls.set(index * 2 + 1, FastSqlUtils.getInClause((Collection<?>) this.varParams[index]));
-//        }
-//
-//        this.varParams = newVarParams.toArray();
-//
-//        this.strBuilder = new StringBuilder(String.join("", sqls));
-//    }
 
 
     /**
@@ -1191,7 +1087,6 @@ public class SQL {
         String sql = strBuilder.toString();
 
         if (useClassicJdbcTemplate) {
-//            doWithCollectionParam();
             count = this.namedParameterJdbcTemplate.getJdbcOperations().update(sql, varParams);
         } else {
             count = this.namedParameterJdbcTemplate.update(sql, this.sqlParameterSource);
