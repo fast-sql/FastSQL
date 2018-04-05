@@ -7,14 +7,9 @@ import org.springframework.jdbc.core.*;
 import org.springframework.jdbc.core.namedparam.*;
 import org.springframework.util.StringUtils;
 import top.fastsql.config.DataSourceType;
-import top.fastsql.dto.BatchUpdateResult;
-import top.fastsql.dto.ColumnMetaData;
-import top.fastsql.dto.ResultPage;
-import top.fastsql.dto.ValueMap;
+import top.fastsql.dto.*;
 import top.fastsql.mapper.OraclePagingSingleColumnRowMapper;
-import top.fastsql.util.FastSqlUtils;
-import top.fastsql.util.PageTemplate;
-import top.fastsql.util.PageUtils;
+import top.fastsql.util.*;
 
 import javax.sql.DataSource;
 import java.math.BigDecimal;
@@ -901,6 +896,15 @@ public class SQL {
         return new ValueMap(map);
     }
 
+    public RowMap queryRowMap() {
+
+        Map<String, Object> map = queryMap();
+        if (map == null) {
+            return null;
+        }
+        return new RowMap(map);
+    }
+
     /**
      * 查询多行结果封装为一个对象列表
      *
@@ -933,7 +937,7 @@ public class SQL {
         checkNull();
         RowMapper<Integer> rowMapper = new SingleColumnRowMapper<>(Integer.class);
         if (this.useClassicJdbcTemplate) {
-//            doWithCollectionParam();
+
             return this.namedParameterJdbcTemplate.getJdbcOperations().query(strBuilder.toString(), rowMapper, varParams);
         }
 
@@ -943,11 +947,26 @@ public class SQL {
     public <T> List<T> queryList(RowMapper<T> rowMapper) {
         checkNull();
         if (this.useClassicJdbcTemplate) {
-//            doWithCollectionParam();
+
             return this.namedParameterJdbcTemplate.getJdbcOperations().query(strBuilder.toString(), rowMapper, varParams);
         }
 
         return this.namedParameterJdbcTemplate.query(strBuilder.toString(), this.sqlParameterSource, rowMapper);
+    }
+
+    /**
+     * 查出一个map ： key为指定的列，value 为传入类型
+     */
+    public <T> Map<String, T> queryColumnKeyMap(String column, Class<T> returnClassType) {
+        List<T> list = queryList(returnClassType);
+        Map<String, T> map = new HashMap<>();
+        for (T row : list) {
+            map.put(
+                    (String) EntityRefelectUtils.getFieldValue(row, StringExtUtils.underlineToCamel(column)),
+                    row
+            );
+        }
+        return map;
     }
 
     /**
@@ -958,19 +977,30 @@ public class SQL {
     public List<Map<String, Object>> queryMapList() {
         checkNull();
         if (this.useClassicJdbcTemplate) {
-//            doWithCollectionParam();
             return this.namedParameterJdbcTemplate.getJdbcOperations().queryForList(strBuilder.toString(), varParams);
         }
         return this.namedParameterJdbcTemplate.queryForList(strBuilder.toString(), this.sqlParameterSource);
     }
 
+    @Deprecated
     public List<ValueMap> queryValueMapList() {
         List<Map<String, Object>> mapList = queryMapList();
 
-        List<ValueMap> valueMapList=new ArrayList<>();
+        List<ValueMap> valueMapList = new ArrayList<>();
         for (Map<String, Object> map : mapList) {
 
             valueMapList.add(new ValueMap(map));
+        }
+        return valueMapList;
+    }
+
+    public List<RowMap> queryRowMapList() {
+        List<Map<String, Object>> mapList = queryMapList();
+
+        List<RowMap> valueMapList = new ArrayList<>();
+        for (Map<String, Object> map : mapList) {
+
+            valueMapList.add(new RowMap(map));
         }
         return valueMapList;
     }
