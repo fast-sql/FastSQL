@@ -29,7 +29,7 @@ public class PageTemplate {
                 rowMapper);
 
         //查询数量
-        String numberSQL = PageUtils.getNumberSQL(sql);
+        String numberSQL = PageUtils.getSmartCountSQL(sql);
         Integer number = namedParameterJdbcTemplate.queryForObject(
                 numberSQL,
                 paramSource,
@@ -46,7 +46,7 @@ public class PageTemplate {
                 rowMapper);
 
         //查询数量
-        String numberSQL = PageUtils.getNumberSQL(sql);
+        String numberSQL = PageUtils.getSmartCountSQL(sql);
         Integer number = namedParameterJdbcTemplate.getJdbcOperations().queryForObject(
                 numberSQL,
                 objects,

@@ -21,12 +21,20 @@ public class PageUtils {
         }
     }
 
+    /**
+     * @see PageUtils#getSmartCountSQL(String)
+     */
+    @Deprecated
     public static String getNumberSQL(String sql) {
         // Can not use  "AS"  in Oracle's subQuery.
         return "SELECT count(*) FROM ( " + sql + " ) total";
     }
 
-    public static String getSmartNumberSQL(String sql) {
+    /**
+     * 获取统计数量的sql
+     * @param sql origin sql
+     */
+    public static String getSmartCountSQL(String sql) {
         // Can not use  "AS"  in Oracle's subQuery.
         return new CountSqlParser().getSimpleCountSql(sql);
     }

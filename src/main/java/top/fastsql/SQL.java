@@ -628,7 +628,7 @@ public class SQL {
 
 
     public SQL countThis() {
-        this.strBuilder = new StringBuilder(PageUtils.getNumberSQL(strBuilder.toString()));
+        this.strBuilder = new StringBuilder(PageUtils.getSmartCountSQL(strBuilder.toString()));
         return this;
     }
 
