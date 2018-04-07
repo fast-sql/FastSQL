@@ -36,7 +36,7 @@ FastSQL可以完全满足你控制欲，可以用Java代码清晰又方便地写
 <dependency>
     <groupId>top.fastsql</groupId>
     <artifactId>fastsql</artifactId>
-    <version>1.0.0</version>
+    <version>1.2.1</version>
 </dependency>
 ```
 
