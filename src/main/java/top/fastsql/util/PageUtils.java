@@ -36,7 +36,7 @@ public class PageUtils {
      */
     public static String getSmartCountSQL(String sql) {
         // Can not use  "AS"  in Oracle's subQuery.
-        return new CountSqlParser().getSimpleCountSql(sql);
+        return new CountSqlParser().getSmartCountSql(sql);
     }
 
     /**
