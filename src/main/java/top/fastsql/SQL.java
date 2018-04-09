@@ -3,8 +3,15 @@ package top.fastsql;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.*;
-import org.springframework.jdbc.core.namedparam.*;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.ColumnMapRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.SingleColumnRowMapper;
+import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.util.StringUtils;
 import top.fastsql.config.DataSourceType;
 import top.fastsql.dto.*;
@@ -14,12 +21,21 @@ import top.fastsql.util.*;
 import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.sql.*;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -39,7 +55,7 @@ public class SQL {
 
 //    private boolean logSqlWhenBuild = false;
 
-    private SqlParameterSource sqlParameterSource = new EmptySqlParameterSource();
+    private final MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
 
     private Object[] varParams;
 
@@ -657,8 +673,8 @@ public class SQL {
     }
 
 
-    public SQL parameter(SqlParameterSource sqlParameterSource) {
-        this.sqlParameterSource = sqlParameterSource;
+    public SQL parameter(MapSqlParameterSource mapSqlParameterSource) {
+        this.sqlParameterSource.addValues(mapSqlParameterSource.getValues());
         return this;
     }
 
@@ -669,7 +685,7 @@ public class SQL {
      * @param mapParameter Map参数
      */
     public SQL mapParameter(Map<String, Object> mapParameter) {
-        this.sqlParameterSource = new MapSqlParameterSource(mapParameter);
+        this.sqlParameterSource.addValues(mapParameter);
         return this;
     }
 
@@ -679,83 +695,52 @@ public class SQL {
      * @param mapParameter 多个Map参数
      */
     public SQL mapParameter(Map<String, Object>... mapParameter) {
-        MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
         for (Map<String, Object> map : mapParameter) {
-            mapSqlParameterSource.addValues(map);
+            this.sqlParameterSource.addValues(map);
         }
-        this.sqlParameterSource = mapSqlParameterSource;
         return this;
     }
 
 
     public SQL mapItemsParameter(String k1, Object v1) {
-        MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
-        mapSqlParameterSource.addValue(k1, v1);
-        this.sqlParameterSource = mapSqlParameterSource;
+        this.sqlParameterSource.addValue(k1, v1);
         return this;
     }
 
     public SQL mapItemsParameter(String k1, Object v1, String k2, Object v2) {
-        MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
-        mapSqlParameterSource.addValue(k1, v1);
-        mapSqlParameterSource.addValue(k2, v2);
-        this.sqlParameterSource = mapSqlParameterSource;
+        this.sqlParameterSource.addValue(k1, v1);
+        this.sqlParameterSource.addValue(k2, v2);
         return this;
     }
 
     public SQL mapItemsParameter(String k1, Object v1, String k2, Object v2, String k3, Object v3) {
-        MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
-        mapSqlParameterSource.addValue(k1, v1);
-        mapSqlParameterSource.addValue(k2, v2);
-        mapSqlParameterSource.addValue(k3, v3);
-        this.sqlParameterSource = mapSqlParameterSource;
+        this.sqlParameterSource.addValue(k1, v1);
+        this.sqlParameterSource.addValue(k2, v2);
+        this.sqlParameterSource.addValue(k3, v3);
         return this;
     }
 
     public SQL mapItemsParameter(String k1, Object v1, String k2, Object v2, String k3, Object v3, String k4, Object v4) {
-        MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
-        mapSqlParameterSource.addValue(k1, v1);
-        mapSqlParameterSource.addValue(k2, v2);
-        mapSqlParameterSource.addValue(k3, v3);
-        mapSqlParameterSource.addValue(k4, v4);
-        this.sqlParameterSource = mapSqlParameterSource;
+        this.sqlParameterSource.addValue(k1, v1);
+        this.sqlParameterSource.addValue(k2, v2);
+        this.sqlParameterSource.addValue(k3, v3);
+        this.sqlParameterSource.addValue(k4, v4);
         return this;
     }
 
     public SQL mapItemsParameter(String k1, Object v1, String k2, Object v2, String k3, Object v3, String k4, Object v4, String k5, Object v5) {
-        MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
-        mapSqlParameterSource.addValue(k1, v1);
-        mapSqlParameterSource.addValue(k2, v2);
-        mapSqlParameterSource.addValue(k3, v3);
-        mapSqlParameterSource.addValue(k4, v4);
-        mapSqlParameterSource.addValue(k5, v5);
-        this.sqlParameterSource = mapSqlParameterSource;
+        this.sqlParameterSource.addValue(k1, v1);
+        this.sqlParameterSource.addValue(k2, v2);
+        this.sqlParameterSource.addValue(k3, v3);
+        this.sqlParameterSource.addValue(k4, v4);
+        this.sqlParameterSource.addValue(k5, v5);
         return this;
     }
 
 
     public SQL addMapParameterItem(String key, Object value) {
-        if (this.sqlParameterSource instanceof EmptySqlParameterSource) {
-            //新建一个MapSqlParameterSource
-            this.sqlParameterSource = new MapSqlParameterSource(key, value);
-        } else if (this.sqlParameterSource instanceof BeanPropertySqlParameterSource) {
-            BeanPropertySqlParameterSource propertySqlParameterSource = (BeanPropertySqlParameterSource) this.sqlParameterSource;
-
-            MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
-            //TODO propertySqlParameterSource.getReadablePropertyNames 多了class属性
-            for (String name : propertySqlParameterSource.getReadablePropertyNames()) {
-                mapSqlParameterSource.addValue(name, propertySqlParameterSource.getValue(name));
-            }
-            //add
-            mapSqlParameterSource.addValue(key, value);
-            this.sqlParameterSource = mapSqlParameterSource;
-        } else if (this.sqlParameterSource instanceof MapSqlParameterSource) {
-            ((MapSqlParameterSource) this.sqlParameterSource).addValue(key, value);
-        } else {
-            throw new RuntimeException("当前参数不支持addParameterMapItem");
-        }
+        this.sqlParameterSource.addValue(key, value);
         return this;
-
     }
 
     public SQL appendMapParameterItem(String key, Object value) {
@@ -763,30 +748,21 @@ public class SQL {
     }
 
 
-    /**
-     * 出现相同名称的参数时，map或覆盖bean中的参数
-     *
-     * @param bean bean
-     * @param map  map
-     */
     public SQL beanAndMapParameter(Object bean, Map<String, Object> map) {
-        BeanPropertySqlParameterSource propertySqlParameterSource = new BeanPropertySqlParameterSource(bean);
-
-        MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
-
-        for (String name : propertySqlParameterSource.getReadablePropertyNames()) {
-            mapSqlParameterSource.addValue(name, propertySqlParameterSource.getValue(name));
-        }
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            mapSqlParameterSource.addValue(entry.getKey(), entry.getValue());
-        }
-        this.sqlParameterSource = mapSqlParameterSource;
+        this.beanParameter(bean);
+        this.sqlParameterSource.addValues(map);
         return this;
     }
 
 
     public SQL beanParameter(Object beanParam) {
-        this.sqlParameterSource = new BeanPropertySqlParameterSource(beanParam);
+        final BeanPropertySqlParameterSource propertySqlParameterSource
+                = new BeanPropertySqlParameterSource(beanParam);
+
+        for (String name : propertySqlParameterSource.getReadablePropertyNames()) {
+            this.sqlParameterSource.addValue(name, propertySqlParameterSource.getValue(name));
+        }
+
         return this;
     }
 
