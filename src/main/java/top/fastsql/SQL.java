@@ -346,7 +346,7 @@ public class SQL {
     }
 
     public SQL EXISTS(String condition) {
-        strBuilder.append(" EXISTS ").append("(").append(condition).append(")");
+        strBuilder.append(" EXISTS ").append(" ( ").append(condition).append(" ) ");
         return this;
     }
 
@@ -357,7 +357,7 @@ public class SQL {
 
 
     public SQL NOT_EXISTS(String condition) {
-        strBuilder.append(" NOT EXISTS ").append("(").append(condition).append(")");
+        strBuilder.append(" NOT EXISTS ").append(" ( ").append(condition).append(" )");
         return this;
     }
 
