@@ -337,11 +337,11 @@ public abstract class BaseDAO<E, ID> {
     }
 
     public int updateSetWhere(String set, String where, String... params) {
-        return getSQL().useSql("UPDAT " + tableName + " SET " + set + " WHERE " + where).varParameter(params).update();
+        return getSQL().useSql("UPDATE " + tableName + " SET " + set + " WHERE " + where).varParameter(params).update();
     }
 
     public int updateSet(String set, String... params) {
-        return getSQL().useSql("UPDAT " + tableName + " SET " + set).varParameter(params).update();
+        return getSQL().useSql("UPDATE " + tableName + " SET " + set).varParameter(params).update();
     }
 
 

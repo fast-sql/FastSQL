@@ -1,13 +1,8 @@
 package top.fastsql.dto;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
-import static top.fastsql.util.FastSqlUtils.toLocalDate;
-import static top.fastsql.util.FastSqlUtils.toLocalDateTime;
 
 /**
  * @author Chenjiazhi
@@ -37,23 +32,6 @@ public class RowMap extends HashMap<String, Object> {
         return (Integer) get(key);
     }
 
-    public LocalDateTime getLocalDateTime(String key) {
-        Object data = get(key);
-        if (data instanceof Date) {
-            return toLocalDateTime((Date) data);
-        } else {
-            return (LocalDateTime) data;
-        }
-    }
-
-    public LocalDate getLocalDate(String key) {
-        Object data = get(key);
-        if (data instanceof Date) {
-            return toLocalDate((Date) data);
-        } else {
-            return (LocalDate) data;
-        }
-    }
 
     public Date getDate(String key) {
         return (Date) get(key);

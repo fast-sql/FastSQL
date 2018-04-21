@@ -37,7 +37,6 @@ public class SQL {
 
     private boolean useClassicJdbcTemplate = false;
 
-//    private boolean logSqlWhenBuild = false;
 
     private SqlParameterSource sqlParameterSource = new EmptySqlParameterSource();
 
@@ -53,7 +52,6 @@ public class SQL {
     public SQL(JdbcTemplate jdbcTemplate, DataSourceType dataSourceType) {
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
         this.dataSourceType = dataSourceType;
-//        this.logSqlWhenBuild = logSqlWhenBuild;
     }
 
     public NamedParameterJdbcTemplate getNamedParameterJdbcTemplate() {
@@ -64,11 +62,6 @@ public class SQL {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
-//    @Deprecated
-//    public SQL template(NamedParameterJdbcTemplate template) {
-//        this.namedParameterJdbcTemplate = template;
-//        return this;
-//    }
 
 
     /**
@@ -207,25 +200,7 @@ public class SQL {
     }
 
 
-//    @Deprecated
-//    public SQL VALUES_byType(Object... columnValues) {
-//        return this.VALUES_byType(Arrays.asList(columnValues));
-//    }
-//
-//    @Deprecated
-//    public SQL VALUES_byType(List<Object> columnValues) {
-//        strBuilder.append(" VALUES ").append("(");
-//        int i = 0;
-//        for (Object value : columnValues) {
-//            if (i != 0) {
-//                strBuilder.append(",");
-//            }
-//            strBuilder.append(getStringByType(value));
-//            i++;
-//        }
-//        strBuilder.append(")");
-//        return this;
-//    }
+
 
 
     /////////////////////update////////////////
@@ -619,10 +594,7 @@ public class SQL {
     }
 
     public String build() {
-//        if (logSqlWhenBuild) {
-//            logger.info(strBuilder.toString());
-//        }
-//        doWithCollectionParam();
+
         return strBuilder.toString();
     }
 
@@ -851,13 +823,11 @@ public class SQL {
         try {
             String sql = this.build();
             if (useClassicJdbcTemplate) {
-//                doWithCollectionParam();
                 return this.namedParameterJdbcTemplate.getJdbcOperations().queryForObject(sql, rowMapper, this.varParams);
             } else {
                 return this.namedParameterJdbcTemplate.queryForObject(sql, this.sqlParameterSource, rowMapper);
             }
         } catch (EmptyResultDataAccessException e) {
-//            logger.warn(e.getClass().getSimpleName() + " : Get a empty result from database,it will be mapped a null object or value");
             return null;
         }
     }
@@ -871,13 +841,11 @@ public class SQL {
         checkNull();
         try {
             if (this.useClassicJdbcTemplate) {
-//                doWithCollectionParam();
                 return this.namedParameterJdbcTemplate.getJdbcOperations().queryForMap(strBuilder.toString(), varParams);
             } else {
                 return this.namedParameterJdbcTemplate.queryForMap(strBuilder.toString(), this.sqlParameterSource);
             }
         } catch (EmptyResultDataAccessException e) {
-//            logger.warn(e.getClass().getSimpleName() + " : Get a empty result from database,it will be mapped a null object or value.");
             return null;
         }
     }
@@ -887,6 +855,7 @@ public class SQL {
      *
      * @return Map
      */
+    @Deprecated
     public ValueMap queryValueMap() {
 
         Map<String, Object> map = queryMap();
@@ -914,7 +883,6 @@ public class SQL {
         checkNull();
         RowMapper<T> rowMapper = getRowMapper(returnClassType);
         if (this.useClassicJdbcTemplate) {
-//            doWithCollectionParam();
             return this.namedParameterJdbcTemplate.getJdbcOperations().query(strBuilder.toString(), rowMapper, varParams);
         }
 
@@ -926,7 +894,6 @@ public class SQL {
         checkNull();
         RowMapper<String> rowMapper = new SingleColumnRowMapper<>(String.class);
         if (this.useClassicJdbcTemplate) {
-//            doWithCollectionParam();
             return this.namedParameterJdbcTemplate.getJdbcOperations().query(strBuilder.toString(), rowMapper, varParams);
         }
 
@@ -1013,7 +980,6 @@ public class SQL {
     public List<Object[]> queryArrayList() {
         checkNull();
         if (this.useClassicJdbcTemplate) {
-//            doWithCollectionParam();
             return this.namedParameterJdbcTemplate.getJdbcOperations().query(strBuilder.toString(), varParams, (rs, rowNum) -> {
                 int columnCount = rs.getMetaData().getColumnCount();
                 Object[] objects = new Object[columnCount];

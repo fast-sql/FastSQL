@@ -1,7 +1,9 @@
 package top.fastsql.util;
 
-import java.time.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * 内部工具类
@@ -56,6 +58,13 @@ public class FastSqlUtils {
         }
         builder.append(")");
         return builder.toString().replaceFirst(",", "");
+    }
+
+    public static String getInClause(String baseSQL, Collection<?>... collections) {
+        for (Collection<?> collection : collections) {
+            baseSQL = baseSQL.replaceFirst("\\{\\}", getInClause(collection));
+        }
+        return baseSQL;
     }
 
     private static void appendWithQuotes(StringBuilder builder, Object value) {
@@ -131,82 +140,70 @@ public class FastSqlUtils {
         return list;
     }
 
-    /**
-     * java.util.Date --> java.time.LocalDateTime
-     */
-    public static LocalDateTime toLocalDateTime(java.util.Date date) {
-        if (date == null) {
-            return null;
-        }
-        Instant instant = date.toInstant();
-        ZoneId zone = ZoneId.systemDefault();
-        return LocalDateTime.ofInstant(instant, zone);
-    }
+//    /**
+//     * java.util.Date --> java.time.LocalDateTime
+//     */
+//    public static LocalDateTime toLocalDateTime(java.util.Date date) {
+//        if (date == null) {
+//            return null;
+//        }
+//        Instant instant = date.toInstant();
+//        ZoneId zone = ZoneId.systemDefault();
+//        return LocalDateTime.ofInstant(instant, zone);
+//    }
+//
+//    /**
+//     * java.util.Date --> java.time.LocalDate
+//     */
+//    public static LocalDate toLocalDate(Date date) {
+//        if (date == null) {
+//            return null;
+//        }
+//        Instant instant = date.toInstant();
+//        ZoneId zone = ZoneId.systemDefault();
+//        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, zone);
+//        return localDateTime.toLocalDate();
+//    }
 
-    /**
-     * java.util.Date --> java.time.LocalDate
-     */
-    public static LocalDate toLocalDate(Date date) {
-        if (date == null) {
-            return null;
-        }
-        Instant instant = date.toInstant();
-        ZoneId zone = ZoneId.systemDefault();
-        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, zone);
-        return localDateTime.toLocalDate();
-    }
-
-    /**
-     * java.util.Date --> java.time.LocalTime
-     */
-    public static LocalTime toLocalTime(Date date) {
-        if (date == null) {
-            return null;
-        }
-        Instant instant = date.toInstant();
-        ZoneId zone = ZoneId.systemDefault();
-        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, zone);
-        return localDateTime.toLocalTime();
-    }
 
     //////////////////////////////////////////////////////2///////////////////////////////////
 
-    /**
-     * java.time.LocalDateTime --> java.util.Date
-     */
-    public static Date toUtilDate(LocalDateTime localDateTime) {
-        if (localDateTime == null) {
-            return null;
-        }
-        ZoneId zone = ZoneId.systemDefault();
-        Instant instant = localDateTime.atZone(zone).toInstant();
-        return Date.from(instant);
-    }
-
-    /**
-     * java.time.LocalDate --> java.util.Date
-     */
-    public static Date toUtilDate(LocalDate localDate) {
-        if (localDate == null) {
-            return null;
-        }
-        ZoneId zone = ZoneId.systemDefault();
-        Instant instant = localDate.atStartOfDay().atZone(zone).toInstant();
-        return Date.from(instant);
-    }
-
-    /**
-     * java.time.LocalTime --> java.util.Date
-     */
-    public static Date toUtilDate(LocalTime localTime) {
-        if (localTime == null) {
-            return null;
-        }
-        LocalDate localDate = LocalDate.now();
-        LocalDateTime localDateTime = LocalDateTime.of(localDate, localTime);
-        ZoneId zone = ZoneId.systemDefault();
-        Instant instant = localDateTime.atZone(zone).toInstant();
-        return Date.from(instant);
-    }
+//    /**
+//     * java.time.LocalDateTime --> java.util.Date
+//     */
+//    public static Date toUtilDate(LocalDateTime localDateTime) {
+//        if (localDateTime == null) {
+//            return null;
+//        }
+//        ZoneId zone = ZoneId.systemDefault();
+//        Instant instant = localDateTime.atZone(zone).toInstant();
+//        return Date.from(instant);
+//    }
+//
+//    /**
+//     * java.time.LocalDate --> java.util.Date
+//     */
+//    public static Date toUtilDate(LocalDate localDate) {
+//        if (localDate == null) {
+//            return null;
+//        }
+//        ZoneId zone = ZoneId.systemDefault();
+//        Instant instant = localDate.atStartOfDay().atZone(zone).toInstant();
+//        return Date.from(instant);
+//    }
+//
+//    /**
+//     * java.time.LocalTime --> java.util.Date
+//     */
+//    public static Date toUtilDate(LocalTime localTime) {
+//        if (localTime == null) {
+//            return null;
+//        }
+//        LocalDate localDate = LocalDate.now();
+//        LocalDateTime localDateTime = LocalDateTime.of(localDate, localTime);
+//        ZoneId zone = ZoneId.systemDefault();
+//        Instant instant = localDateTime.atZone(zone).toInstant();
+//        return Date.from(instant);
+//    }
 
 }

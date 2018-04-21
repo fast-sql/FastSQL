@@ -15,4 +15,12 @@ public class FastSQLUtilsTest {
         FastSqlUtils.leftWildcard("李");
         FastSqlUtils.rightWildcard("李");
     }
+    @Test
+    public void in(){
+        System.out.println(
+                FastSqlUtils.getInClause(
+                        "state in {} and id IN {}", FastSqlUtils.listOf(1, 2, 3), FastSqlUtils.listOf("11", "qwq"))
+        );
+
+    }
 }
