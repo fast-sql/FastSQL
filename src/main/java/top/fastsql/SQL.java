@@ -315,6 +315,27 @@ public class SQL {
         return this;
     }
 
+    public SQL EXISTS() {
+        strBuilder.append(" EXISTS ");
+        return this;
+    }
+
+    public SQL EXISTS(String condition) {
+        strBuilder.append(" EXISTS ").append(" ( ").append(condition).append(" ) ");
+        return this;
+    }
+
+    public SQL NOT_EXISTS() {
+        strBuilder.append(" NOT EXISTS ");
+        return this;
+    }
+
+
+    public SQL NOT_EXISTS(String condition) {
+        strBuilder.append(" NOT EXISTS ").append(" ( ").append(condition).append(" )");
+        return this;
+    }
+
 
     public SQL BETWEEN_AND(String from, String to) {
         strBuilder.append(" BETWEEN ").append(from).append(" AND ").append(to);
