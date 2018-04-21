@@ -7,7 +7,7 @@
 
     <groupId>top.fastsql</groupId>
     <artifactId>fastsql</artifactId>
-    <version>1.2.3</version>
+    <version>1.2.4</version>
 
     <name>fastsql</name>
     <description>FastSQL is a lightweight database operate library.</description>
