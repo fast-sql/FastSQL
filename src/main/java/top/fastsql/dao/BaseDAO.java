@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.util.StringUtils;
 import top.fastsql.SQL;
 import top.fastsql.SQLFactory;
@@ -18,6 +18,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -349,7 +350,7 @@ public abstract class BaseDAO<E, ID> {
     /**
      * 根据id列表批量删除数据
      */
-    public BatchUpdateResult deleteInBatch(List<ID> ids) {
+    public BatchUpdateResult deleteInBatch(Collection<ID> ids) {
         final String sql = "DELETE FROM " + tableName + " WHERE " + idColumnName + "=:" + idColumnName;
 
         List<Map<String, Object>> mapList = new ArrayList<>(ids.size());
@@ -409,7 +410,7 @@ public abstract class BaseDAO<E, ID> {
         }
     }
 
-    public E selectOneWhere(String sqlCondition, SqlParameterSource parameterSource) {
+    public E selectOneWhere(String sqlCondition, MapSqlParameterSource parameterSource) {
         //sql
         String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition;
 
@@ -440,7 +441,7 @@ public abstract class BaseDAO<E, ID> {
         return getSQL().useSql(sql).varParameter(values).queryList(new BeanPropertyRowMapper<>(entityClass));
     }
 
-    public List<E> selectWhere(String sqlCondition, SqlParameterSource parameterSource) {
+    public List<E> selectWhere(String sqlCondition, MapSqlParameterSource parameterSource) {
         //sql
         String sql = "SELECT * FROM " + tableName + " WHERE " + sqlCondition;
         return getSQL().useSql(sql).parameter(parameterSource).queryList(new BeanPropertyRowMapper<>(entityClass));
@@ -452,7 +453,7 @@ public abstract class BaseDAO<E, ID> {
         return getSQL().useSql(sql).varParameter(values).queryInteger();
     }
 
-    public int countWhere(String sqlCondition, SqlParameterSource parameterSource) {
+    public int countWhere(String sqlCondition, MapSqlParameterSource parameterSource) {
         //sql
         String sql = "SELECT count(*) FROM " + tableName + " WHERE " + sqlCondition;
         return getSQL().useSql(sql).parameter(parameterSource).queryInteger();
@@ -471,7 +472,7 @@ public abstract class BaseDAO<E, ID> {
     }
 
     public ResultPage<E> selectPageWhere(String sqlCondition, int pageNumber, int perPage,
-                                         SqlParameterSource parameterSource) {
+                                         MapSqlParameterSource parameterSource) {
         String sql = "SELECT * FROM " + tableName + " WHERE 1=1 AND " + sqlCondition;
         return getSQL().useSql(sql).parameter(parameterSource)
                 .queryPage(pageNumber, perPage, new BeanPropertyRowMapper<>(entityClass));
