@@ -27,7 +27,8 @@ public class PageUtils {
     @Deprecated
     public static String getNumberSQL(String sql) {
         // Can not use  "AS"  in Oracle's subQuery.
-        return "SELECT count(*) FROM ( " + sql + " ) total";
+//        return "SELECT count(*) FROM ( " + sql + " ) total";
+        return getSmartCountSQL(sql);
     }
 
     /**
