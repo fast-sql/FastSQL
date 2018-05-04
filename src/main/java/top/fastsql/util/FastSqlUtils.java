@@ -1,9 +1,10 @@
 package top.fastsql.util;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
 
 /**
  * 内部工具类
@@ -140,30 +141,30 @@ public class FastSqlUtils {
         return list;
     }
 
-//    /**
-//     * java.util.Date --> java.time.LocalDateTime
-//     */
-//    public static LocalDateTime toLocalDateTime(java.util.Date date) {
-//        if (date == null) {
-//            return null;
-//        }
-//        Instant instant = date.toInstant();
-//        ZoneId zone = ZoneId.systemDefault();
-//        return LocalDateTime.ofInstant(instant, zone);
-//    }
-//
-//    /**
-//     * java.util.Date --> java.time.LocalDate
-//     */
-//    public static LocalDate toLocalDate(Date date) {
-//        if (date == null) {
-//            return null;
-//        }
-//        Instant instant = date.toInstant();
-//        ZoneId zone = ZoneId.systemDefault();
-//        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, zone);
-//        return localDateTime.toLocalDate();
-//    }
+    /**
+     * java.util.Date --> java.time.LocalDateTime
+     */
+    public static LocalDateTime toLocalDateTime(java.util.Date date) {
+        if (date == null) {
+            return null;
+        }
+        Instant instant = date.toInstant();
+        ZoneId zone = ZoneId.systemDefault();
+        return LocalDateTime.ofInstant(instant, zone);
+    }
+
+    /**
+     * java.util.Date --> java.time.LocalDate
+     */
+    public static LocalDate toLocalDate(Date date) {
+        if (date == null) {
+            return null;
+        }
+        Instant instant = date.toInstant();
+        ZoneId zone = ZoneId.systemDefault();
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, zone);
+        return localDateTime.toLocalDate();
+    }
 
 
     //////////////////////////////////////////////////////2///////////////////////////////////

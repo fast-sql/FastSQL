@@ -20,6 +20,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.Date;
 import java.util.function.Consumer;
 
 /**
@@ -811,11 +812,20 @@ public class SQL {
     /**
      * 查询单行结果封装为一个对象
      *
-     * @param returnClassType Class&lt;T&gt;类型 T 可以为String/Integer/Long/Short/BigDecimal/BigInteger/Float/Double/Boolean或者任意POJO
+     * @param returnClassType Class&lt;T&gt;类型 T 可以为
+     *                        String/Integer/Long/Short/BigDecimal/BigInteger/Float/Double/Boolean/Date或者任意POJO
      * @return 查询结果
      */
     public <T> T queryOne(Class<T> returnClassType) {
         checkNull();
+        //jdbc 不支持 LocalDate LocalDateTime
+        if (returnClassType.equals(LocalDate.class) ){
+            return (T) queryLocalDate();
+        }
+        if (returnClassType.equals(LocalDateTime.class) ){
+            return (T) queryLocalDateTime();
+        }
+        //
         RowMapper<T> rowMapper = getRowMapper(returnClassType);
         return useTemplateQueryOne(rowMapper);
     }
@@ -830,6 +840,15 @@ public class SQL {
 
     public String queryString() {
         return queryOne(String.class);
+    }
+    public Date queryDate() {
+        return queryOne(Date.class);
+    }
+    public LocalDate queryLocalDate() {
+        return FastSqlUtils.toLocalDate(queryOne(Date.class));
+    }
+    public LocalDateTime queryLocalDateTime() {
+        return FastSqlUtils.toLocalDateTime(queryOne(Date.class));
     }
 
     public <T> T queryOne(RowMapper<T> rowMapper) {
@@ -1278,6 +1297,8 @@ public class SQL {
                         Integer.class, int.class, Long.class, long.class,
                         Short.class, short.class,
                         BigDecimal.class,
+//                        LocalDate.class,
+//                        LocalDateTime.class,
                         BigInteger.class,
                         Float.class, float.class, Double.class, double.class,
                         Boolean.class, boolean.class,
