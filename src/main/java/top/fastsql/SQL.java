@@ -73,26 +73,40 @@ public class SQL {
         return this;
     }
 
+    /**
+     * 追加空格
+     */
     public SQL blank() {
         strBuilder.append(" ");
         return this;
     }
 
+    /**
+     * 追加空格和其他字符串
+     */
     public SQL blank(String string) {
         strBuilder.append(" ").append(string);
         return this;
     }
 
+    /**
+     * 追加逗号
+     */
     public SQL comma() {
         strBuilder.append(",");
         return this;
     }
-
+    /**
+     * 追加逗号和其他字符串
+     */
     public SQL comma(String sql) {
         strBuilder.append(",").append(sql);
         return this;
     }
 
+    /**
+     * 使用sql字符串
+     */
     public SQL useSql(String sql) {
         strBuilder.append(sql);
         return this;
@@ -115,7 +129,9 @@ public class SQL {
         return this;
     }
 
-
+    /**
+     * 追加换行符
+     */
     public SQL nl() {
         strBuilder.append("\n");
         return this;
@@ -147,6 +163,7 @@ public class SQL {
         return this.SELECT("*").FROM(tableName);
     }
 
+    @Deprecated
     public SQL append_SELECT(String... columns) {
         String columnsStr = String.join(",", columns);
         strBuilder.append(",").append(columnsStr);
@@ -895,15 +912,15 @@ public class SQL {
      *
      * @return Map
      */
-    @Deprecated
-    public ValueMap queryValueMap() {
-
-        Map<String, Object> map = queryMap();
-        if (map == null) {
-            return null;
-        }
-        return new ValueMap(map);
-    }
+//    @Deprecated
+//    public ValueMap queryValueMap() {
+//
+//        Map<String, Object> map = queryMap();
+//        if (map == null) {
+//            return null;
+//        }
+//        return new ValueMap(map);
+//    }
 
     public RowMap queryRowMap() {
 
@@ -989,17 +1006,17 @@ public class SQL {
         return this.namedParameterJdbcTemplate.queryForList(strBuilder.toString(), this.sqlParameterSource);
     }
 
-    @Deprecated
-    public List<ValueMap> queryValueMapList() {
-        List<Map<String, Object>> mapList = queryMapList();
-
-        List<ValueMap> valueMapList = new ArrayList<>();
-        for (Map<String, Object> map : mapList) {
-
-            valueMapList.add(new ValueMap(map));
-        }
-        return valueMapList;
-    }
+//    @Deprecated
+//    public List<ValueMap> queryValueMapList() {
+//        List<Map<String, Object>> mapList = queryMapList();
+//
+//        List<ValueMap> valueMapList = new ArrayList<>();
+//        for (Map<String, Object> map : mapList) {
+//
+//            valueMapList.add(new ValueMap(map));
+//        }
+//        return valueMapList;
+//    }
 
     public List<RowMap> queryRowMapList() {
         List<Map<String, Object>> mapList = queryMapList();
