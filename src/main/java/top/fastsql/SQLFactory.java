@@ -27,13 +27,10 @@ public class SQLFactory {
 
     private boolean resultsMapCaseInsensitive = false;
 
-//    private boolean logSQLWhenBuild = false;
-
     private JdbcTemplate jdbcTemplate;
 
     public SQL createSQL() {
         if (this.jdbcTemplate == null) {
-
             this.jdbcTemplate = new JdbcTemplate();
             this.jdbcTemplate.setIgnoreWarnings(ignoreWarnings);
             this.jdbcTemplate.setFetchSize(fetchSize);
@@ -47,6 +44,9 @@ public class SQLFactory {
         return new SQL(this.jdbcTemplate, this.dataSourceType);
     }
 
+    public SQL getSQL(){
+        return createSQL();
+    }
 
     public DataSource getDataSource() {
         return dataSource;
@@ -119,12 +119,4 @@ public class SQLFactory {
     public void setResultsMapCaseInsensitive(boolean resultsMapCaseInsensitive) {
         this.resultsMapCaseInsensitive = resultsMapCaseInsensitive;
     }
-
-//    public boolean isLogSQLWhenBuild() {
-//        return logSQLWhenBuild;
-//    }
-//
-//    public void setLogSQLWhenBuild(boolean logSQLWhenBuild) {
-//        this.logSQLWhenBuild = logSQLWhenBuild;
-//    }
 }

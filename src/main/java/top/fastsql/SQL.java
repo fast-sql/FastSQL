@@ -348,12 +348,10 @@ public class SQL {
         return this;
     }
 
-
     public SQL NOT_EXISTS(String condition) {
         strBuilder.append(" NOT EXISTS ").append(" ( ").append(condition).append(" )");
         return this;
     }
-
 
     public SQL BETWEEN_AND(String from, String to) {
         strBuilder.append(" BETWEEN ").append(from).append(" AND ").append(to);
@@ -365,12 +363,10 @@ public class SQL {
         return this;
     }
 
-
     public SQL GROUP_BY(String... condition) {
         strBuilder.append(" GROUP BY ").append(String.join(",", condition));
         return this;
     }
-
 
     public SQL ASC() {
         strBuilder.append(" ASC");
@@ -383,7 +379,6 @@ public class SQL {
     }
 
     //////////////////////////////////IN///////////////////////////////////////
-
     public SQL IN() {
         strBuilder.append(" IN ");
         return this;
@@ -424,7 +419,6 @@ public class SQL {
         return this;
     }
 
-
     //-----------------  operator method--------------------------------
 
     /**
@@ -443,7 +437,6 @@ public class SQL {
         return this;
     }
 
-
     /**
      * Generate '>' operator and append the param
      */
@@ -459,7 +452,6 @@ public class SQL {
         strBuilder.append(" > ");
         return this;
     }
-
 
     /**
      * >= operator
@@ -477,7 +469,6 @@ public class SQL {
         return this;
     }
 
-
     /**
      * <= operator
      */
@@ -490,7 +481,6 @@ public class SQL {
         strBuilder.append(" < ");
         return this;
     }
-
 
     /**
      * <=
@@ -518,7 +508,6 @@ public class SQL {
         return this;
     }
 
-
     public SQL nEq(String value) {
         strBuilder.append(" != ").append(value);
         return this;
@@ -539,7 +528,6 @@ public class SQL {
         return this;
     }
 
-
     public SQL NOT_LIKE(String value) {
         strBuilder.append(" LIKE ").append(value);
         return this;
@@ -549,7 +537,6 @@ public class SQL {
         strBuilder.append(" LIKE ");
         return this;
     }
-
 
     /**
      * 根据类型判断如何拼接SQL
@@ -594,8 +581,6 @@ public class SQL {
     }
 
     ///////////////////////////分页关键字///////////////////////////
-
-
     public SQL LIMIT(Integer offset, Integer rows) {
         strBuilder.append(" LIMIT ").append(offset).append(",").append(rows);
         return this;
@@ -621,7 +606,6 @@ public class SQL {
         return this;
     }
 
-
     public SQL HAVING(String condition) {
         strBuilder.append(" HAVING ").append(condition);
         return this;
@@ -633,16 +617,13 @@ public class SQL {
     }
 
     public String build() {
-
         return strBuilder.toString();
     }
-
 
     public SQL countThis() {
         this.strBuilder = new StringBuilder(PageUtils.getSmartCountSQL(strBuilder.toString()));
         return this;
     }
-
 
     public SQL pageThis(int pageNumber, int perPageSize) {
         this.strBuilder = new StringBuilder(PageUtils.getRowsSQL(strBuilder.toString(), pageNumber, perPageSize, this.dataSourceType));
@@ -667,12 +648,10 @@ public class SQL {
         return this;
     }
 
-
     public SQL parameter(SqlParameterSource sqlParameterSource) {
         this.sqlParameterSource = sqlParameterSource;
         return this;
     }
-
 
     /**
      * 通过Map添加命名参数
@@ -733,7 +712,8 @@ public class SQL {
         return this;
     }
 
-    public SQL mapItemsParameter(String k1, Object v1, String k2, Object v2, String k3, Object v3, String k4, Object v4, String k5, Object v5) {
+    public SQL mapItemsParameter(String k1, Object v1, String k2, Object v2, String k3, Object v3,
+                                 String k4, Object v4, String k5, Object v5) {
         MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
         mapSqlParameterSource.addValue(k1, v1);
         mapSqlParameterSource.addValue(k2, v2);
@@ -743,7 +723,6 @@ public class SQL {
         this.sqlParameterSource = mapSqlParameterSource;
         return this;
     }
-
 
     public SQL addMapParameterItem(String key, Object value) {
         if (this.sqlParameterSource instanceof EmptySqlParameterSource) {
@@ -772,7 +751,6 @@ public class SQL {
     public SQL appendMapParameterItem(String key, Object value) {
         return addMapParameterItem(key, value);
     }
-
 
     /**
      * 出现相同名称的参数时，map或覆盖bean中的参数
@@ -816,7 +794,6 @@ public class SQL {
             Collections.addAll(objectList, vars);
             this.varParams = objectList.toArray();
         }
-
         return this;
     }
 
@@ -853,7 +830,6 @@ public class SQL {
      * @since 1.3.1
      */
     public <T> T queryFirst(Class<T> returnClassType) {
-//        checkNull();
         this.pageThis(1, 1);
         return queryOne(returnClassType);
     }
@@ -949,7 +925,6 @@ public class SQL {
 
         return this.namedParameterJdbcTemplate.query(strBuilder.toString(), this.sqlParameterSource, rowMapper);
     }
-
 
     public List<String> queryStringList() {
         checkNull();
@@ -1142,12 +1117,10 @@ public class SQL {
         checkNull();
         int count;
         String sql = strBuilder.toString();
-
         if (useClassicJdbcTemplate) {
             count = this.namedParameterJdbcTemplate.getJdbcOperations().update(sql, varParams);
         } else {
             count = this.namedParameterJdbcTemplate.update(sql, this.sqlParameterSource);
-
         }
         if (count < 1) {
             logger.warn("update更新成功数量为" + count);
@@ -1210,7 +1183,7 @@ public class SQL {
     public List<String> getTableNames(String catalog, String schemaPattern,
                                       String tableNamePattern) {
         checkNull();
-        Connection connection = null;
+        Connection connection;
         try {
             connection = this.getDataSource().getConnection();
             ResultSet resultSet = connection.getMetaData().getTables(catalog, schemaPattern, tableNamePattern, new String[]{"TABLE"});
