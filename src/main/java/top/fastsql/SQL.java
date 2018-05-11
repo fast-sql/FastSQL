@@ -1285,7 +1285,6 @@ public class SQL {
 
     private <T> RowMapper<T> getRowMapper(Class<T> returnClassType) {
         RowMapper<T> rowMapper;
-
         List<Class<?>> classArrayList =
                 Arrays.asList(String.class,
                         Integer.class, int.class, Long.class, long.class,

@@ -44,8 +44,10 @@ public class SQLFactory {
         return new SQL(this.jdbcTemplate, this.dataSourceType);
     }
 
-    public SQL getSQL(){
-        return createSQL();
+
+
+    public DatabaseMeta createMeta(){
+        return new DatabaseMeta();
     }
 
     public DataSource getDataSource() {
