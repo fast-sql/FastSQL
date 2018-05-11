@@ -7,7 +7,10 @@ import org.springframework.jdbc.core.*;
 import org.springframework.jdbc.core.namedparam.*;
 import org.springframework.util.StringUtils;
 import top.fastsql.config.DataSourceType;
-import top.fastsql.dto.*;
+import top.fastsql.dto.BatchUpdateResult;
+import top.fastsql.dto.ColumnMetaData;
+import top.fastsql.dto.ResultPage;
+import top.fastsql.dto.RowMap;
 import top.fastsql.mapper.OraclePagingSingleColumnRowMapper;
 import top.fastsql.util.*;
 
@@ -64,7 +67,6 @@ public class SQL {
     }
 
 
-
     /**
      * 追加任意字符串
      */
@@ -96,6 +98,7 @@ public class SQL {
         strBuilder.append(",");
         return this;
     }
+
     /**
      * 追加逗号和其他字符串
      */
@@ -216,9 +219,6 @@ public class SQL {
         strBuilder.append(" VALUES ").append("(").append(columnsStr).append(")");
         return this;
     }
-
-
-
 
 
     /////////////////////update////////////////
@@ -836,15 +836,26 @@ public class SQL {
     public <T> T queryOne(Class<T> returnClassType) {
         checkNull();
         //jdbc 不支持 LocalDate LocalDateTime
-        if (returnClassType.equals(LocalDate.class) ){
+        if (returnClassType.equals(LocalDate.class)) {
             return (T) queryLocalDate();
         }
-        if (returnClassType.equals(LocalDateTime.class) ){
+        if (returnClassType.equals(LocalDateTime.class)) {
             return (T) queryLocalDateTime();
         }
         //
         RowMapper<T> rowMapper = getRowMapper(returnClassType);
         return useTemplateQueryOne(rowMapper);
+    }
+
+    /**
+     * 分页并取得第一条记录
+     *
+     * @since 1.3.1
+     */
+    public <T> T queryFirst(Class<T> returnClassType) {
+//        checkNull();
+        this.pageThis(1, 1);
+        return queryOne(returnClassType);
     }
 
     public Integer queryInteger() {
@@ -858,12 +869,15 @@ public class SQL {
     public String queryString() {
         return queryOne(String.class);
     }
+
     public Date queryDate() {
         return queryOne(Date.class);
     }
+
     public LocalDate queryLocalDate() {
         return FastSqlUtils.toLocalDate(queryOne(Date.class));
     }
+
     public LocalDateTime queryLocalDateTime() {
         return FastSqlUtils.toLocalDateTime(queryOne(Date.class));
     }
@@ -921,7 +935,6 @@ public class SQL {
 //        }
 //        return new ValueMap(map);
 //    }
-
     public RowMap queryRowMap() {
 
         Map<String, Object> map = queryMap();
