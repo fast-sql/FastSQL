@@ -926,15 +926,6 @@ public class SQL {
      *
      * @return Map
      */
-//    @Deprecated
-//    public ValueMap queryValueMap() {
-//
-//        Map<String, Object> map = queryMap();
-//        if (map == null) {
-//            return null;
-//        }
-//        return new ValueMap(map);
-//    }
     public RowMap queryRowMap() {
 
         Map<String, Object> map = queryMap();
@@ -1019,17 +1010,6 @@ public class SQL {
         return this.namedParameterJdbcTemplate.queryForList(strBuilder.toString(), this.sqlParameterSource);
     }
 
-//    @Deprecated
-//    public List<ValueMap> queryValueMapList() {
-//        List<Map<String, Object>> mapList = queryMapList();
-//
-//        List<ValueMap> valueMapList = new ArrayList<>();
-//        for (Map<String, Object> map : mapList) {
-//
-//            valueMapList.add(new ValueMap(map));
-//        }
-//        return valueMapList;
-//    }
 
     public List<RowMap> queryRowMapList() {
         List<Map<String, Object>> mapList = queryMapList();
@@ -1327,8 +1307,6 @@ public class SQL {
                         Integer.class, int.class, Long.class, long.class,
                         Short.class, short.class,
                         BigDecimal.class,
-//                        LocalDate.class,
-//                        LocalDateTime.class,
                         BigInteger.class,
                         Float.class, float.class, Double.class, double.class,
                         Boolean.class, boolean.class,
