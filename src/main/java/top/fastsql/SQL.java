@@ -1074,6 +1074,8 @@ public class SQL {
 
     /**
      * 查询结果页
+     * page <=0 查询数量
+     * perPage <=0 仅查询条数
      *
      * @param page            第几页 从1开始
      * @param perPage         每页几条 最小为1
@@ -1094,6 +1096,15 @@ public class SQL {
         }
     }
 
+    /**
+     * page <=0 查询数量
+     * perPage <=0 仅查询条数
+     *
+     * @param page      第几页 从1开始
+     * @param perPage   每页几条 最小为1
+     * @param rowMapper 结果类型
+     * @return 返回的结果页
+     */
     public <T> ResultPage<T> queryPage(int page, int perPage, RowMapper<T> rowMapper) {
         checkNull();
 

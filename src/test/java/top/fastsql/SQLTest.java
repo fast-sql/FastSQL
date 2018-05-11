@@ -34,7 +34,7 @@ public class SQLTest {
 
         //log
 
-     }
+    }
 
     @Test
     public void testOperatorMethod() {
@@ -128,10 +128,19 @@ public class SQLTest {
     @Test
     public void pageSQLTest() {
 //        sqlFactory.setLogSQLWhenBuild(true);
-
         sqlFactory.setDataSourceType(DataSourceType.ORACLE);
         sqlFactory.createSQL().SELECT("*").FROM("student").pageThis(1, 10).build();
     }
 
+    @Test
+    public void testPage0() {
+        sqlFactory.setDataSourceType(DataSourceType.POSTGRESQL);
+        System.out.println(sqlFactory.createSQL().SELECT("id").FROM("sys_dict").queryPage(0, 1, String.class));
+    }
 
+    @Test
+    public void testPerPage0() {
+        sqlFactory.setDataSourceType(DataSourceType.POSTGRESQL);
+        System.out.println(sqlFactory.createSQL().SELECT("id").FROM("sys_dict").queryPage(1, 0, String.class));
+    }
 }
