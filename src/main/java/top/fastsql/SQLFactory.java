@@ -43,6 +43,60 @@ public class SQLFactory {
         }
         return new SQL(this.jdbcTemplate, this.dataSourceType);
     }
+	
+	 public SQL sql() {
+        return createSQL();
+    }
+
+    public static SQLFactory createUseSimpleDateSource(Driver driver, String url, String username, String password) {
+        SQLFactory sqlFactory = new SQLFactory();
+        if (url.contains("jdbc:mysql:")) {
+            sqlFactory.setDataSourceType(DataSourceType.MY_SQL);
+        }
+        if (url.contains("jdbc:oracle:")) {
+            sqlFactory.setDataSourceType(DataSourceType.ORACLE);
+        }
+
+        if (url.contains("jdbc:postgresql:")) {
+            sqlFactory.setDataSourceType(DataSourceType.POSTGRESQL);
+        }
+
+        SimpleDriverDataSource dataSource = new SimpleDriverDataSource(driver, url, username, password);
+        sqlFactory.setDataSource(dataSource);
+        return sqlFactory;
+    }
+
+    public static SQLFactory createUseSimpleDateSource(String url, String username, String password) {
+        SQLFactory sqlFactory = new SQLFactory();
+
+        String driverClass = null;
+        Driver driver = null;
+        if (url.contains("jdbc:mysql:")) {
+            sqlFactory.setDataSourceType(DataSourceType.MY_SQL);
+            driverClass = "com.mysql.jdbc.Driver";
+        }
+        if (url.contains("jdbc:oracle:")) {
+            sqlFactory.setDataSourceType(DataSourceType.ORACLE);
+            driverClass = "oracle.jdbc.driver.OracleDriver";
+
+        }
+
+        if (url.contains("jdbc:postgresql:")) {
+            sqlFactory.setDataSourceType(DataSourceType.POSTGRESQL);
+            driverClass = "org.postgresql.Driver";
+
+        }
+
+        try {
+            driver = (Driver) Class.forName(driverClass).newInstance();
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        SimpleDriverDataSource dataSource = new SimpleDriverDataSource(driver, url, username, password);
+
+        sqlFactory.setDataSource(dataSource);
+        return sqlFactory;
+    }
 
 
 
