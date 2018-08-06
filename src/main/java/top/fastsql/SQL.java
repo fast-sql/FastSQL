@@ -1128,6 +1128,35 @@ public class SQL {
         return count;
     }
 
+	 public KeyHolderResult updateForKey(String... keyColumns) {
+        checkNull();
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        int count;
+        String sql = strBuilder.toString();
+        if (useClassicJdbcTemplate) {
+            //TODO 只能使用命名参数形式
+            throw new UnsupportedOperationException("updateForKey() 目前只能使用命名参数形式");
+
+
+//            PreparedStatementCreatorFactory preparedStatementCreatorFactory = new PreparedStatementCreatorFactory(sql);
+//
+//
+//            PreparedStatementCreator creator = preparedStatementCreatorFactory
+//                    .newPreparedStatementCreator(Arrays.asList(this.varParams));
+//
+//
+//            count = this.namedParameterJdbcTemplate.getJdbcOperations().update(
+//                    creator, keyHolder);
+        } else {
+            count = this.namedParameterJdbcTemplate.update(sql, this.sqlParameterSource, keyHolder, keyColumns);
+        }
+        if (count < 1) {
+            logger.warn("update更新成功数量为" + count);
+        }
+        return new KeyHolderResult(count, keyHolder);
+    }
 
     public BatchUpdateResult batchUpdateByMapParams(List<Map<String, Object>> mapParamList) {
         checkNull();

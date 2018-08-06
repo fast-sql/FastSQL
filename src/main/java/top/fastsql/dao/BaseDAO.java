@@ -205,6 +205,73 @@ public abstract class BaseDAO<E, ID> {
         }
         return count;
     }
+	
+	 public KeyHolderResult insertForKey(E entity, String... keyColumns) {
+        if (useBeforeInsert) {
+            beforeInsert(entity);
+        }
+
+        StringBuilder nameBuilder = new StringBuilder();
+        StringBuilder valueBuilder = new StringBuilder();
+
+
+        Object fieldValue = EntityRefelectUtils.getFieldValue(entity, idField);
+        if (fieldValue == null) {
+            fieldsWithoutId.forEach(field -> {
+                nameBuilder.append(",").append(StringExtUtils.camelToUnderline(field.getName()));
+                valueBuilder.append(",:").append(field.getName());
+            });
+        } else {
+            fields.forEach(field -> {
+                nameBuilder.append(",").append(StringExtUtils.camelToUnderline(field.getName()));
+                valueBuilder.append(",:").append(field.getName());
+            });
+        }
+
+        SQL sql = getSQL()
+                .INSERT_INTO(tableName, nameBuilder.deleteCharAt(0).toString())
+                .VALUES(valueBuilder.deleteCharAt(0).toString())
+                .beanParameter(entity);
+
+        KeyHolderResult keyHolderResult = sql.updateForKey(keyColumns);
+        if (useAfterInsert) {
+            afterInsert(entity, keyHolderResult.getCount());
+        }
+        return keyHolderResult;
+    }
+
+    public KeyHolderResult insertForId(E entity) {
+        if (useBeforeInsert) {
+            beforeInsert(entity);
+        }
+
+        StringBuilder nameBuilder = new StringBuilder();
+        StringBuilder valueBuilder = new StringBuilder();
+        Object fieldValue = EntityRefelectUtils.getFieldValue(entity, idField);
+        if (fieldValue == null) {
+            fieldsWithoutId.forEach(field -> {
+                nameBuilder.append(",").append(StringExtUtils.camelToUnderline(field.getName()));
+                valueBuilder.append(",:").append(field.getName());
+            });
+        } else {
+            fields.forEach(field -> {
+                nameBuilder.append(",").append(StringExtUtils.camelToUnderline(field.getName()));
+                valueBuilder.append(",:").append(field.getName());
+            });
+        }
+
+        SQL sql = getSQL()
+                .INSERT_INTO(tableName, nameBuilder.deleteCharAt(0).toString())
+                .VALUES(valueBuilder.deleteCharAt(0).toString())
+                .beanParameter(entity);
+
+        KeyHolderResult keyHolderResult = sql.updateForKey(idColumnName);
+        if (useAfterInsert) {
+            afterInsert(entity, keyHolderResult.getCount());
+        }
+        return keyHolderResult;
+    }
+
 
     /**
      * 批量插入
