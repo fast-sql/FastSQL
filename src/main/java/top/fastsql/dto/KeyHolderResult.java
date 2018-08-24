@@ -3,6 +3,7 @@ package top.fastsql.dto;
 import org.springframework.jdbc.support.KeyHolder;
 
 /**
+ * 保存数据库自动生成的主键值（或其他值）
  * @author ChenJiazhi
  */
 public class KeyHolderResult {
