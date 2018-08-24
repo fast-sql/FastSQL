@@ -5,12 +5,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.*;
 import org.springframework.jdbc.core.namedparam.*;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.util.StringUtils;
 import top.fastsql.config.DataSourceType;
-import top.fastsql.dto.BatchUpdateResult;
-import top.fastsql.dto.ColumnMetaData;
-import top.fastsql.dto.ResultPage;
-import top.fastsql.dto.RowMap;
+import top.fastsql.dto.*;
 import top.fastsql.mapper.OraclePagingSingleColumnRowMapper;
 import top.fastsql.util.*;
 

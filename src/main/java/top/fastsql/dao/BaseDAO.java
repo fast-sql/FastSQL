@@ -11,6 +11,7 @@ import org.springframework.util.StringUtils;
 import top.fastsql.SQL;
 import top.fastsql.SQLFactory;
 import top.fastsql.dto.BatchUpdateResult;
+import top.fastsql.dto.KeyHolderResult;
 import top.fastsql.dto.ResultPage;
 import top.fastsql.util.EntityRefelectUtils;
 import top.fastsql.util.StringExtUtils;

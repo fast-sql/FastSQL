@@ -1,9 +1,11 @@
 package top.fastsql;
 
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import top.fastsql.config.DataSourceType;
 
 import javax.sql.DataSource;
+import java.sql.Driver;
 
 /**
  * SQL类的工厂类
