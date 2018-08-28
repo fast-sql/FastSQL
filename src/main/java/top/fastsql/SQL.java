@@ -109,7 +109,7 @@ public class SQL {
     /**
      * 使用sql字符串
      *
-     * @see SQL#useStr(String)
+     * @see SQL#str(String)
      */
     @Deprecated
     public SQL useSql(String sql) {
@@ -120,7 +120,7 @@ public class SQL {
     /**
      * 使用sql字符串
      */
-    public SQL useStr(String sql) {
+    public SQL str(String sql) {
         strBuilder.append(sql);
         return this;
     }
@@ -401,6 +401,19 @@ public class SQL {
 
     public SQL IN(String sql) {
         strBuilder.append(" IN ").append(sql);
+        return this;
+    }
+
+    /**
+     * 使用可变参数
+     */
+    public SQL IN_var(Object... params) {
+        strBuilder.append(" IN ").append(FastSqlUtils.getInClause(Arrays.asList(params)));
+        return this;
+    }
+
+    public SQL NOT_IN_var(Object... params) {
+        strBuilder.append(" NOT IN ").append(FastSqlUtils.getInClause(Arrays.asList(params)));
         return this;
     }
 
@@ -1296,6 +1309,13 @@ public class SQL {
 
     public SQL ifPresent(Object object, Consumer<SQL> sQLConsumer) {
         return ifTrue(!StringUtils.isEmpty(object), sQLConsumer);
+    }
+
+    /**
+     * 如果前两个参数相等，则执行lambda表达式
+     */
+    public SQL ifEquals(Object object1, Object object2, Consumer<SQL> sQLConsumer) {
+        return ifTrue(Objects.equals(object1, object2), sQLConsumer);
     }
 
     public SQL ifNotEmpty(Collection<?> collection, Consumer<SQL> sQLConsumer) {

@@ -48,8 +48,9 @@ compile 'top.fastsql:fastsql:1.3.0'
 ## 2.2 构建 SQLFactory
 你可以直接从 Java 程序构建一个 SQLFactory ，如果使用SQL的执行功能，至少需要设置 DataSource 。
 ```java
-//新建一个DataSource（这里使用了Spring-Jdbc的SimpleDriverDataSource）
-DataSource dataSource = new SimpleDriverDataSource([传入url,username等]);
+//新建一个DataSource（这里使用了spring-jdbc的SimpleDriverDataSource）
+//也可以使用支持连接池的各种DataSource,如DruidDataSource等
+DataSource dataSource = new SimpleDriverDataSource(<...省略参数...>);
 
 SQLFactory sqlFactory = new SQLFactory();
 sqlFactory.setDataSource(dataSource);
@@ -105,9 +106,13 @@ sqlFactory.setDataSourceType(DataSourceType.POSTGRESQL);//默认
 //支持 DataSourceType.POSTGRESQL、 DataSourceType.MY_SQL、DataSourceType.ORACLE
 ```
 
-设置其他内容
+其他设置
+```java
+sqlFactory.setQueryTimeout(5000);//设置最大超时时间
+sqlFactory.setMaxRows(100);//查询最大行数
+```
 
->撰写中
+ 
 
 
 # 4 使用SQL类构建sql语句
@@ -123,7 +128,7 @@ sqlFactory.sql().SELECT("name", "age").FROM("student").WHERE("age>10").build();
 sqlFactory.sql().SELECT("name", "age").FROM("student").WHERE("name='小红'").build();
 //==> SELECT name,age FROM student WHERE name='小红'
 ```
-`WHERE()`关键字生成`WHERE 1=1`,如下
+`WHERE()`关键字生成`WHERE 1=1`语句,动态sql构建如下
 ```java
 SQL sql = sqlFactory.sql().SELECT("name", "age").FROM("student").WHERE();
 if (true){
@@ -253,15 +258,21 @@ sqlFactory.sql().SELECT("*")
 //3.使用数组
 sqlFactory.sql().SELECT("*")
    .FROM("student")
-   .WHERE("name").IN(new Object[]{"小明","小红"})//
+   .WHERE("name").IN(new Object[]{"小明","小红"})
+   .build();
+
+//4.使用可变参数(最简洁)
+sqlFactory.sql().SELECT("*")
+   .FROM("student")
+   .WHERE("name").IN_var("小明","小红")
    .build();
 
 //生成sql==> SELECT *  FROM student  WHERE name  IN ('小明','小红')
 ```
 
-## 4.6 使用$_$()方法进行子查询
+## ~~4.6 使用$_$()方法进行子查询~~
 
-查询大于平均分的成绩（可以使用 $_$()方法）
+~~查询大于平均分的成绩（可以使用 $_$()方法）~~
 
 ```java
 sqlFactory.sql().SELECT("*")
@@ -276,7 +287,7 @@ sqlFactory.sql().SELECT("*")
 //WHERE score_value >  ( SELECT avg(score_value)  FROM score  )
 ```
 
-带有IN的子查询
+~~带有IN的子查询~~
 
 ```java
 sqlFactory.sql().SELECT("*")
@@ -288,6 +299,11 @@ sqlFactory.sql().SELECT("*")
     )
     .build();
 //生成sql==> SELECT * FROM score WHERE 1 = 1 AND score IN (SELECT DISTINCT score_value FROM score)
+```
+注：复杂sql推荐使用字符串直接构建：
+```java
+String sql="SELECT * FROM score WHERE 1 = 1 AND score IN (SELECT DISTINCT score_value FROM score)";
+sqlFactory.sql().str(sql);
 ```
 
 ## 4.7 AND和OR结合使用
@@ -313,7 +329,7 @@ sqlFactory.sql().SELECT("*")
 - `ifTrue(boolean bool, Consumer<SQL> sqlConsumer)`:如果第1个参数为true，则执行第二个参数（Lambda表达式）
 - `ifNotEmpty(Collection<?> collection, Consumer<SQL> sqlConsumer)`:如果第1个参数长度大于0，则执行第二个参数（Lambda表达式）
 - `ifPresent(Object object, Consumer<SQL> sqlConsumer)`:如果第1个参数存在（不等于null且不为""），则执行第二个参数（Lambda表达式）
-
+- `ifEquals(Object object1, Object object2, Consumer<SQL> sQLConsumer)`:如果前两个参数相等，则执行lambda表达式
 ```java
 sqlFactory.sql()
     .SELECT("student")
@@ -349,9 +365,9 @@ sqlFactory.sql().SELECT("*").FROM("student").LIMIT(10).OFFSET(5).build(); //post
 生成如下SQL
 
 ```sql
-SELECT * FROM student LIMIT 10
-SELECT * FROM student LIMIT 5,10
-SELECT * FROM student LIMIT 10 OFFSET 5
+SELECT * FROM student LIMIT 10;
+SELECT * FROM student LIMIT 5,10;
+SELECT * FROM student LIMIT 10 OFFSET 5;
 ```
 
 ### 使用 `pageThis(int,int)` 分页方法进行分页
@@ -361,7 +377,7 @@ SELECT * FROM student LIMIT 10 OFFSET 5
 sqlFactory.setDataSourceType(DataSourceType.POSTGRESQL); //使用枚举指定数据源类型
 sqlFactory.sql().SELECT("*").FROM("student").pageThis(1,10).build();
 ```
-注意：如果不指定 dataSourceType，将会使用 postgresql 数据库类型进行分页;
+注意：如果不指定 dataSourceType，将会默认使用 postgresql 数据库类型进行分页;
 
 ### 使用 `countThis()` 生成获取数量语句
 
@@ -539,6 +555,20 @@ ResultPage<StudVO> studVOResultPage =sqlFactory.sql().SELECT("name", "age")
 
 注意2：queryPage返回的是ResultPage对象
 
+### 各种RowMapper
+
+RowMapper接口
+
+BeanPropertyRowMapper实现类（spring-jdbc）
+
+ColumnMapRowMapper实现类（spring-jdbc）
+
+SingleColumnRowMapper实现类（spring-jdbc）
+
+PartialBeanPropertyRowMapper实现类（fastsql）
+
+CombinedBeanPropertyRowMapper实现类（fastsql，*测试中）
+
 
 ##  5.4 增删改操作
 
@@ -563,16 +593,10 @@ sqlFactory.sql().DELETE_FROM("student")
         .update();
 ```
 
-##  获取数据库元信息
-```java
-//表名称
-List<String> tableNames = sqlFactory.sql().getTableNames();
-//列名称
-List<String> columnNames = sqlFactory.sql().getColumnNames("student");
-//列对象
-List<ColumnMetaData> columnMetaDataList = sqlFactory.sql().getColumnMetaDataList("sys_dict");
 
-```
+
+
+ 
 
 ##  5.5 事务管理
 
@@ -595,6 +619,9 @@ sqlFactory.sql()
 
 connection.commit();//提交事务
 ```
+
+##  5.6 批量操作
+
 
 
 # 6 BaseDAO
