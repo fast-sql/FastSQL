@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  * 2018-08-01
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD})//定义注解的作用目标**作用范围字段、枚举的常量/方法
+@Target({ElementType.FIELD})
 public @interface InnerBeanMapped {
 
 }
