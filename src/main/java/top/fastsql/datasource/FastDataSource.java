@@ -9,6 +9,7 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+@Deprecated
 public class FastDataSource implements DataSource {
 
     private Driver driver;
