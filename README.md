@@ -24,6 +24,8 @@ FastSQL一个基于spring-jdbc的简单ORM框架，它支持sql构建、sql执�
 
 FastSQL可以完全满足你控制欲，可以用Java代码清晰又方便地写出sql语句并执行。
 
+FastSQL完全可用于生产环境，相比Mybatis,使用简单，开发效率高。
+
 
 # 2 入门
 
