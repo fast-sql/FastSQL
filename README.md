@@ -586,21 +586,21 @@ List<StudentVO> list
                 });
 ```
 
-#### BeanPropertyRowMapper实现类（spring-jdbc）
+#### BeanPropertyRowMapper实现类（spring-jdbc实现）
 
 自动绑定，需要列名称和Java实体类名字一致，如：属性名 “userName” 可以匹配数据库中的列字段 "USERNAME" 或 “user_name”。
 这样，我们就不需要一个个手动绑定了。SQL类的 queryList/queryOne/queryPage当查询结果是一个复合对象时，使用了这个类，大部分时候不必手动调用。
 
-#### ColumnMapRowMapper实现类（spring-jdbc）
+#### ColumnMapRowMapper实现类（spring-jdbc实现）
 将结果封装为一个Map,SQL类的 queryMap/queryMapList大部份使用了这个类，大部分时候不必手动调用。
 
-#### SingleColumnRowMapper实现类（spring-jdbc）
+#### SingleColumnRowMapper实现类（spring-jdbc实现）
 SQL类的 queryList/queryOne ,当结果为一列时使用了这个类，如返回List<String>，List<Integer>，Long,Date。大部分时候不必手动调用。
 
-#### PartialBeanPropertyRowMapper实现类（fastsql）
+#### PartialBeanPropertyRowMapper实现类（fastsql实现）
 能够匹配的如BeanPropertyRowMapper类，剩下的需要手动指定，子类需要重写remainingMap方法。
 
-#### CombinedBeanPropertyRowMapper实现类（fastsql，*测试中）
+#### CombinedBeanPropertyRowMapper实现类（fastsql实现，*测试中）
 匹配复合结果，配合注解InnerBeanMapped使用
 
 
