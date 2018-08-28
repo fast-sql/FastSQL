@@ -108,8 +108,19 @@ public class SQL {
 
     /**
      * 使用sql字符串
+     *
+     * @see SQL#useStr(String)
      */
+    @Deprecated
     public SQL useSql(String sql) {
+        strBuilder.append(sql);
+        return this;
+    }
+
+    /**
+     * 使用sql字符串
+     */
+    public SQL useStr(String sql) {
         strBuilder.append(sql);
         return this;
     }
@@ -1127,7 +1138,7 @@ public class SQL {
         return count;
     }
 
-	 public KeyHolderResult updateForKey(String... keyColumns) {
+    public KeyHolderResult updateForKey(String... keyColumns) {
         checkNull();
 
         KeyHolder keyHolder = new GeneratedKeyHolder();

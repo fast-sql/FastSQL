@@ -31,7 +31,18 @@ public class SQLFactory {
 
     private JdbcTemplate jdbcTemplate;
 
+    /**
+     * @see SQLFactory#createSQL()
+     */
+    @Deprecated
     public SQL createSQL() {
+        return sql();
+    }
+
+    /**
+     * 创建一个SQL实例
+     */
+    public SQL sql() {
         if (this.jdbcTemplate == null) {
             this.jdbcTemplate = new JdbcTemplate();
             this.jdbcTemplate.setIgnoreWarnings(ignoreWarnings);
@@ -44,10 +55,6 @@ public class SQLFactory {
             this.jdbcTemplate.setDataSource(this.dataSource);
         }
         return new SQL(this.jdbcTemplate, this.dataSourceType);
-    }
-	
-	 public SQL sql() {
-        return createSQL();
     }
 
     public static SQLFactory createUseSimpleDateSource(Driver driver, String url, String username, String password) {
@@ -101,8 +108,7 @@ public class SQLFactory {
     }
 
 
-
-    public DatabaseMeta createMeta(){
+    public DatabaseMeta createMeta() {
         return new DatabaseMeta();
     }
 
