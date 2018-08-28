@@ -501,7 +501,7 @@ sql.INSERT_INTO("student", "id", "name", "age")
 
 ##  5.3 查询方法
 
-### 查询方法解析
+### 5.3.1 查询方法解析
 
 - `T queryOne(Class<T> returnClassType)`查询单行结果封装为一个对象,参数可以是可以为String/Integer/Long/Short/BigDecimal/BigInteger/Float/Double/Boolean或者任意POJO的class。
 - `Map<String, Object> queryMap()`查询单行结果封装为Map
@@ -511,7 +511,7 @@ sql.INSERT_INTO("student", "id", "name", "age")
 - `ResultPage<T> queryPage(int page, int perPage, Class<T> returnClassType)` 查询结果页
 
 
-### 示例
+### 5.3.2 示例
 
 StudentVO是查询视图类，包含name和age字段；StudentDTO是查询参数类，包含name字段。
 
@@ -555,19 +555,53 @@ ResultPage<StudVO> studVOResultPage =sqlFactory.sql().SELECT("name", "age")
 
 注意2：queryPage返回的是ResultPage对象
 
-### 各种RowMapper
+### 5.3.3 各种RowMapper
 
-RowMapper接口
+#### RowMapper接口
 
-BeanPropertyRowMapper实现类（spring-jdbc）
+RowMapper是Spring-jdbc中的接口，它可以将数据中的每一行数据封装成用户定义的类.
+```java
+public interface RowMapper<T> {
 
-ColumnMapRowMapper实现类（spring-jdbc）
+	/**
+	 *  Spring会把从数据库中查到的结果集迭代调用，每次迭代都会调用这个方法进行 结果集-对象 转换。
+	 */
+	T mapRow(ResultSet rs, int rowNum) throws SQLException;
+}
+```
+SQL类的queryXXX相关的方法支持这个接口，
+用法如下：
+```java
+List<StudentVO> list 
+         = sqlFactory.sql().SELECT("name", "age")
+                .FROM("student")
+                .queryList(new RowMapper<StudentVO>() {
+                    @Override
+                    public StudentVO mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        StudentVO studentVO = new StudentVO();
+                        studentVO.setName(rs.getString("name"));
+                        studentVO.setAge(rs.getInt("age"));
+                        return studentVO;
+                    }
+                });
+```
 
-SingleColumnRowMapper实现类（spring-jdbc）
+#### BeanPropertyRowMapper实现类（spring-jdbc）
 
-PartialBeanPropertyRowMapper实现类（fastsql）
+自动绑定，需要列名称和Java实体类名字一致，如：属性名 “userName” 可以匹配数据库中的列字段 "USERNAME" 或 “user_name”。
+这样，我们就不需要一个个手动绑定了。SQL类的 queryList/queryOne大部份使用了这个类，不必手动调用。
 
-CombinedBeanPropertyRowMapper实现类（fastsql，*测试中）
+#### ColumnMapRowMapper实现类（spring-jdbc）
+将结果封装为一个Map,SQL类的 queryMap/queryMapList大部份使用了这个类，不必手动调用。
+
+#### SingleColumnRowMapper实现类（spring-jdbc）
+SQL类的 queryList/queryOne ,当结果为一列时使用了这个类，如返回List<String>，List<Integer>，Long,Date。不必手动调用。
+
+#### PartialBeanPropertyRowMapper实现类（fastsql）
+能够匹配的如BeanPropertyRowMapper类，剩下的需要手动指定，子类需要重写remainingMap方法。
+
+#### CombinedBeanPropertyRowMapper实现类（fastsql，*测试中）
+匹配复合结果，配合注解InnerBeanMapped使用
 
 
 ##  5.4 增删改操作
@@ -592,10 +626,6 @@ sqlFactory.sql().DELETE_FROM("student")
         .mapItemsParameter("id", 678)
         .update();
 ```
-
-
-
-
  
 
 ##  5.5 事务管理

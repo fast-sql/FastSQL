@@ -3,10 +3,13 @@ package top.fastsql;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import top.fastsql.config.DataSourceType;
 
 import javax.sql.DataSource;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,6 +77,43 @@ public class SQLTest {
                 .FROM("student")
                 .WHERE("name").IN(new Object[]{"小红", "小明"})
                 .build();
+    }
+
+    static class StudentVO {
+        private String name;
+        private Integer age;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public Integer getAge() {
+            return age;
+        }
+
+        public void setAge(Integer age) {
+            this.age = age;
+        }
+    }
+
+    @Test
+    public void testRowMapper() {
+        sqlFactory.sql()
+                .SELECT("name", "age")
+                .FROM("student")
+                .queryList(new RowMapper<StudentVO>() {
+                    @Override
+                    public StudentVO mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        StudentVO studentVO = new StudentVO();
+                        studentVO.setName(rs.getString("name"));
+                        studentVO.setAge(rs.getInt("age"));
+                        return studentVO;
+                    }
+                });
     }
 
     @Test
