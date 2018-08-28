@@ -22,9 +22,9 @@ public class SQLTest {
     static {
         DataSource dataSource = null;
         try {
-            dataSource = new SimpleDriverDataSource(
-                    new org.postgresql.Driver(), "jdbc:postgresql://192.168.0.226:5432/picasso_dev2?stringtype=unspecified",
-                    "developer", "password");
+//            dataSource = new SimpleDriverDataSource(
+//                    new org.postgresql.Driver(), "jdbc:postgresql://192.168.0.226:5432/picasso_dev2?stringtype=unspecified",
+//                    "developer", "password");
         } catch (Exception e) {
             e.printStackTrace();
         }
