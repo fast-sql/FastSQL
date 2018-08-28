@@ -21,21 +21,6 @@ public class PartialBeanPropertyRowMapper<T> extends BeanPropertyRowMapper<T> {
     }
 
 
-//    public static Object getSuperField(Object paramClass, String paramString) {
-//        Field field = null;
-//        Object object = null;
-//        try {
-//            Class<?> superclass = paramClass.getClass().getSuperclass().getSuperclass();
-//            field = superclass.getDeclaredField(paramString);
-//            field.setAccessible(true);
-//            object = field.get(paramClass);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        return object;
-//    }
-
-
     @Override
     public T mapRow(ResultSet rs, int rowNumber) throws SQLException {
         T t = super.mapRow(rs, rowNumber);
@@ -48,7 +33,12 @@ public class PartialBeanPropertyRowMapper<T> extends BeanPropertyRowMapper<T> {
         return t;
     }
 
+    /**
+     * 子类需要重写这个方法
+     *
+     * @throws SQLException ex
+     */
     public void remainingMap(T object, ResultSet rs, int rowNumber) throws SQLException {
-
+        //Override
     }
 }
