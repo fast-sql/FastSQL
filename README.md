@@ -829,6 +829,8 @@ Student student = studentDao.selectOneWhere("name=? AND home_address=?", "小明
 
 方法     `E selectOneWhere(String sqlCondition, SqlParameterSource parameterSource)` 查询一条数据
 
+方法     `E selectOneByEntity(E entity)` 通过entity查找,不为空的值将会作为where条件
+
 ### 多条数据查询
 
 方法     `List<E> selectWhere(String sqlCondition, Object... values)`,用法与selectOneWhere()相同，可以返回一条或多条数据，可变参数最多支持三个
@@ -847,6 +849,8 @@ List<Student> allStudents  =  studentDao.selectAll();
 ```
 
 方法     ` List<E> selectWhere(String sqlCondition, SqlParameterSource parameterSource)`可以返回一条或多条数据
+
+方法     `List<E> selectByEntity(E entity)` 通过entity查找多条数据,不为空的值将会作为where条件
 
 ### 分页查询
 
@@ -1062,6 +1066,10 @@ logging.level.org.springframework.jdbc.core.StatementCreatorUtils=trace
 * [版本下载](https://oss.sonatype.org/content/repositories/releases/top/fastsql/fastsql/)
 
 # 10 更新日志
+
+## 1.3.3
+
+BaseDAO增加selectByEntity和selectOneByEntity方法
 
 ## 1.2.1
 

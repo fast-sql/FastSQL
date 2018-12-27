@@ -487,6 +487,32 @@ public abstract class BaseDAO<E, ID> {
         return returnObject;
     }
 
+    /**
+     * 通过entity查找,不为空的值将会作为where条件
+     */
+    public E selectOneByEntity(E entity) {
+        String clause = " 1=1 ";
+        for (Field field : fields) {
+            Object fieldValue = EntityRefelectUtils.getFieldValue(entity, field);
+            if (!StringUtils.isEmpty(fieldValue)){
+                clause+=" AND "+StringExtUtils.camelToUnderline(field.getName())+" = :"+field.getName();
+            }
+        }
+
+        E returnObject;
+        try {
+            returnObject = getSQL()
+                    .SELECT(columns)
+                    .FROM(tableName)
+                    .WHERE(clause)
+                    .parameter(new BeanPropertySqlParameterSource(entity))
+                    .queryOne(entityClass);
+        } catch (EmptyResultDataAccessException e) {
+            returnObject = null;
+        }
+        return returnObject;
+    }
+
 
     /**
      * 通过where条件查找一条记录
@@ -548,6 +574,22 @@ public abstract class BaseDAO<E, ID> {
         //sql
         String sql = "SELECT " + columns + " FROM " + tableName + " WHERE " + sqlCondition;
         return getSQL().useSql(sql).parameter(parameterSource).queryList(new BeanPropertyRowMapper<>(entityClass));
+    }
+
+    public List<E> selectByEntity(E entity) {
+        String clause = " 1=1 ";
+        for (Field field : fields) {
+            Object fieldValue = EntityRefelectUtils.getFieldValue(entity, field);
+            if (!StringUtils.isEmpty(fieldValue)){
+                clause+=" AND "+StringExtUtils.camelToUnderline(field.getName())+" = :"+field.getName();
+            }
+        }
+
+        return getSQL().SELECT(columns)
+                .FROM(tableName)
+                .WHERE(clause)
+                .parameter(new BeanPropertySqlParameterSource(entity))
+                .queryList(entityClass);
     }
 
     ////////////////////////////////////count///////////////////////////////////////////
