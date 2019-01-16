@@ -461,7 +461,7 @@ public class SQL {
     }
 
     /**
-     * Generate '>' operator and append the param
+     * Generate 大于 operator and append the param
      */
     public SQL gt(String value) {
         strBuilder.append(" > ").append(value);
@@ -469,32 +469,25 @@ public class SQL {
     }
 
     /**
-     * Generate '>' operator
+     * Generate 大于 operator
      */
     public SQL gt() {
         strBuilder.append(" > ");
         return this;
     }
 
-    /**
-     * >= operator
-     */
+
     public SQL gtEq(String value) {
         strBuilder.append(" >= ").append(value);
         return this;
     }
 
-    /**
-     * >= operator
-     */
+
     public SQL gtEq() {
         strBuilder.append(" >= ");
         return this;
     }
 
-    /**
-     * <= operator
-     */
     public SQL lt(String value) {
         strBuilder.append(" < ").append(value);
         return this;
@@ -505,9 +498,7 @@ public class SQL {
         return this;
     }
 
-    /**
-     * <=
-     */
+
     public SQL ltEq(String value) {
         strBuilder.append(" <= ").append(value);
         return this;
@@ -1072,8 +1063,8 @@ public class SQL {
 
     /**
      * 查询结果页
-     * page <=0 查询数量
-     * perPage <=0 仅查询条数
+     * page 小于等于0 查询数量
+     * perPage 小于等于 0 仅查询条数
      *
      * @param page            第几页 从1开始
      * @param perPage         每页几条 最小为1
@@ -1095,8 +1086,8 @@ public class SQL {
     }
 
     /**
-     * page <=0 查询数量
-     * perPage <=0 仅查询条数
+     * page 小于等于0 查询数量
+     * perPage 小于等于 0 仅查询条数
      *
      * @param page      第几页 从1开始
      * @param perPage   每页几条 最小为1

@@ -7,7 +7,7 @@ package top.fastsql.util;
 public class StringExtUtils {
 
     /**
-     * 驼峰转下划线  camelToUnderline -> camel_to_underline
+     * 驼峰转下划线  camelToUnderline - camel_to_underline
      *
      * @param param 驼峰形式的字符串
      * @return 下划线形式的字符串
@@ -36,7 +36,7 @@ public class StringExtUtils {
     }
 
     /**
-     * 下划线转驼峰  underline_to_camel -> underlineToCamel
+     * 下划线转驼峰  underline_to_camel - underlineToCamel
      *
      * @param param 下划线形式的字符串
      * @return 驼峰形式的字符串

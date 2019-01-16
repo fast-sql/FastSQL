@@ -516,7 +516,7 @@ public abstract class BaseDAO<E, ID> {
 
     /**
      * 通过where条件查找一条记录
-     * 查找姓名为1年龄大于23的记录  selectOneWhere("name=? and age>?", "wang",23)
+     * 查找姓名为1年龄大于23的记录  selectOneWhere("name=? and age 大于号 ?", "wang",23)
      *
      * @param sqlCondition name=:1 and age=:2
      * @param values       "wang",23

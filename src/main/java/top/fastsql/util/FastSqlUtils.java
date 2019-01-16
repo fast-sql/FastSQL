@@ -79,7 +79,7 @@ public class FastSqlUtils {
     /**
      * 内存分页
      * page 1开始
-     * size >0
+     * size 大于 0
      *
      * @param list 列表
      */
@@ -142,7 +142,7 @@ public class FastSqlUtils {
     }
 
     /**
-     * java.util.Date --> java.time.LocalDateTime
+     * java.util.Date -- java.time.LocalDateTime
      */
     public static LocalDateTime toLocalDateTime(java.util.Date date) {
         if (date == null) {
@@ -154,7 +154,7 @@ public class FastSqlUtils {
     }
 
     /**
-     * java.util.Date --> java.time.LocalDate
+     * java.util.Date -- java.time.LocalDate
      */
     public static LocalDate toLocalDate(Date date) {
         if (date == null) {
